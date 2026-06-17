@@ -1,48 +1,44 @@
-# Environment
-.env
-*.env.local
-backend/.env
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-*.egg-info/
-.venv/
-venv/
-env/
-.pytest_cache/
-.coverage
-htmlcov/
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dev.log
+server.log
+
+# local env files
+.env*.local
+.env
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# database
+/db
 *.db
 *.sqlite
 *.sqlite3
-
-# Node
-node_modules/
-dist/
-.vite/
-npm-debug.log*
-yarn-debug.log*
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Build artifacts
-build/
-*.egg
-*.whl
-
-# cPanel / Passenger
-tmp/
-logs/

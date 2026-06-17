@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <defs>
+    <linearGradient id="anseinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0ea5e9"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+  </defs>
+  <!-- Outer Hexagon Shield -->
+  <path d="M200 24 L356 114 V286 L200 376 L44 286 V114 Z" fill="none" stroke="url(#anseinGrad)" stroke-width="36" stroke-linejoin="round"/>
+  
+  <!-- Inner Stylized 'A' for AnseIn -->
+  <path d="M200 110 L100 280 H160 L200 200 L240 280 H300 Z" fill="url(#anseinGrad)"/>
+  
+  <!-- Center Neural/Intelligence Node -->
+  <circle cx="200" cy="270" r="24" fill="url(#anseinGrad)"/>
+</svg>

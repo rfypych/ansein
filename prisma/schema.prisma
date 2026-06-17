@@ -1,0 +1,225 @@
+// AnseIn v3 — Prisma schema
+// Designed to be MySQL-compatible for cPanel deployment.
+// For local dev we use SQLite (per environment constraint).
+// When deploying to cPanel/MySQL: change `provider = "sqlite"` to `"mysql"`
+// and set DATABASE_URL to: mysql://USER:PASS@HOST:3306/DB?charset=utf8mb4
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ----------------------------------------------------------------- users
+model User {
+  id            Int       @id @default(autoincrement())
+  email         String    @unique
+  hashedPassword String   @map("hashed_password")
+  fullName      String    @default("") @map("full_name")
+  isActive      Boolean   @default(true) @map("is_active")
+  isSuperuser   Boolean   @default(false) @map("is_superuser")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  lastLoginAt   DateTime? @map("last_login_at")
+
+  settings        UserSettings?
+  investigations  Investigation[]
+  chatSessions    ChatSession[]
+  auditLogs       AuditLog[]
+  notes           InvestigationNote[]
+
+  @@index([email, isActive])
+  @@map("users")
+}
+
+model UserSettings {
+  id                 Int      @id @default(autoincrement())
+  userId             Int      @unique @map("user_id")
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  openaiApiKey       String   @default("") @map("openai_api_key")
+  groqApiKey         String   @default("") @map("groq_api_key")
+  virustotalApiKey   String   @default("") @map("virustotal_api_key")
+  abuseipdbApiKey    String   @default("") @map("abuseipdb_api_key")
+  shodanApiKey       String   @default("") @map("shodan_api_key")
+  preferredLlm       String   @default("auto") @map("preferred_llm")
+  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("user_settings")
+}
+
+// ------------------------------------------------------- investigations
+model Investigation {
+  id             Int       @id @default(autoincrement())
+  userId         Int       @map("user_id")
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title          String
+  description    String    @default("")
+  status         String    @default("pending") // pending | extracting | enriching | analyzing | completed | failed
+  severityScore  Float     @default(0) @map("severity_score")
+  tags           String    @default("[]") // JSON-encoded array (SQLite-compatible)
+  isStarred      Boolean   @default(false) @map("is_starred")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  sources       Source[]
+  entities      Entity[]
+  relationships Relationship[]
+  analysisRuns  AnalysisRun[]
+  chatSessions  ChatSession[]
+  notes         InvestigationNote[]
+
+  @@index([userId, status])
+  @@index([userId, isStarred])
+  @@map("investigations")
+}
+
+// ---------------------------------------------------- investigation notes
+model InvestigationNote {
+  id              Int      @id @default(autoincrement())
+  investigationId Int      @map("investigation_id")
+  investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+  userId          Int      @map("user_id")
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  body            String
+  pinned          Boolean  @default(false)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@index([investigationId, createdAt])
+  @@map("investigation_notes")
+}
+
+model Source {
+  id              Int      @id @default(autoincrement())
+  investigationId Int      @map("investigation_id")
+  investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+  sourceType      String   @map("source_type") // text | file | url | email
+  title           String   @default("")
+  content         String   @default("")
+  contentHash     String   @default("") @map("content_hash")
+  mimeType        String   @default("text/plain") @map("mime_type")
+  sizeBytes       Int      @default(0) @map("size_bytes")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([investigationId])
+  @@map("sources")
+}
+
+// --------------------------------------------------------- entities / rel
+model Entity {
+  id              Int      @id @default(autoincrement())
+  investigationId Int      @map("investigation_id")
+  entityType      String   @map("entity_type") // threat_actor | malware | tool | technique | vulnerability | ioc_ip | ioc_domain | ioc_url | ioc_hash | ioc_wallet | target | location | identity
+  value           String
+  normalized      String   @default("")
+  confidence      Float    @default(0.5)
+  enrichment      String   @default("{}") // JSON-encoded dict
+  sourceMethod    String   @default("regex") @map("source_method") // regex | gliner | llm
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  investigation       Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+  relationshipsFrom   Relationship[] @relation("RelationshipSource")
+  relationshipsTo     Relationship[] @relation("RelationshipTarget")
+
+  @@index([investigationId, entityType])
+  @@index([value])
+  @@map("entities")
+}
+
+model Relationship {
+  id              Int      @id @default(autoincrement())
+  investigationId Int      @map("investigation_id")
+  investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+  sourceId        Int      @map("source_id")
+  source          Entity   @relation("RelationshipSource", fields: [sourceId], references: [id], onDelete: Cascade)
+  targetId        Int      @map("target_id")
+  target          Entity   @relation("RelationshipTarget", fields: [targetId], references: [id], onDelete: Cascade)
+  relationType    String   @map("relation_type")
+  weight          Float    @default(1)
+  evidence        String   @default("")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([investigationId])
+  @@index([sourceId])
+  @@index([targetId])
+  @@map("relationships")
+}
+
+// --------------------------------------------------------------- analysis
+model AnalysisRun {
+  id              Int      @id @default(autoincrement())
+  investigationId Int      @map("investigation_id")
+  investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+  narrative       String   @default("")
+  actorHypothesis String   @default("{}") @map("actor_hypothesis") // JSON
+  severityScore   Float    @default(0) @map("severity_score")
+  recommendations String   @default("[]") // JSON array
+  admiraltyCode   String   @default("C2") @map("admiralty_code")
+  confidence      Float    @default(0.5)
+  modelUsed       String   @default("") @map("model_used")
+  tokensUsed      Int      @default(0) @map("tokens_used")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([investigationId])
+  @@map("analysis_runs")
+}
+
+// ----------------------------------------------------------------- copilot
+model ChatSession {
+  id              Int       @id @default(autoincrement())
+  userId          Int       @map("user_id")
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  investigationId Int?      @map("investigation_id")
+  investigation   Investigation? @relation(fields: [investigationId], references: [id], onDelete: SetNull)
+  title           String    @default("New Chat")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  messages ChatMessage[]
+
+  @@index([userId])
+  @@index([investigationId])
+  @@map("chat_sessions")
+}
+
+model ChatMessage {
+  id         Int      @id @default(autoincrement())
+  sessionId  Int      @map("session_id")
+  session    ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role       String   // user | assistant | system
+  content    String
+  citations  String   @default("[]") // JSON array
+  tokensUsed Int      @default(0) @map("tokens_used")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([sessionId])
+  @@map("chat_messages")
+}
+
+// ----------------------------------------------------------------- audit
+model AuditLog {
+  id            Int      @id @default(autoincrement())
+  userId        Int?     @map("user_id")
+  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action        String
+  targetType    String   @default("") @map("target_type")
+  targetId      Int?     @map("target_id")
+  ipAddress     String   @default("") @map("ip_address")
+  extraMetadata String   @default("{}") @map("extra_metadata") // JSON
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@index([action, createdAt])
+  @@map("audit_logs")
+}
+
+// ----------------------------------------------------- app config (setup)
+model AppConfig {
+  id        Int      @id @default(1)
+  key       String   @unique
+  value     String   @default("")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("app_config")
+}
