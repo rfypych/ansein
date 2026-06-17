@@ -1,0 +1,54 @@
+# ===== AnseIn Backend Dependencies =====
+# Web framework
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20
+websockets==14.1
+
+# Database (MySQL for cPanel hosting)
+SQLAlchemy==2.0.36
+PyMySQL==1.1.1
+cryptography==44.0.0
+alembic==1.14.0
+
+# Auth
+passlib==1.7.4
+bcrypt==3.2.2
+python-jose[cryptography]==3.3.0
+email-validator==2.2.0
+
+# Settings / env
+pydantic==2.10.4
+pydantic-settings==2.7.0
+python-dotenv==1.0.1
+
+# LLM / Extraction
+openai==1.58.1
+httpx==0.28.1
+gliner==0.2.13
+torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
+transformers==4.47.1
+
+# Graph
+networkx==3.4.2
+
+# Export
+openpyxl==3.1.5
+reportlab==4.2.5
+stix2==3.0.1
+
+# Async / cache (graceful degradation if missing)
+redis==5.2.1
+celery==5.4.0
+
+# Utils
+python-dateutil==2.9.0
+pyyaml==6.0.2
+orjson==3.10.12
+tenacity==9.0.0
+
+# Testing
+pytest==8.3.4
+pytest-asyncio==0.25.0
+pytest-cov==6.0.0
+httpx==0.28.1
