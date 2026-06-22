@@ -28,6 +28,9 @@ async function getUserKeys(userId: number) {
     openai_api_key: s.openaiApiKey ? decrypt(s.openaiApiKey) : '',
     groq_api_key: s.groqApiKey ? decrypt(s.groqApiKey) : '',
     preferred_llm: s.preferredLlm,
+    custom_llm_api_key: s.customLlmApiKey ? decrypt(s.customLlmApiKey) : '',
+    custom_llm_base_url: s.customLlmBaseUrl || '',
+    custom_llm_model: s.customLlmModel || '',
   }
 }
 

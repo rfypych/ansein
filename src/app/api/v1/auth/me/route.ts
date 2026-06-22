@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 import { ok, jsonError, withErrorHandler, requireUser } from '@/lib/api'
+import { getUserRole } from '@/lib/rbac'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,6 +12,7 @@ async function me(req: NextRequest) {
     full_name: user.fullName,
     is_active: user.isActive,
     is_superuser: user.isSuperuser,
+    role: getUserRole(user),
     created_at: user.createdAt.toISOString(),
     last_login_at: user.lastLoginAt ? user.lastLoginAt.toISOString() : null,
   })

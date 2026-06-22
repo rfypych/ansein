@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import {
   Shield,
   Activity,
@@ -21,12 +21,19 @@ import {
   StickyNote,
   Star,
   AlertTriangle,
+  ShieldCheck,
+  Link2,
+  Crown,
+  UserPlus,
+  UserMinus,
 } from 'lucide-react'
 import { http } from '@/lib/http'
-import { useAuthStore } from '@/lib/auth-store'
+import { useAuthStore, authUserRole } from '@/lib/auth-store'
 import { Badge, EmptyState, Spinner } from '@/components/ansein/ui'
 import { formatDate, formatRelative } from '@/lib/format'
+import { can } from '@/lib/rbac'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 
 interface AuditEntry {
   id: number
@@ -36,6 +43,8 @@ interface AuditEntry {
   target_id: number | null
   ip_address: string
   extra_metadata: Record<string, unknown>
+  prev_hash: string
+  entry_hash: string
   created_at: string
 }
 
@@ -51,6 +60,10 @@ const ACTION_ICONS: Record<string, React.ComponentType<{ className?: string }>> 
   'user.profile.update': UserIcon,
   'user.profile.view': UserIcon,
   'profile.view': UserIcon,
+  'user.role.change': Crown,
+  'user.activate': ShieldCheck,
+  'user.deactivate': UserMinus,
+  'user.create': UserPlus,
   'investigation.pipeline.complete': Cpu,
   'investigation.pipeline.start': Play,
   'investigation.pipeline.failed': AlertTriangle,
@@ -75,6 +88,10 @@ const ACTION_COLORS: Record<string, string> = {
   'user.password.change': '#f43f5e',
   'user.profile.update': '#06b6d4',
   'profile.view': '#06b6d4',
+  'user.role.change': '#fb7185',
+  'user.activate': '#10b981',
+  'user.deactivate': '#ef4444',
+  'user.create': '#8b5cf6',
   'investigation.pipeline.complete': '#10b981',
   'investigation.pipeline.start': '#f59e0b',
   'investigation.pipeline.failed': '#f43f5e',
@@ -98,7 +115,7 @@ const ACTION_COLORS: Record<string, string> = {
 const ACTION_GROUPS = [
   { key: 'all', label: 'All events' },
   { key: 'auth', label: 'Authentication', match: /auth\./ },
-  { key: 'user', label: 'Account', match: /user\.|profile\./ },
+  { key: 'user', label: 'Account & Admin', match: /user\.|profile\./ },
   { key: 'investigation', label: 'Investigations', match: /investigation\.|source\.|analysis\./ },
   { key: 'note', label: 'Notes', match: /note\./ },
   { key: 'copilot', label: 'Copilot', match: /copilot\./ },
@@ -120,6 +137,9 @@ function getActionLabel(action: string): string {
 
 export default function AuditPage() {
   const user = useAuthStore((s) => s.user)
+  const role = authUserRole(user)
+  const isFullScope = role === 'editor' || role === 'admin'
+  const canVerify = can(user, 'audit.verify_chain')
   const [page, setPage] = useState(1)
   const [activeGroup, setActiveGroup] = useState('all')
   const pageSize = 25
@@ -129,18 +149,41 @@ export default function AuditPage() {
     queryFn: () => http.get<AuditPage>(`/audit?page=${page}&page_size=${pageSize}`),
   })
 
-  if (!user?.is_superuser) {
-    return (
-      <div className="px-6 py-8 max-w-3xl mx-auto">
-        <EmptyState
-          icon={<Shield className="h-6 w-6 text-rose-400" />}
-          title="Administrator access required"
-          description="The audit log is only visible to workspace administrators."
-          className="py-16"
-        />
-      </div>
-    )
-  }
+  // Hash chain verification (POST /audit — runs verifyAuditChain on the most
+  // recent sample of entries). Admin-only; hidden from editor/analyst UI.
+  const [chainStatus, setChainStatus] = useState<
+    | { valid: boolean; brokenAt: number | null; sampleSize: number; scannedAt: string }
+    | null
+  >(null)
+
+  const verifyMutation = useMutation({
+    mutationFn: () =>
+      http.post<{
+        valid: boolean
+        brokenAt: number | null
+        sample_size: number
+      }>('/audit', {}),
+    onSuccess: (data) => {
+      setChainStatus({
+        valid: data.valid,
+        brokenAt: data.brokenAt,
+        sampleSize: data.sample_size,
+        scannedAt: new Date().toISOString(),
+      })
+      if (data.valid) {
+        toast.success(`Chain intact — verified ${data.sample_size} entries`)
+      } else {
+        toast.error(`Chain broken at entry #${data.brokenAt}`)
+      }
+    },
+    onError: (err) => {
+      const e = err as Error
+      toast.error(e.message || 'Verification failed')
+    },
+  })
+
+  // Analysts and editors always have at least their own scope, so we no
+  // longer hard-block the page — we just render the appropriate copy.
 
   const allItems = query.data?.items || []
   const total = query.data?.total || 0
@@ -162,16 +205,56 @@ export default function AuditPage() {
   return (
     <div className="px-6 py-8 max-w-5xl mx-auto">
       {/* Header */}
-      <div className="mb-8">
-        <p className="ansein-mono text-xs uppercase tracking-widest text-[var(--ansein-text-dim)] mb-1">
-          Security forensics
-        </p>
-        <h1 className="text-2xl font-semibold tracking-tight text-[var(--ansein-text)]">
-          Audit log
-        </h1>
-        <p className="text-sm text-[var(--ansein-text-muted)] mt-1">
-          Tamper-evident record of all security-relevant actions across the workspace.
-        </p>
+      <div className="mb-8 flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <p className="ansein-mono text-xs uppercase tracking-widest text-[var(--ansein-text-dim)] mb-1">
+            {isFullScope ? 'Security forensics' : 'Personal activity'}
+          </p>
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--ansein-text)] flex items-center gap-3 flex-wrap">
+            {isFullScope ? 'Audit log' : 'My activity'}
+            <Badge color={isFullScope ? 'primary' : 'slate'} dot>
+              {isFullScope ? 'Workspace scope' : 'Own scope'}
+            </Badge>
+          </h1>
+          <p className="text-sm text-[var(--ansein-text-muted)] mt-1">
+            {isFullScope
+              ? 'Tamper-evident, hash-chained record of all security-relevant actions across the workspace.'
+              : 'A hash-chained record of your own actions. Workspace-wide events are visible to editors and administrators.'}
+          </p>
+        </div>
+        {/* Verify chain button — admin-only */}
+        {canVerify && (
+          <button
+            onClick={() => verifyMutation.mutate()}
+            disabled={verifyMutation.isPending}
+            className={cn(
+              'inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs font-medium border transition-colors flex-shrink-0',
+              chainStatus?.valid === false
+                ? 'bg-rose-500/15 text-rose-300 border-rose-500/40 hover:bg-rose-500/25'
+                : chainStatus?.valid === true
+                  ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/25'
+                  : 'bg-[var(--ansein-surface)] text-[var(--ansein-text-muted)] border-[var(--ansein-border)] hover:text-[var(--ansein-text)] hover:border-[var(--ansein-border-strong)]',
+            )}
+            title="Recompute hashes for the most recent entries and verify the chain is intact"
+          >
+            {verifyMutation.isPending ? (
+              <Spinner className="h-3.5 w-3.5" />
+            ) : chainStatus?.valid === false ? (
+              <AlertTriangle className="h-3.5 w-3.5" />
+            ) : chainStatus?.valid === true ? (
+              <ShieldCheck className="h-3.5 w-3.5" />
+            ) : (
+              <Link2 className="h-3.5 w-3.5" />
+            )}
+            {verifyMutation.isPending
+              ? 'Verifying…'
+              : chainStatus?.valid === false
+                ? `Chain broken at #${chainStatus.brokenAt}`
+                : chainStatus?.valid === true
+                  ? `Chain intact (${chainStatus.sampleSize} checked)`
+                  : 'Verify chain'}
+          </button>
+        )}
       </div>
 
       {/* Stats */}
@@ -332,6 +415,18 @@ export default function AuditPage() {
                           )}
                         </div>
                       )}
+                      {/* Hash-chain fingerprint — abbreviated SHA-256 entry hash */}
+                      {e.entry_hash && (
+                        <div className="mt-1.5 flex items-center gap-1.5">
+                          <span
+                            className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded bg-[var(--ansein-primary)]/8 border border-[var(--ansein-primary)]/25 text-[var(--ansein-primary)] ansein-mono"
+                            title={`prev: ${e.prev_hash || '(genesis)'}\nhash: ${e.entry_hash}`}
+                          >
+                            <Link2 className="h-2 w-2" />
+                            {e.prev_hash ? '↳' : '◇'} {e.entry_hash.slice(0, 12)}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )
@@ -371,8 +466,9 @@ export default function AuditPage() {
 
       {/* Note */}
       <p className="mt-6 text-xs text-[var(--ansein-text-dim)] text-center">
-        Audit entries are immutable and retained indefinitely. Contact your database administrator
-        for archival policies.
+        Audit entries are immutable, hash-chained, and retained indefinitely. Each row's
+        <span className="ansein-mono text-[var(--ansein-primary)]"> entry_hash</span> depends on the
+        previous row's hash, making historical tampering detectable.
       </p>
     </div>
   )

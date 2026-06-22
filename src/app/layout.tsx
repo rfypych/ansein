@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
@@ -13,6 +14,18 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const sigurd = localFont({
+  src: "../../public/fonts/sigurd.woff2",
+  variable: "--font-sigurd",
+  display: "swap",
+});
+
+const courier = localFont({
+  src: "../../public/fonts/courier.woff2",
+  variable: "--font-courier",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -42,19 +55,31 @@ export const metadata: Metadata = {
   },
 };
 
+import { LenisProvider } from "@/components/ansein/lenis-provider";
+import { ThemeProvider } from "@/components/ansein/theme-provider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground min-h-screen flex flex-col`}
+        className={`${geistSans.variable} ${geistMono.variable} ${sigurd.variable} ${courier.variable} antialiased bg-background text-foreground min-h-screen flex flex-col`}
       >
-        <QueryProvider>{children}</QueryProvider>
-        <Toaster />
-        <SonnerToaster position="bottom-right" theme="dark" />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <LenisProvider>
+            <QueryProvider>{children}</QueryProvider>
+            <Toaster />
+            <SonnerToaster position="bottom-right" theme="system" />
+          </LenisProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -11,19 +11,177 @@ import { enrichEntity, type EnrichmentData } from '@/lib/engines/enrichment'
 import { analyze, type EntityForAnalysis } from '@/lib/engines/analysis'
 import { decrypt } from '@/lib/crypto'
 import { safeParseJson, safeStringifyJson } from '@/lib/api'
+import { appendAuditLog } from '@/lib/audit-chain'
 
 /** Write an audit log entry (best-effort — never throws). */
 function audit(userId: number, action: string, targetType: string, targetId: number, extra: Record<string, unknown> = {}) {
-  db.auditLog.create({
-    data: {
-      userId,
-      action,
-      targetType,
-      targetId,
-      ipAddress: '',
-      extraMetadata: safeStringifyJson({ ts: new Date().toISOString(), ...extra }),
-    },
+  // Hash-chained audit append — best-effort, never blocks the request.
+  appendAuditLog(db, {
+    userId,
+    action,
+    targetType,
+    targetId,
+    ipAddress: '',
+    extraMetadata: safeStringifyJson({ ts: new Date().toISOString(), ...extra }),
   }).catch(() => {})
+}
+
+// ---------------------------------------------------------------------------
+// SOAR playbook execution — runs after every pipeline completion.
+// Trigger types:
+//   severity_threshold — value: number (0-100). Fires when severity_score >= value.
+//   entity_type        — value: EntityType string. Fires when any extracted
+//                         entity of that type is present.
+//   alert_type         — value: 'phishing'|'malware'|'c2'|'suspicious'|'custom'.
+//                         Fires when the investigation has that tag (set by
+//                         webhook ingest or manually).
+//   always             — no value. Fires on every completed pipeline run.
+interface PlaybookTrigger {
+  type: 'severity_threshold' | 'entity_type' | 'alert_type' | 'always'
+  value?: number | string
+}
+
+interface PlaybookAction {
+  type: 'notify' | 'tag' | 'star' | 'export'
+  params: Record<string, unknown>
+}
+
+interface PlaybookRow {
+  id: number
+  userId: number
+  name: string
+  trigger: string
+  actions: string
+  enabled: boolean
+}
+
+/** Decide whether a playbook's trigger matches the pipeline result. */
+function playbookMatches(
+  trigger: PlaybookTrigger | null,
+  ctx: {
+    severityScore: number
+    entityTypes: Set<string>
+    tags: string[]
+  }
+): boolean {
+  if (!trigger) return false
+  switch (trigger.type) {
+    case 'always':
+      return true
+    case 'severity_threshold': {
+      const threshold = typeof trigger.value === 'number' ? trigger.value : Number(trigger.value)
+      if (!Number.isFinite(threshold)) return false
+      return ctx.severityScore >= threshold
+    }
+    case 'entity_type': {
+      const t = typeof trigger.value === 'string' ? trigger.value : String(trigger.value ?? '')
+      return t ? ctx.entityTypes.has(t) : false
+    }
+    case 'alert_type': {
+      const t = typeof trigger.value === 'string' ? trigger.value : String(trigger.value ?? '')
+      if (!t) return false
+      // Tags are stored as `alert_type:phishing` or just `phishing` (webhook
+      // ingest uses the bare alert_type as a tag). Match either.
+      return ctx.tags.includes(t) || ctx.tags.includes(`alert_type:${t}`)
+    }
+    default:
+      return false
+  }
+}
+
+/** Apply a single action to the investigation. Best-effort — never throws. */
+async function applyAction(
+  investigationId: number,
+  userId: number,
+  action: PlaybookAction,
+  playbookName: string
+): Promise<void> {
+  try {
+    switch (action.type) {
+      case 'tag': {
+        const tag = typeof action.params.tag === 'string' ? action.params.tag : `playbook:${playbookName}`
+        if (!tag) return
+        const inv = await db.investigation.findUnique({ where: { id: investigationId } })
+        if (!inv) return
+        const existing = safeParseJson<string[]>(inv.tags, [])
+        if (existing.includes(tag)) return // idempotent — don't double-tag
+        existing.push(tag)
+        await db.investigation.update({
+          where: { id: investigationId },
+          data: { tags: safeStringifyJson(existing) },
+        })
+        break
+      }
+      case 'star': {
+        await db.investigation.update({
+          where: { id: investigationId },
+          data: { isStarred: true },
+        })
+        break
+      }
+      case 'notify':
+      case 'export': {
+        // 'notify' and 'export' are recorded as audit-log entries — the
+        // front-end can surface them as toasts/recent activity. (A future
+        // iteration could push these through a websocket for live notify.)
+        // For 'export', we log the intent; the actual JSON blob can be
+        // fetched on demand from the existing /export/{id}/json endpoint.
+        break
+      }
+      default:
+        break
+    }
+  } catch (e) {
+    console.error(`[playbook] action ${action.type} failed:`, e)
+  }
+}
+
+/**
+ * Fetch the user's enabled playbooks, evaluate each trigger against the
+ * pipeline result, and execute matching actions. Logs an audit entry per
+ * fired playbook so the audit timeline reflects automation.
+ */
+async function runPlaybooks(
+  investigationId: number,
+  userId: number,
+  result: {
+    severityScore: number
+    entityTypes: Set<string>
+    tags: string[]
+  }
+): Promise<void> {
+  let playbooks: PlaybookRow[]
+  try {
+    playbooks = await db.playbook.findMany({ where: { userId, enabled: true } })
+  } catch (e) {
+    console.error('[playbook] fetch failed:', e)
+    return
+  }
+  for (const p of playbooks) {
+    const trigger = safeParseJson<PlaybookTrigger | null>(p.trigger, null)
+    const actions = safeParseJson<PlaybookAction[]>(p.actions, [])
+    if (!playbookMatches(trigger, result)) continue
+    // Trigger matched — execute actions in order.
+    for (const a of actions) {
+      await applyAction(investigationId, userId, a, p.name)
+    }
+    // Audit: playbook fired (with the trigger that matched + actions taken).
+    await appendAuditLog(db, {
+      userId,
+      action: 'playbook.fired',
+      targetType: 'investigation',
+      targetId: investigationId,
+      ipAddress: '',
+      extraMetadata: safeStringifyJson({
+        ts: new Date().toISOString(),
+        playbook_id: p.id,
+        playbook_name: p.name,
+        trigger: trigger ? `${trigger.type}=${trigger.value ?? ''}` : 'none',
+        actions: actions.map((a) => a.type),
+        severity: result.severityScore,
+      }),
+    }).catch(() => {})
+  }
 }
 
 export interface PipelineProgress {
@@ -38,6 +196,9 @@ async function getUserKeys(userId: number): Promise<UserKeys & { virustotal_api_
     openai_api_key: settings.openaiApiKey ? decrypt(settings.openaiApiKey) : undefined,
     groq_api_key: settings.groqApiKey ? decrypt(settings.groqApiKey) : undefined,
     preferred_llm: settings.preferredLlm,
+    custom_llm_api_key: settings.customLlmApiKey ? decrypt(settings.customLlmApiKey) : undefined,
+    custom_llm_base_url: settings.customLlmBaseUrl || undefined,
+    custom_llm_model: settings.customLlmModel || undefined,
     virustotal_api_key: settings.virustotalApiKey ? decrypt(settings.virustotalApiKey) : undefined,
     abuseipdb_api_key: settings.abuseipdbApiKey ? decrypt(settings.abuseipdbApiKey) : undefined,
     shodan_api_key: settings.shodanApiKey ? decrypt(settings.shodanApiKey) : undefined,
@@ -154,6 +315,7 @@ export async function runPipeline(investigationId: number, userId: number): Prom
         actorHypothesis: safeStringifyJson(result.actor_hypothesis),
         severityScore: result.severity_score,
         recommendations: safeStringifyJson(result.recommendations),
+        hypotheses: safeStringifyJson(result.hypotheses),
         admiraltyCode: result.admiralty_code,
         confidence: result.confidence,
         modelUsed: result.model_used,
@@ -177,6 +339,26 @@ export async function runPipeline(investigationId: number, userId: number): Prom
     })
 
     void analysisRun
+
+    // Step 4: SOAR — evaluate playbooks against the pipeline result.
+    // Fetch the (possibly updated) tags + entity types, then fire any matching
+    // playbooks. Errors here are caught inside runPlaybooks and never bubble
+    // up to fail the pipeline.
+    try {
+      const [invFresh, freshEntities] = await Promise.all([
+        db.investigation.findUnique({ where: { id: inv.id } }),
+        db.entity.findMany({ where: { investigationId: inv.id } }),
+      ])
+      const tags = safeParseJson<string[]>(invFresh?.tags || '[]', [])
+      const entityTypes = new Set<string>(freshEntities.map((e) => e.entityType))
+      await runPlaybooks(inv.id, userId, {
+        severityScore: result.severity_score,
+        entityTypes,
+        tags,
+      })
+    } catch (e) {
+      console.error('[playbook] orchestration failed:', e)
+    }
   } catch (e) {
     console.error('[pipeline] failed:', e)
     await db.investigation.update({

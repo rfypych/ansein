@@ -39,7 +39,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[11px] font-medium tracking-wide',
+        'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded border text-[10px] font-bold uppercase tracking-widest',
         badgeColors[color],
         className
       )}
@@ -149,11 +149,11 @@ export function SectionHeader({
           </div>
         )}
         <div>
-          <h2 className="text-base font-semibold text-[var(--ansein-text)] tracking-tight">
+          <h2 className="text-xl font-bold text-[var(--ansein-text)] tracking-tight">
             {title}
           </h2>
           {subtitle && (
-            <p className="text-sm text-[var(--ansein-text-muted)] mt-0.5">{subtitle}</p>
+            <p className="text-sm text-[var(--ansein-text-muted)] mt-1">{subtitle}</p>
           )}
         </div>
       </div>

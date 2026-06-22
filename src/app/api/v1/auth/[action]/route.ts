@@ -27,6 +27,7 @@ function userOut(u: {
   fullName: string
   isActive: boolean
   isSuperuser: boolean
+  role: string
   createdAt: Date
   lastLoginAt: Date | null
 }) {
@@ -36,6 +37,7 @@ function userOut(u: {
     full_name: u.fullName,
     is_active: u.isActive,
     is_superuser: u.isSuperuser,
+    role: u.role === 'admin' ? 'admin' : u.role === 'editor' ? 'editor' : 'analyst',
     created_at: u.createdAt.toISOString(),
     last_login_at: u.lastLoginAt ? u.lastLoginAt.toISOString() : null,
   }
@@ -55,7 +57,10 @@ async function register(req: NextRequest) {
   const { email, password, full_name } = parsed.data
 
   const userCount = await db.user.count()
-  const isSuperuser = userCount === 0
+  const isFirstUser = userCount === 0
+  // First user is promoted to admin; everyone else joins as an analyst by default.
+  const role = isFirstUser ? 'admin' : 'analyst'
+  const isSuperuser = isFirstUser
 
   const existing = await db.user.findUnique({ where: { email: email.toLowerCase() } })
   if (existing) {
@@ -69,6 +74,7 @@ async function register(req: NextRequest) {
         email: email.toLowerCase(),
         hashedPassword: hashed,
         fullName: full_name,
+        role,
         isSuperuser,
       },
     })

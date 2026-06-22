@@ -2,7 +2,25 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import * as d3 from 'd3'
-import { ZoomIn, ZoomOut, Maximize2, Grid3x3, Pause, Play } from 'lucide-react'
+import { ZoomIn, ZoomOut, Maximize2, Grid3x3, Pause, Play, Network, Clock, Rewind } from 'lucide-react'
+
+/**
+ * Community color palette — 8 distinct hues. Must stay in sync with
+ * COMMUNITY_COLORS in src/lib/engines/graph.ts (kept duplicated here to avoid
+ * pulling server-only modules into the client bundle).
+ */
+const COMMUNITY_COLORS: string[] = [
+  '#14b8a6', // teal
+  '#f59e0b', // amber
+  '#8b5cf6', // violet
+  '#ec4899', // pink
+  '#22d3ee', // cyan
+  '#84cc16', // lime
+  '#fb923c', // orange
+  '#a78bfa', // light violet
+]
+
+type ColorMode = 'community' | 'type'
 
 interface GraphNode {
   id: number
@@ -12,6 +30,9 @@ interface GraphNode {
   icon: string
   confidence: number
   enrichment: boolean
+  community?: number
+  /** ISO timestamp — when the underlying entity row was created (4D temporal). */
+  createdAt?: string
   x?: number
   y?: number
   fx?: number | null
@@ -19,16 +40,29 @@ interface GraphNode {
 }
 
 interface GraphEdge {
-  source: number
-  target: number
+  source: number | GraphNode
+  target: number | GraphNode
   label: string
   weight: number
   evidence: string
+  /** ISO timestamp — when the underlying relationship row was created (4D temporal). */
+  createdAt?: string
+}
+
+interface GraphCommunity {
+  id: number
+  size: number
+  color: string
 }
 
 interface GraphData {
   nodes: GraphNode[]
   edges: GraphEdge[]
+  communities?: GraphCommunity[]
+  /** Earliest creation timestamp across nodes+edges — start of the timeline slider. */
+  minDate?: string | null
+  /** Latest creation timestamp across nodes+edges — end of the timeline slider. */
+  maxDate?: string | null
 }
 
 interface GraphViewProps {
@@ -42,14 +76,151 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null)
   const [showGrid, setShowGrid] = useState(true)
   const [simRunning, setSimRunning] = useState(true)
+  const hasCommunities = !!(
+    data.communities &&
+    data.communities.length > 0 &&
+    data.nodes.some((n) => typeof n.community === 'number')
+  )
+  const [colorMode, setColorMode] = useState<ColorMode>(hasCommunities ? 'community' : 'type')
   const simulationRef = useRef<d3.Simulation<GraphNode, undefined> | null>(null)
   const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown> | null>(null)
   const svgSelRef = useRef<d3.Selection<SVGSVGElement, unknown, null, undefined> | null>(null)
+
+  // -------- 4D temporal slider state --------
+  // timelineAt is a Unix timestamp in ms; null = "show everything" (slider at
+  // the rightmost end). HasTemporal is false when the data has no createdAt
+  // info (e.g. legacy investigations), in which case the slider is hidden.
+  const minTs = data.minDate ? Date.parse(data.minDate) : NaN
+  const maxTs = data.maxDate ? Date.parse(data.maxDate) : NaN
+  const hasTemporal = Number.isFinite(minTs) && Number.isFinite(maxTs) && maxTs > minTs
+  // Slider value drives the filter: nodes/edges with createdAt > timelineAt are hidden.
+  const [timelineAt, setTimelineAt] = useState<number | null>(null)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const playbackRafRef = useRef<number | null>(null)
+  // Live D3 selections — captured by the main render effect so the timeline
+  // filter effect can update visibility WITHOUT restarting the simulation.
+  // Typed loosely (any) because the precise D3 Selection generics depend on
+  // the call chain that produced them and aren't worth pinning down for an
+  // internal implementation detail.
+  const nodeSelRef = useRef<d3.Selection<SVGGElement, GraphNode, SVGGElement, unknown> | null>(null)
+  const linkSelRef = useRef<d3.Selection<SVGPathElement, GraphEdge & { source: unknown; target: unknown }, SVGGElement, unknown> | null>(null)
+  const edgeLabelSelRef = useRef<d3.Selection<SVGGElement, GraphEdge & { source: unknown; target: unknown }, SVGGElement, unknown> | null>(null)
+  // Mirror timelineAt into a ref so the inline D3 click handler (rebound only
+  // on sim restart) always sees the latest value without being a dep.
+  const timelineAtRef = useRef<number | null>(null)
+  useEffect(() => {
+    timelineAtRef.current = timelineAt
+  }, [timelineAt])
+
+  // Initialize / reset the slider to "show all" when the underlying graph data
+  // changes (e.g. user switches investigations, pipeline re-runs).
+  useEffect(() => {
+    // eslint-disable-next-line
+    setTimelineAt(null)
+    // eslint-disable-next-line
+    setIsPlaying(false)
+  }, [data])
+
+  // Stop any in-flight playback raf on unmount.
+  useEffect(() => {
+    return () => {
+      if (playbackRafRef.current) cancelAnimationFrame(playbackRafRef.current)
+    }
+  }, [])
+
+  // Build a communityId → color lookup from data.communities (the top-8 list
+  // prepared by the graph builder). Communities outside the top-8 fall back to
+  // COMMUNITY_COLORS[id % 8].
+  const communityColorMap = useCallback((): Map<number, string> => {
+    const m = new Map<number, string>()
+    if (data.communities) {
+      for (const c of data.communities) m.set(c.id, c.color)
+    }
+    return m
+  }, [data.communities])
+
+  // Pick the rendered color for a node based on the active color mode.
+  const colorFor = useCallback(
+    (n: GraphNode): string => {
+      if (colorMode === 'community' && typeof n.community === 'number') {
+        return (
+          communityColorMap().get(n.community) ||
+          COMMUNITY_COLORS[n.community % COMMUNITY_COLORS.length]
+        )
+      }
+      return n.color
+    },
+    [colorMode, communityColorMap]
+  )
 
   // Handle node click — stable callback so D3 doesn't need to rebind
   const handleNodeClick = useCallback((event: MouseEvent, d: GraphNode) => {
     event.stopPropagation()
     setSelectedNode(d)
+  }, [])
+
+  /**
+   * Apply the 4D temporal filter to the live D3 selections. Hidden elements
+   * get opacity 0 + display:none; visible elements get opacity 1 + display ''.
+   *
+   * This function is invoked:
+   *   - Once after the main render effect sets up the selections (initial state).
+   *   - On every timelineAt change via the dedicated filter effect below.
+   *
+   * The simulation is NOT restarted — node positions are preserved so dragging
+   * the slider feels smooth.
+   */
+  const applyTimelineFilter = useCallback((at: number | null) => {
+    const nodeSel = nodeSelRef.current
+    const linkSel = linkSelRef.current
+    const edgeLabelSel = edgeLabelSelRef.current
+    if (!nodeSel || !linkSel || !edgeLabelSel) return
+    if (at == null) {
+      // Show everything.
+      nodeSel.style('display', '').attr('opacity', 1)
+      linkSel.style('display', '').attr('stroke-opacity', 0.6)
+      edgeLabelSel.style('display', '').attr('opacity', 0.8)
+      return
+    }
+    nodeSel
+      .style('display', (n) => {
+        if (!n.createdAt) return ''
+        return Date.parse(n.createdAt) <= at ? '' : 'none'
+      })
+      .attr('opacity', (n) => {
+        if (!n.createdAt) return 1
+        return Date.parse(n.createdAt) <= at ? 1 : 0
+      })
+    linkSel
+      .style('display', (l) => {
+        const sTs = (l.source as GraphNode).createdAt
+        const tTs = (l.target as GraphNode).createdAt
+        const sOk = !sTs || Date.parse(sTs) <= at
+        const tOk = !tTs || Date.parse(tTs) <= at
+        return sOk && tOk ? '' : 'none'
+      })
+      .attr('stroke-opacity', (l) => {
+        const sTs = (l.source as GraphNode).createdAt
+        const tTs = (l.target as GraphNode).createdAt
+        const sOk = !sTs || Date.parse(sTs) <= at
+        const tOk = !tTs || Date.parse(tTs) <= at
+        return sOk && tOk ? 0.6 : 0
+      })
+    edgeLabelSel
+      .style('display', (l) => {
+        const sTs = (l.source as GraphNode).createdAt
+        const tTs = (l.target as GraphNode).createdAt
+        const sOk = !sTs || Date.parse(sTs) <= at
+        const tOk = !tTs || Date.parse(tTs) <= at
+        return sOk && tOk ? '' : 'none'
+      })
+      .attr('opacity', (l) => {
+        const sTs = (l.source as GraphNode).createdAt
+        const tTs = (l.target as GraphNode).createdAt
+        const sOk = !sTs || Date.parse(sTs) <= at
+        const tOk = !tTs || Date.parse(tTs) <= at
+        return sOk && tOk ? 0.8 : 0
+      })
   }, [])
 
   useEffect(() => {
@@ -176,7 +347,7 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
       .attr('stroke', '#1f2538')
       .attr('stroke-width', 0.5)
 
-    const edgeLabel = edgeLabelGroup
+    edgeLabelGroup
       .append('text')
       .attr('font-size', 9)
       .attr('fill', '#64748b')
@@ -217,19 +388,19 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
           })
       )
 
-    // Node glow (subtle)
+    // Node glow (subtle) — uses active color (community or type)
     node
       .append('circle')
       .attr('r', (d) => 12 + d.confidence * 10)
-      .attr('fill', (d) => d.color)
+      .attr('fill', (d) => colorFor(d))
       .attr('fill-opacity', 0.08)
       .attr('stroke', 'none')
 
-    // Node circles
+    // Node circles — colored by community in community mode, else by entity type
     node
       .append('circle')
       .attr('r', (d) => 8 + d.confidence * 8)
-      .attr('fill', (d) => d.color)
+      .attr('fill', (d) => colorFor(d))
       .attr('stroke', '#0a0e16')
       .attr('stroke-width', 2)
 
@@ -244,10 +415,15 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
       .attr('stroke-opacity', 0.5)
       .attr('stroke-dasharray', '3 3')
 
-    // Node hover title
+    // Node hover title — includes community when available
     node
       .append('title')
-      .text((d) => `[${d.type}] ${d.label}\nconfidence: ${(d.confidence * 100).toFixed(0)}%${d.enrichment ? '\nenriched: yes' : ''}`)
+      .text(
+        (d) =>
+          `[${d.type}] ${d.label}\nconfidence: ${(d.confidence * 100).toFixed(0)}%${
+            typeof d.community === 'number' ? `\ncommunity: #${d.community}` : ''
+          }${d.enrichment ? '\nenriched: yes' : ''}`
+      )
 
     // Node labels — with background for readability
     const nodeLabelGroup = node
@@ -278,31 +454,92 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
       .attr('font-family', 'var(--font-geist-mono), monospace')
       .text((d) => (d.label.length > 20 ? d.label.slice(0, 18) + '…' : d.label))
 
-    // Click handler — use native event listener to avoid D3 interference
+    // Click handler — when community data is available, highlight every node
+    // in the same community (and edges internal to that community). Otherwise
+    // fall back to direct-neighbour highlighting.
     node.on('click', function (event, d) {
       event.stopPropagation()
       setSelectedNode(d)
-      // Highlight connected edges
-      node.transition().duration(200).attr('opacity', (n) =>
-        n.id === d.id || links.some((l) =>
-          (l.source as GraphNode).id === d.id && (l.target as GraphNode).id === n.id ||
-          (l.target as GraphNode).id === d.id && (l.source as GraphNode).id === n.id
+      const hasComm = typeof d.community === 'number'
+      node.transition().duration(200).attr('opacity', (n) => {
+        // Respect the timeline filter — nodes outside the current time window
+        // stay hidden regardless of community membership.
+        if (timelineAtRef.current != null && n.createdAt && Date.parse(n.createdAt) > timelineAtRef.current) {
+          return 0
+        }
+        if (hasComm) return n.community === d.community ? 1 : 0.2
+        return (
+          n.id === d.id ||
+          links.some(
+            (l) =>
+              ((l.source as GraphNode).id === d.id && (l.target as GraphNode).id === n.id) ||
+              ((l.target as GraphNode).id === d.id && (l.source as GraphNode).id === n.id)
+          )
         ) ? 1 : 0.3
-      )
-      link.transition().duration(200).attr('stroke-opacity', (l) =>
-        (l.source as GraphNode).id === d.id || (l.target as GraphNode).id === d.id ? 0.9 : 0.1
-      )
-      edgeLabelGroup.transition().duration(200).attr('opacity', (l) =>
-        (l.source as GraphNode).id === d.id || (l.target as GraphNode).id === d.id ? 1 : 0.1
-      )
+      })
+      link.transition().duration(200).attr('stroke-opacity', (l) => {
+        if (timelineAtRef.current != null) {
+          const sTs = (l.source as GraphNode).createdAt
+          const tTs = (l.target as GraphNode).createdAt
+          const sOk = !sTs || Date.parse(sTs) <= timelineAtRef.current
+          const tOk = !tTs || Date.parse(tTs) <= timelineAtRef.current
+          if (!sOk || !tOk) return 0
+        }
+        if (hasComm) {
+          return (l.source as GraphNode).community === d.community &&
+            (l.target as GraphNode).community === d.community
+            ? 0.9
+            : 0.05
+        }
+        return (l.source as GraphNode).id === d.id || (l.target as GraphNode).id === d.id ? 0.9 : 0.1
+      })
+      edgeLabelGroup.transition().duration(200).attr('opacity', (l) => {
+        if (timelineAtRef.current != null) {
+          const sTs = (l.source as GraphNode).createdAt
+          const tTs = (l.target as GraphNode).createdAt
+          const sOk = !sTs || Date.parse(sTs) <= timelineAtRef.current
+          const tOk = !tTs || Date.parse(tTs) <= timelineAtRef.current
+          if (!sOk || !tOk) return 0
+        }
+        if (hasComm) {
+          return (l.source as GraphNode).community === d.community &&
+            (l.target as GraphNode).community === d.community
+            ? 1
+            : 0.1
+        }
+        return (l.source as GraphNode).id === d.id || (l.target as GraphNode).id === d.id ? 1 : 0.1
+      })
     })
 
     // Background click resets highlight
     svgSel.on('click.reset', () => {
       setSelectedNode(null)
-      node.transition().duration(200).attr('opacity', 1)
-      link.transition().duration(200).attr('stroke-opacity', 0.6)
-      edgeLabelGroup.transition().duration(200).attr('opacity', 0.8)
+      node.transition().duration(200).attr('opacity', (n) => {
+        if (timelineAtRef.current != null && n.createdAt && Date.parse(n.createdAt) > timelineAtRef.current) {
+          return 0
+        }
+        return 1
+      })
+      link.transition().duration(200).attr('stroke-opacity', (l) => {
+        if (timelineAtRef.current != null) {
+          const sTs = (l.source as GraphNode).createdAt
+          const tTs = (l.target as GraphNode).createdAt
+          const sOk = !sTs || Date.parse(sTs) <= timelineAtRef.current
+          const tOk = !tTs || Date.parse(tTs) <= timelineAtRef.current
+          if (!sOk || !tOk) return 0
+        }
+        return 0.6
+      })
+      edgeLabelGroup.transition().duration(200).attr('opacity', (l) => {
+        if (timelineAtRef.current != null) {
+          const sTs = (l.source as GraphNode).createdAt
+          const tTs = (l.target as GraphNode).createdAt
+          const sOk = !sTs || Date.parse(sTs) <= timelineAtRef.current
+          const tOk = !tTs || Date.parse(tTs) <= timelineAtRef.current
+          if (!sOk || !tOk) return 0
+        }
+        return 0.8
+      })
     })
 
     // Tick — update positions
@@ -351,11 +588,32 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
     })
     resizeObs.observe(container)
 
+    // Capture D3 selections so the timeline-filter effect can update visibility
+    // WITHOUT restarting the simulation (smooth scrubbing).
+    nodeSelRef.current = node
+    linkSelRef.current = link as unknown as d3.Selection<SVGPathElement, GraphEdge & { source: unknown; target: unknown }, SVGGElement, unknown>
+    edgeLabelSelRef.current = edgeLabelGroup as unknown as d3.Selection<SVGGElement, GraphEdge & { source: unknown; target: unknown }, SVGGElement, unknown>
+
+    // Apply the current timeline filter to the freshly-rendered graph so the
+    // initial state matches the slider position (e.g. user reloads the page
+    // mid-playback).
+    applyTimelineFilter(timelineAtRef.current)
+
     return () => {
       resizeObs.disconnect()
       sim.stop()
+      nodeSelRef.current = null
+      linkSelRef.current = null
+      edgeLabelSelRef.current = null
     }
-  }, [data, height, showGrid])
+  }, [data, height, showGrid, colorMode, colorFor])
+
+
+
+  // Filter effect — fires on every slider change. Does NOT restart the sim.
+  useEffect(() => {
+    applyTimelineFilter(timelineAt)
+  }, [timelineAt, applyTimelineFilter])
 
   function zoomBy(factor: number) {
     if (!svgSelRef.current || !zoomRef.current) return
@@ -378,6 +636,109 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
       setSimRunning(true)
     }
   }
+
+  // -------- Timeline playback controls --------
+  /** Start auto-advancing the slider from start to end over ~10 seconds. */
+  function startPlayback() {
+    if (!hasTemporal) return
+    const start = minTs
+    const end = maxTs
+    const duration = 10000 // 10 seconds end-to-end
+    const t0 = performance.now()
+    // If the user is mid-scrub, animate from current position; else from start.
+    const fromTs = timelineAt != null ? timelineAt : start
+    const span = end - fromTs
+    if (span <= 0) {
+      // Already at end — rewind to start first.
+      setTimelineAt(start)
+    }
+    setIsPlaying(true)
+    const tick = (now: number) => {
+      const elapsed = now - t0
+      const progress = Math.min(1, elapsed / duration)
+      const next = fromTs + span * progress
+      setTimelineAt(next)
+      if (progress < 1) {
+        playbackRafRef.current = requestAnimationFrame(tick)
+      } else {
+        // Snap to "show all" at the end so all nodes are visible.
+        setTimelineAt(null)
+        setIsPlaying(false)
+        playbackRafRef.current = null
+      }
+    }
+    playbackRafRef.current = requestAnimationFrame(tick)
+  }
+
+  function stopPlayback() {
+    if (playbackRafRef.current) {
+      cancelAnimationFrame(playbackRafRef.current)
+      playbackRafRef.current = null
+    }
+    setIsPlaying(false)
+  }
+
+  function rewindTimeline() {
+    stopPlayback()
+    setTimelineAt(minTs)
+  }
+
+  function handleSliderChange(e: React.ChangeEvent<HTMLInputElement>) {
+    stopPlayback()
+    const v = Number(e.target.value)
+    if (v >= maxTs) {
+      // At the rightmost end → show all (matches spec: "When slider is at the
+      // end (latest date), show all nodes").
+      setTimelineAt(null)
+    } else {
+      setTimelineAt(v)
+    }
+  }
+
+  // Format a timestamp for the slider labels (date only, no seconds).
+  function fmtDate(ts: number): string {
+    try {
+      const d = new Date(ts)
+      return d.toLocaleString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    } catch {
+      return ''
+    }
+  }
+
+  // Slider value (must be a finite number for the input element). When
+  // timelineAt is null (show all), use maxTs so the thumb sits at the right.
+  const sliderValue = timelineAt != null ? timelineAt : maxTs
+  // Count of visible nodes at the current slider position — for the live count.
+  const visibleNodeCount =
+    timelineAt == null
+      ? data.nodes.length
+      : data.nodes.filter((n) => !n.createdAt || Date.parse(n.createdAt) <= timelineAt).length
+  const visibleEdgeCount =
+    timelineAt == null
+      ? data.edges.length
+      : data.edges.filter((e) => {
+          const src = data.nodes.find((n) => n.id === (e.source as unknown as number))
+          const tgt = data.nodes.find((n) => n.id === (e.target as unknown as number))
+          const sOk = !src?.createdAt || Date.parse(src.createdAt) <= timelineAt
+          const tOk = !tgt?.createdAt || Date.parse(tgt.createdAt) <= timelineAt
+          return sOk && tOk
+        }).length
+
+  // Resolve a community ID to a hex color for use in the selected-node panel.
+  function communityColor(id: number): string {
+    return (
+      communityColorMap().get(id) || COMMUNITY_COLORS[id % COMMUNITY_COLORS.length]
+    )
+  }
+
+  // Unused-but-stable: avoids the React Compiler warning about identity churn.
+  void handleNodeClick
 
   return (
     <div className="relative ansein-graph-bg rounded-lg border border-[var(--ansein-border)] overflow-hidden" style={{ height }}>
@@ -444,6 +805,24 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
           >
             <Grid3x3 className="h-3.5 w-3.5" />
           </button>
+          {hasCommunities && (
+            <button
+              onClick={() => setColorMode((m) => (m === 'community' ? 'type' : 'community'))}
+              className={
+                'p-1.5 rounded-md border transition-colors ' +
+                (colorMode === 'community'
+                  ? 'bg-[var(--ansein-primary)]/10 border-[var(--ansein-primary)]/30 text-[var(--ansein-primary)]'
+                  : 'bg-[var(--ansein-surface)] border-[var(--ansein-border)] text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)]')
+              }
+              title={
+                colorMode === 'community'
+                  ? 'Coloring by community — click to switch to entity type'
+                  : 'Coloring by entity type — click to switch to community'
+              }
+            >
+              <Network className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
       )}
 
@@ -454,11 +833,11 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
             <div
               className="h-10 w-10 rounded-lg flex-shrink-0 border flex items-center justify-center"
               style={{
-                background: `${selectedNode.color}20`,
-                borderColor: `${selectedNode.color}40`,
+                background: `${colorFor(selectedNode)}20`,
+                borderColor: `${colorFor(selectedNode)}40`,
               }}
             >
-              <div className="h-4 w-4 rounded-full" style={{ background: selectedNode.color }} />
+              <div className="h-4 w-4 rounded-full" style={{ background: colorFor(selectedNode) }} />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[10px] uppercase tracking-wider ansein-mono text-[var(--ansein-text-dim)]">
@@ -472,6 +851,15 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
                   <span className="h-1.5 w-1.5 rounded-full" style={{ background: selectedNode.color }} />
                   confidence: {(selectedNode.confidence * 100).toFixed(0)}%
                 </span>
+                {typeof selectedNode.community === 'number' && (
+                  <span className="flex items-center gap-1">
+                    <span
+                      className="h-1.5 w-1.5 rounded-full"
+                      style={{ background: communityColor(selectedNode.community) }}
+                    />
+                    community #{selectedNode.community}
+                  </span>
+                )}
                 {selectedNode.enrichment && (
                   <span className="text-teal-400 flex items-center gap-1">
                     <span className="h-1.5 w-1.5 rounded-full bg-teal-400" />
@@ -520,7 +908,7 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
 
       {/* Legend + Stats */}
       {data.nodes.length > 0 && (
-        <div className="absolute top-3 left-3 ansein-card rounded-md p-2.5 max-w-[200px]">
+        <div className="absolute top-3 left-3 ansein-card rounded-md p-2.5 max-w-[210px]">
           <div className="flex items-center justify-between mb-2">
             <p className="text-[9px] uppercase tracking-widest ansein-mono text-[var(--ansein-text-dim)]">
               Graph
@@ -536,10 +924,40 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
               No relationships detected. Click a node to inspect.
             </p>
           )}
+          {/* Communities legend — shown when community data exists */}
+          {hasCommunities && data.communities && data.communities.length > 0 && (
+            <div className={colorMode === 'community' ? '' : 'opacity-50'}>
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="text-[9px] uppercase tracking-widest ansein-mono text-[var(--ansein-text-dim)]">
+                  Communities
+                </p>
+                <span className="text-[9px] text-[var(--ansein-text-dim)] ansein-mono">
+                  {data.communities.length} cluster{data.communities.length === 1 ? '' : 's'}
+                </span>
+              </div>
+              <div className="grid grid-cols-1 gap-y-0.5 text-[10px] mb-2">
+                {data.communities.map((c) => (
+                  <div key={c.id} className="flex items-center gap-1">
+                    <span
+                      className="h-1.5 w-1.5 rounded-full flex-shrink-0"
+                      style={{ background: c.color }}
+                    />
+                    <span className="text-[var(--ansein-text-muted)] truncate">cluster #{c.id}</span>
+                    <span className="text-[var(--ansein-text-dim)] ml-auto ansein-mono">{c.size}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           <p className="text-[9px] uppercase tracking-widest ansein-mono text-[var(--ansein-text-dim)] mb-1.5">
             Entity types
           </p>
-          <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10px]">
+          <div
+            className={
+              'grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10px] ' +
+              (colorMode === 'type' ? '' : 'opacity-50')
+            }
+          >
             {Array.from(new Set(data.nodes.map((n) => n.type))).slice(0, 8).map((t) => {
               const n = data.nodes.find((x) => x.type === t)!
               const count = data.nodes.filter((x) => x.type === t).length
@@ -554,6 +972,77 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
                 </div>
               )
             })}
+          </div>
+        </div>
+      )}
+
+      {/* 4D Timeline Playback Slider */}
+      {data.nodes.length > 0 && hasTemporal && (
+        <div className="absolute bottom-0 left-0 right-0 ansein-card border-t border-[var(--ansein-border)] rounded-none px-4 py-2.5">
+          <div className="flex items-center gap-3">
+            {/* Playback buttons */}
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <button
+                onClick={rewindTimeline}
+                className="p-1.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] hover:border-[var(--ansein-border-strong)] transition-colors"
+                title="Rewind to start"
+              >
+                <Rewind className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onClick={isPlaying ? stopPlayback : startPlayback}
+                className={
+                  'p-1.5 rounded-md border transition-colors ' +
+                  (isPlaying
+                    ? 'bg-[var(--ansein-primary)]/10 border-[var(--ansein-primary)]/30 text-[var(--ansein-primary)]'
+                    : 'bg-[var(--ansein-primary)] text-[var(--ansein-bg)] border-[var(--ansein-primary)] hover:bg-[var(--ansein-primary-hover)]')
+                }
+                title={isPlaying ? 'Pause playback' : 'Play timeline (~10s)'}
+              >
+                {isPlaying ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+              </button>
+            </div>
+
+            {/* Clock icon + start label */}
+            <div className="flex items-center gap-1.5 flex-shrink-0 text-[10px] ansein-mono text-[var(--ansein-text-dim)]">
+              <Clock className="h-3 w-3" />
+              <span>{fmtDate(minTs)}</span>
+            </div>
+
+            {/* Range slider */}
+            <input
+              type="range"
+              min={minTs}
+              max={maxTs}
+              step={(maxTs - minTs) / 1000}
+              value={sliderValue}
+              onChange={handleSliderChange}
+              aria-label="Timeline playback"
+              className="ansein-timeline-slider flex-1"
+            />
+
+            {/* End label + live count */}
+            <div className="flex items-center gap-1.5 flex-shrink-0 text-[10px] ansein-mono text-[var(--ansein-text-dim)]">
+              <span>{fmtDate(maxTs)}</span>
+            </div>
+          </div>
+
+          {/* Status row: live count + current position */}
+          <div className="mt-1.5 flex items-center justify-between text-[9px] uppercase tracking-widest ansein-mono">
+            <span className="text-[var(--ansein-text-dim)]">
+              <span className="text-[var(--ansein-primary)]">{visibleNodeCount}</span>
+              <span className="mx-1">/</span>
+              <span>{data.nodes.length} nodes</span>
+              <span className="mx-2">·</span>
+              <span className="text-amber-400">{visibleEdgeCount}</span>
+              <span className="mx-1">/</span>
+              <span>{data.edges.length} edges</span>
+            </span>
+            <span className="text-[var(--ansein-text-dim)]">
+              {timelineAt == null
+                ? 'showing all · drag to scrub'
+                : `at ${fmtDate(timelineAt)}`}
+            </span>
           </div>
         </div>
       )}

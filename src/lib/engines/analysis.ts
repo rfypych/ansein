@@ -21,6 +21,13 @@ export interface ActorHypothesis {
   reasoning: string
 }
 
+export interface ThreatHypothesis {
+  scenario: string
+  confidence: number
+  reasoning: string
+  next_steps: string[]
+}
+
 export interface AnalysisResult {
   narrative: string
   actor_hypothesis: ActorHypothesis | Record<string, never>
@@ -30,6 +37,7 @@ export interface AnalysisResult {
   confidence: number
   model_used: string
   tokens_used: number
+  hypotheses: ThreatHypothesis[]
 }
 
 const LLM_SYSTEM = 'You output strict JSON, no prose, no code fences. Use GitHub-flavored Markdown (headings, bold, lists, code blocks) for the narrative and recommendations fields.'
@@ -53,16 +61,25 @@ Who/what is being targeted and potential impact.
 ## Severity Assessment
 Score (0-100) with justification. Use a table if comparing multiple factors.
 
+## Attack Hypotheses
+For each of the following, provide scenario, confidence %, reasoning, and recommended next steps:
+1. Lateral Movement Potential
+2. Data Exfiltration Risk
+3. Persistence & Long-term Access
+
 Cover:
 1. What the threat is and its primary mechanism
 2. Who is likely behind it (attribution reasoning) — only if entities suggest an actor
 3. Who/what is being targeted
 4. Severity assessment (0-100) with justification
 5. Recommended defensive actions (as a numbered list with **bold** action items)
+6. Three attack hypotheses (lateral movement, data exfiltration, persistence)
 
 Return strict JSON with keys: narrative (string, Markdown formatted),
 actor_hypothesis (object with keys: actor, confidence, motivation, origin, reasoning),
-severity_score (number 0-100), recommendations (array of strings, each Markdown formatted).
+severity_score (number 0-100), recommendations (array of strings, each Markdown formatted),
+hypotheses (array of 3 objects, each with keys: scenario (string), confidence (number 0-100),
+reasoning (string, Markdown formatted), next_steps (array of strings)).
 
 ENTITIES:
 `
@@ -191,6 +208,140 @@ function heuristicRecommendations(
   return recs
 }
 
+/**
+ * Generate three attack hypotheses (lateral movement, data exfiltration,
+ * persistence) from extracted entities. Used as the heuristic fallback and
+ * to fill in any hypotheses the LLM omits.
+ *
+ * Confidence is computed from entity coverage + investigation severity:
+ *  - Each hypothesis has a "core" entity-type pair. Confidence is boosted
+ *    when both halves are present, when the severity score is high, and
+ *    when enrichment corroborates the indicators (malicious flags).
+ *  - All confidences are clamped to [0, 100].
+ */
+export function generateHypotheses(
+  entities: EntityForAnalysis[],
+  severity: number
+): ThreatHypothesis[] {
+  const counts: Partial<Record<EntityType, number>> = {}
+  for (const e of entities) counts[e.entity_type] = (counts[e.entity_type] || 0) + 1
+
+  // Aggregate enrichment signal (any malicious verdict bumps confidence).
+  let maliciousHits = 0
+  for (const e of entities) {
+    for (const [, d] of Object.entries(e.enrichment || {})) {
+      if (typeof d?.malicious === 'number' && d.malicious > 0) maliciousHits += 1
+      if (typeof d?.abuse_score === 'number' && d.abuse_score >= 75) maliciousHits += 1
+    }
+  }
+  const sevBoost = Math.min(25, Math.round(severity * 0.25))
+  const enrBoost = Math.min(20, maliciousHits * 4)
+  const clamp = (n: number) => Math.min(100, Math.max(0, Math.round(n)))
+
+  // ----- 1. Lateral Movement (IPs + domains) -----
+  const hasIp = (counts.ioc_ip || 0) > 0
+  const hasDomain = (counts.ioc_domain || 0) > 0
+  let latConf = 0
+  if (hasIp && hasDomain) latConf = 55
+  else if (hasIp || hasDomain) latConf = 30
+  latConf += sevBoost + enrBoost
+  if (counts.target) latConf += 5
+  const latSteps = [
+    'Map all internal hosts that have communicated with the implicated external IPs/domains.',
+    'Review authentication logs for anomalous logins and new account creation.',
+    'Deploy EDR telemetry to detect Pass-the-Hash / Pass-the-Ticket attempts.',
+    'Segment the network to contain any identified pivot points.',
+  ]
+  if (!hasIp && !hasDomain) latSteps.unshift('No network IOCs available — collect internal flow logs first to baseline normal traffic.')
+
+  // ----- 2. Data Exfiltration (URLs + hashes) -----
+  const hasUrl = (counts.ioc_url || 0) > 0
+  const hasHash = (counts.ioc_hash || 0) > 0
+  let exfConf = 0
+  if (hasUrl && hasHash) exfConf = 55
+  else if (hasUrl || hasHash) exfConf = 30
+  exfConf += sevBoost + enrBoost
+  if (counts.malware) exfConf += 5
+  const exfSteps = [
+    'Inventory files matching the identified hashes across the estate.',
+    'Inspect proxy egress logs for large or anomalous uploads to the implicated URLs.',
+    'Enable DLP rules to flag staging of compressed archives in temp directories.',
+    'Correlate DNS beaconing patterns with the identified URLs for C2 staging detection.',
+  ]
+  if (!hasUrl && !hasHash) exfSteps.unshift('No URL/hash IOCs available — focus on outbound bandwidth baselining until indicators arrive.')
+
+  // ----- 3. Persistence (malware + techniques) -----
+  const hasMalware = (counts.malware || 0) > 0
+  const hasTechnique = (counts.technique || 0) > 0
+  let persConf = 0
+  if (hasMalware && hasTechnique) persConf = 55
+  else if (hasMalware || hasTechnique) persConf = 30
+  persConf += sevBoost + enrBoost
+  if (counts.vulnerability) persConf += 5
+  const persSteps = [
+    'Hunt for the identified malware family across scheduled tasks, run keys, and startup folders.',
+    'Audit WMI subscriptions, services, and LSASS injection for the identified techniques.',
+    'Pull and preserve volatile memory from suspect hosts for timeline reconstruction.',
+    'Validate patch posture against any CVEs leveraged by the malware.',
+  ]
+  if (!hasMalware && !hasTechnique) persSteps.unshift('No malware/technique entities extracted — review autoruns and persistence mechanisms manually.')
+
+  return [
+    {
+      scenario: 'Lateral Movement Potential',
+      confidence: clamp(latConf),
+      reasoning: `Based on **${counts.ioc_ip || 0} IP** and **${counts.ioc_domain || 0} domain** indicators extracted from the source. ` +
+        `Combined with a severity score of ${severity}/100${maliciousHits > 0 ? ` and ${maliciousHits} corroborating enrichment hit(s)` : ''}, ` +
+        `the adversary is ${hasIp && hasDomain ? 'well-positioned' : 'potentially able'} to pivot from initial foothold into the internal network.`,
+      next_steps: latSteps,
+    },
+    {
+      scenario: 'Data Exfiltration Risk',
+      confidence: clamp(exfConf),
+      reasoning: `Derived from **${counts.ioc_url || 0} URL** and **${counts.ioc_hash || 0} file hash** indicators. ` +
+        `URLs paired with file artifacts is a classic staging/exfiltration signature. ` +
+        `Severity of ${severity}/100${maliciousHits > 0 ? ` plus ${maliciousHits} enrichment corroboration(s)` : ''} ` +
+        `elevates the likelihood of active data movement.`,
+      next_steps: exfSteps,
+    },
+    {
+      scenario: 'Persistence & Long-term Access',
+      confidence: clamp(persConf),
+      reasoning: `Based on **${counts.malware || 0} malware** and **${counts.technique || 0} technique** entities. ` +
+        `Presence of named malware families alongside known TTPs strongly suggests the adversary will ` +
+        `re-establish footholds after reboots or remediation. Severity ${severity}/100 ` +
+        `${maliciousHits > 0 ? `and ${maliciousHits} enrichment hit(s) ` : ''}reinforce the need for persistence hunting.`,
+      next_steps: persSteps,
+    },
+  ]
+}
+
+/** Normalise raw hypothesis objects coming back from the LLM. */
+function normaliseHypotheses(raw: unknown, fallback: ThreatHypothesis[]): ThreatHypothesis[] {
+  if (!Array.isArray(raw) || raw.length === 0) return fallback
+  const out: ThreatHypothesis[] = []
+  for (const item of raw.slice(0, 3)) {
+    if (!item || typeof item !== 'object') continue
+    const obj = item as Record<string, unknown>
+    const scenario = typeof obj.scenario === 'string' ? obj.scenario : ''
+    const confidenceRaw = Number(obj.confidence)
+    const confidence = Number.isFinite(confidenceRaw)
+      ? Math.min(100, Math.max(0, Math.round(confidenceRaw > 1 ? confidenceRaw : confidenceRaw * 100)))
+      : 0
+    const reasoning = typeof obj.reasoning === 'string' ? obj.reasoning : ''
+    const next_steps = Array.isArray(obj.next_steps)
+      ? obj.next_steps.filter((s): s is string => typeof s === 'string')
+      : []
+    if (!scenario && !reasoning) continue
+    out.push({ scenario: scenario || 'Untitled hypothesis', confidence, reasoning, next_steps })
+  }
+  // Pad with fallback hypotheses if the LLM returned fewer than 3.
+  while (out.length < 3 && fallback.length > 0) {
+    out.push(fallback[out.length])
+  }
+  return out
+}
+
 // ------------------------------------------------ main entry
 export async function analyze(
   entities: EntityForAnalysis[],
@@ -232,6 +383,7 @@ export async function analyze(
         actor_hypothesis?: ActorHypothesis
         severity_score?: number
         recommendations?: string[]
+        hypotheses?: unknown
       } = {}
       try {
         parsed = JSON.parse(cleaned)
@@ -261,6 +413,7 @@ export async function analyze(
         confidence,
         model_used: resp.model,
         tokens_used: resp.tokensIn + resp.tokensOut,
+        hypotheses: normaliseHypotheses(parsed.hypotheses, generateHypotheses(entities, severity)),
       }
     } catch (e) {
       console.warn('[analysis] LLM failed, using heuristic:', e)
@@ -279,5 +432,6 @@ export async function analyze(
     confidence,
     model_used: 'heuristic',
     tokens_used: 0,
+    hypotheses: generateHypotheses(entities, severity),
   }
 }

@@ -1,609 +1,1053 @@
 'use client'
 
 import Link from 'next/link'
-import {
-  ArrowRight,
-  Network,
-  Bot,
-  FileSearch,
-  Brain,
-  Download,
-  ShieldCheck,
-  Lock,
-  Cpu,
-  Activity,
-  Github,
-  ChevronRight,
-  Zap,
-  Globe,
-  Layers,
-  CheckCircle2,
-  XCircle,
-  Server,
-  Code2,
-  Database,
-  GitBranch,
-} from 'lucide-react'
-import { Brand } from '@/components/ansein/brand'
-import { Badge } from '@/components/ansein/ui'
+import { ShieldCheck, Brain, Lightning, ChatCircleDots, FilePdf, LockKey, ArrowRight, GithubLogo, Cube, Cloud, HardDrives } from '@phosphor-icons/react'
+import { useEffect, useState, useRef } from 'react'
+import { ThemeToggle } from "@/components/ansein/theme-toggle"
+import gsap from 'gsap'
+import { useGSAP } from '@gsap/react'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+gsap.registerPlugin(useGSAP, ScrollTrigger)
+
+/* ──────────────────────────────────────────────────────────────────────
+   AnseIn Landing Page — Hermes-inspired editorial layout
+   Clean programmatic ASCII animations, no scraped art, no glitch bugs
+   ────────────────────────────────────────────────────────────────────── */
 
 const FEATURES = [
   {
-    icon: FileSearch,
-    title: 'Hybrid Extraction',
-    color: '#14b8a6',
-    description:
-      'Regex → LLM pipeline extracts IOCs, malware families, threat actors, and vulnerabilities from raw threat data — degrades gracefully when no LLM is configured.',
-  },
-  {
-    icon: Network,
-    title: 'Knowledge Graph',
-    color: '#f59e0b',
-    description:
-      'Interactive force-directed visualisation of entities and their relationships. Click any node to inspect enrichment, evidence, and confidence scores.',
+    icon: ShieldCheck,
+    title: 'HYBRID\nEXTRACTION',
+    desc: 'Regex catches the obvious. LLM catches the subtle. Both co-exist in a single deduplication pass with graceful degradation.',
   },
   {
     icon: Brain,
-    title: 'Cognitive Analysis',
-    color: '#a78bfa',
-    description:
-      'LLM-generated threat narratives, actor hypotheses, severity scores 0–100, Admiralty reliability codes, and actionable defensive recommendations.',
+    title: 'GRAPH\nMEMORY',
+    desc: 'Force-directed entity visualisation maps relationships between IOCs, threat actors, malware families, and TTPs.',
   },
   {
-    icon: Bot,
-    title: 'Investigation Copilot',
-    color: '#38bdf8',
-    description:
-      'RAG-style chat grounded strictly in your investigation data. Per-session memory, citation-aware answers, no fabrication by design.',
+    icon: Lightning,
+    title: 'AUTO\nANALYSIS',
+    desc: 'LLM-generated threat narratives, actor hypotheses, severity scores, admiralty codes, and defensive recommendations.',
   },
   {
-    icon: Download,
-    title: 'STIX 2.1 Export',
-    color: '#10b981',
-    description:
-      'One-click export to STIX 2.1 bundle, raw JSON, or a polished printable PDF threat report — ready to share with stakeholders.',
+    icon: ChatCircleDots,
+    title: 'THREAT\nCOPILOT',
+    desc: 'RAG-style chat grounded strictly in your investigation data. Per-session memory, citation-aware, zero fabrication.',
   },
   {
-    icon: ShieldCheck,
-    title: 'Multi-Tenant SaaS',
-    color: '#f43f5e',
-    description:
-      'Bring-your-own-key (BYOK) architecture with Fernet-equivalent AES-256-GCM encryption at rest. Each user supplies their own API keys.',
+    icon: FilePdf,
+    title: 'EXPORT\nREPORTS',
+    desc: 'One-click export to STIX 2.1 bundle, raw JSON, or a polished printable PDF threat report for stakeholders.',
+  },
+  {
+    icon: LockKey,
+    title: 'ZERO\nTRUST',
+    desc: 'Multi-tenant BYOK architecture. API keys encrypted with AES-256-GCM. Each user cryptographically sandboxed.',
   },
 ]
 
-const STATS = [
-  { value: '13', label: 'Entity types' },
-  { value: '4', label: 'Enrichment providers' },
-  { value: '3', label: 'Export formats' },
-  { value: '100', label: 'Analyst-grade' },
-]
+// ─── Smooth animated ASCII canvas ───────────────────────────────────
+function AnimatedWave() {
+  const [lines, setLines] = useState<string[]>([])
 
-const PIPELINE_STEPS = [
-  {
-    n: '01',
-    title: 'Ingest',
-    description: 'Paste raw text, upload files, or reference URLs into an investigation case.',
-  },
-  {
-    n: '02',
-    title: 'Extract',
-    description: 'Hybrid regex + LLM extraction identifies IOCs, actors, malware, and TTPs.',
-  },
-  {
-    n: '03',
-    title: 'Enrich',
-    description: 'VirusTotal, AbuseIPDB, and Shodan enrich technical indicators with verdicts.',
-  },
-  {
-    n: '04',
-    title: 'Analyse',
-    description: 'LLM synthesises a narrative, severity score, and Admiralty reliability code.',
-  },
-  {
-    n: '05',
-    title: 'Decide',
-    description: 'Query the Copilot for grounded answers, then export a STIX bundle or PDF.',
-  },
-]
+  useEffect(() => {
+    let frame = 0
+    const w = 300
+    const h = 50
+    const interval = setInterval(() => {
+      frame++
+      const result: string[] = []
+      for (let y = 0; y < h; y++) {
+        let row = ''
+        for (let x = 0; x < w; x++) {
+          const v = Math.sin(x * 0.12 + frame * 0.08) * 4 +
+            Math.sin(x * 0.05 + y * 0.3 + frame * 0.05) * 3 +
+            Math.sin(y * 0.2 - frame * 0.06) * 2
+          const ny = (y - h / 2)
+          const d = Math.abs(ny - v)
+          if (d < 0.8) row += '\u2588'
+          else if (d < 1.6) row += '\u2593'
+          else if (d < 2.4) row += '\u2592'
+          else if (d < 3.5) row += '\u2591'
+          else row += ' '
+        }
+        result.push(row)
+      }
+      setLines(result)
+    }, 80)
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <pre 
+      className="text-[12px] md:text-[16px] leading-[1.1] text-primary/80 whitespace-pre select-none"
+      style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}
+    >
+      {lines.join('\n')}
+    </pre>
+  )
+}
+
+function AnimatedTopo() {
+  const [lines, setLines] = useState<string[]>([])
+
+  useEffect(() => {
+    let frame = 0
+    const w = 150
+    const h = 50
+    const interval = setInterval(() => {
+      frame++
+      const result: string[] = []
+      for (let y = 0; y < h; y++) {
+        let row = ''
+        for (let x = 0; x < w * 2; x++) {
+          const nx = x * 0.03 + frame * 0.01
+          const ny = y * 0.06 - frame * 0.015
+          const v = Math.sin(nx) * Math.cos(ny) + Math.sin(nx * 0.5 + ny * 0.5)
+          // Create sharp contour lines
+          const contour = Math.abs((v * 8) % 2)
+
+          if (contour < 0.2) row += '\u2588'
+          else if (contour < 0.4) row += '\u2593'
+          else if (contour < 0.6) row += '\u00b7'
+          else row += ' '
+        }
+        result.push(row)
+      }
+      setLines(result)
+    }, 80)
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <pre 
+      className="text-[10px] md:text-[12px] leading-[1.15] text-primary/40 whitespace-pre select-none"
+      style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}
+    >
+      {lines.join('\n')}
+    </pre>
+  )
+}
+
+function AnimatedGlobe() {
+  const [lines, setLines] = useState<string[]>([])
+
+  useEffect(() => {
+    let frame = 0
+    const w = 150
+    const h = 40
+    const interval = setInterval(() => {
+      frame++
+      const result: string[] = []
+      for (let y = 0; y < h; y++) {
+        let row = ''
+        for (let x = 0; x < w; x++) {
+          const distFromRight = w - 1 - x
+          const wave1 = Math.sin(x * 0.15 + frame * 0.1 + y * 0.1)
+          const wave2 = Math.sin(x * 0.05 + frame * 0.05 - y * 0.2)
+          const noise = wave1 * wave2
+          
+          // Smooth fade out from the right edge
+          const xFade = Math.exp(-distFromRight * 0.035)
+          // Smooth fade out towards top and bottom edges
+          const yFade = Math.exp(-Math.pow((y - h / 2) / (h / 3), 2))
+          
+          const envelope = xFade * yFade
+          const density = Math.abs(noise) * envelope
+
+          if (density > 0.6) row += '\u2588'
+          else if (density > 0.4) row += '\u2593'
+          else if (density > 0.2) row += '\u2592'
+          else if (density > 0.05) row += '\u2591'
+          else row += ' '
+        }
+        result.push(row)
+      }
+      setLines(result)
+    }, 80)
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <pre 
+      className="text-[7px] md:text-[9px] leading-[1] text-primary/40 whitespace-pre select-none text-right block"
+      style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}
+    >
+      {lines.join('\n')}
+    </pre>
+  )
+}
+
+// ─── Bento Grid ASCII Backgrounds ──────────────────────────────────
+function DockerASCII() {
+  const [lines, setLines] = useState<string[]>([])
+
+  useEffect(() => {
+    let frame = 0
+    const w = 60
+    const h = 16
+    const interval = setInterval(() => {
+      frame++
+      const result: string[] = []
+      for (let y = 0; y < h; y++) {
+        let row = ''
+        for (let x = 0; x < w; x++) {
+          const stackIdx = Math.floor(x / 10)
+          const lx = x % 10
+          if (lx >= 1 && lx <= 8) {
+            // We are inside a stack
+            const sinVal = Math.sin(stackIdx * 1.2 + frame * 0.06)
+            const containerCount = Math.floor(sinVal * 1.5 + 2.5) // 1 to 4 containers
+            const hCells = containerCount * 3
+
+            if (y >= h - hCells) {
+              const localY = h - 1 - y
+              const isTop = y === h - hCells
+              const isDivider = localY % 3 === 0
+              const isEdge = lx === 1 || lx === 8
+
+              if (isTop) {
+                row += '\u2584' // bottom half block
+              } else if (isEdge) {
+                row += '\u2588' // full block
+              } else if (isDivider) {
+                row += '\u2550' // double horizontal line
+              } else {
+                // Corrugated container body
+                // Alternate light/dark vertical ridges
+                const ridge = (lx % 2 === 0)
+                const pulse = Math.sin(x * 0.2 - frame * 0.08) > 0.2
+                if (ridge) {
+                  row += pulse ? '\u2588' : '\u2593'
+                } else {
+                  row += pulse ? '\u2592' : '\u2591'
+                }
+              }
+              continue
+            }
+          }
+          row += ' '
+        }
+        result.push(row)
+      }
+      setLines(result)
+    }, 80)
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <div className="absolute top-0 right-0 bottom-0 w-full md:w-1/2 flex items-center justify-end pointer-events-none opacity-[0.12] overflow-hidden">
+      <pre 
+        className="text-[10px] md:text-[12px] leading-[1.1] text-primary whitespace-pre select-none pr-8"
+        style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}
+      >
+        {lines.join('\n')}
+      </pre>
+    </div>
+  )
+}
+
+function CloudASCII() {
+  const [lines, setLines] = useState<string[]>([])
+
+  useEffect(() => {
+    let frame = 0
+    const cols = 28
+    const rows = 14
+    const interval = setInterval(() => {
+      frame++
+      const result: string[] = []
+      for (let y = 0; y < rows; y++) {
+        let row = ''
+        for (let x = 0; x < cols; x++) {
+          // Clean, geometric rippling node grid
+          const dx = x - cols / 2
+          const dy = y - rows / 2
+          const dist = Math.sqrt(dx * dx + (dy * 2.5) ** 2) // stretch Y for isometric feel
+
+          const ripple = Math.sin(dist * 0.6 - frame * 0.15)
+
+          if (ripple > 0.6) row += ' ✦ '
+          else if (ripple > 0.1) row += ' + '
+          else if (ripple > -0.5) row += ' · '
+          else row += '   '
+        }
+        result.push(row)
+      }
+      setLines(result)
+    }, 80)
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <div className="absolute inset-0 flex items-center justify-end pointer-events-none opacity-[0.20] overflow-hidden">
+      <pre 
+        className="text-[9px] md:text-[11px] leading-[1.3] text-primary whitespace-pre select-none pr-8"
+        style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}
+      >
+        {lines.join('\n')}
+      </pre>
+    </div>
+  )
+}
+
+function CircuitASCII() {
+  const [lines, setLines] = useState<string[]>([])
+
+  useEffect(() => {
+    let frame = 0
+    const w = 8 // 8 columns of hex pairs
+    const h = 14
+    const hexChars = '0123456789ABCDEF'
+
+    // Pre-generate a static memory block
+    const mem = Array.from({ length: h * w * 2 }, () => hexChars[Math.floor(Math.random() * 16)])
+
+    const interval = setInterval(() => {
+      frame++
+      const result: string[] = []
+
+      for (let y = 0; y < h; y++) {
+        let row = `0x${(y * 16).toString(16).padStart(4, '0').toUpperCase()}  `
+        for (let x = 0; x < w; x++) {
+          const idx = (y * w + x) * 2
+
+          // Randomly mutate some bytes to simulate active memory dumping
+          if (Math.random() > 0.96) {
+            mem[idx] = hexChars[Math.floor(Math.random() * 16)]
+            mem[idx + 1] = hexChars[Math.floor(Math.random() * 16)]
+          }
+
+          row += `${mem[idx]}${mem[idx + 1]} `
+        }
+
+        // Add ASCII representation string on the right
+        row += ' '
+        for (let x = 0; x < w; x++) {
+          const charCode = parseInt(mem[(y * w + x) * 2] + mem[(y * w + x) * 2 + 1], 16)
+          // Printable ascii range
+          if (charCode >= 33 && charCode <= 126) {
+            row += String.fromCharCode(charCode)
+          } else {
+            row += '.'
+          }
+        }
+
+        result.push(row)
+      }
+      setLines(result)
+    }, 100)
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <div className="absolute inset-0 flex items-center justify-end pointer-events-none opacity-[0.25] overflow-hidden">
+      <pre 
+        className="text-[10px] md:text-[12px] leading-[1.3] text-primary whitespace-pre select-none pr-8"
+        style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}
+      >
+        {lines.join('\n')}
+      </pre>
+    </div>
+  )
+}
+
+function MatrixRain({ color = 'text-primary/30' }: { color?: string }) {
+  const [content, setContent] = useState('')
+
+  useEffect(() => {
+    const cols = 60
+    const rows = 25
+    const drops = new Array(cols).fill(0).map(() => Math.floor(Math.random() * rows))
+    const chars = '01ANSEIN{}<>[]/:;!@#$%^&*()THREAT'
+
+    const interval = setInterval(() => {
+      const grid: string[][] = Array.from({ length: rows }, () => new Array(cols).fill(' '))
+      for (let c = 0; c < cols; c++) {
+        const head = drops[c]
+        for (let t = 0; t < 8; t++) {
+          const r = head - t
+          if (r >= 0 && r < rows) {
+            grid[r][c] = chars[Math.floor(Math.random() * chars.length)]
+          }
+        }
+        drops[c]++
+        if (drops[c] > rows + 10 && Math.random() > 0.95) {
+          drops[c] = 0
+        }
+      }
+      setContent(grid.map(row => row.join('')).join('\n'))
+    }, 80)
+
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <pre 
+      className={`text-[10px] md:text-[12px] leading-[1.15] whitespace-pre select-none ${color}`}
+      style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}
+    >
+      {content}
+    </pre>
+  )
+}
+
+// Dummy high-detail dashboard for preview
+function DummyDashboard() {
+  const [time, setTime] = useState('14:44:00')
+  const [pulse, setPulse] = useState(false)
+
+  useEffect(() => {
+    const tInterval = setInterval(() => {
+      const now = new Date()
+      setTime(now.toTimeString().split(' ')[0])
+    }, 1000)
+
+    const pInterval = setInterval(() => {
+      setPulse(p => !p)
+    }, 1500)
+
+    return () => {
+      clearInterval(tInterval)
+      clearInterval(pInterval)
+    }
+  }, [])
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 text-[10px] md:text-[11px] font-sans text-foreground/70 h-full select-none">
+      {/* Left Column: Stats & Investigations */}
+      <div className="hidden lg:flex lg:col-span-3 flex-col gap-5 border-r border-border/50 pr-5">
+        <div>
+          <div className="text-[9px] uppercase tracking-widest text-primary font-bold mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <span className={`w-2.5 h-2.5 rounded-full bg-red-500 ${pulse ? 'animate-pulse' : ''}`} />
+              Active Triage
+            </div>
+            <span className="text-foreground/30 text-[8px]">3 PENDING</span>
+          </div>
+          <div className="space-y-2">
+            <div className="bg-card/[0.02] border border-border/50 p-2.5 rounded-sm hover:bg-card/[0.04] transition-colors cursor-pointer">
+              <div className="flex justify-between mb-1.5 font-mono text-[9.5px]">
+                <span className="text-foreground truncate max-w-[120px]">APT29_report.pdf</span>
+                <span className="text-[8px] text-red-400 font-bold bg-red-400/10 px-1.5 py-0.5 border border-red-400/20">CRITICAL</span>
+              </div>
+              <div className="w-full bg-card/5 h-1 rounded-full overflow-hidden">
+                <div className="bg-red-400 h-full w-[85%]" />
+              </div>
+              <div className="text-[8px] text-foreground/40 mt-1.5 flex justify-between"><span>Risk Score: 85</span><span>T1059.001</span></div>
+            </div>
+            <div className="bg-card/[0.02] border border-border/50 p-2.5 rounded-sm hover:bg-card/[0.04] transition-colors cursor-pointer">
+              <div className="flex justify-between mb-1.5 font-mono text-[9.5px]">
+                <span className="text-foreground truncate max-w-[120px]">log_dump_tor.txt</span>
+                <span className="text-[8px] text-amber-400 font-bold bg-amber-400/10 px-1.5 py-0.5 border border-amber-400/20">HIGH</span>
+              </div>
+              <div className="w-full bg-card/5 h-1 rounded-full overflow-hidden">
+                <div className="bg-amber-400 h-full w-[60%]" />
+              </div>
+              <div className="text-[8px] text-foreground/40 mt-1.5 flex justify-between"><span>Risk Score: 60</span><span>T1090.003</span></div>
+            </div>
+            <div className="bg-card/[0.02] border border-border/50 p-2.5 rounded-sm hover:bg-card/[0.04] transition-colors cursor-pointer">
+              <div className="flex justify-between mb-1.5 font-mono text-[9.5px]">
+                <span className="text-foreground truncate max-w-[120px]">payload_v2.dll</span>
+                <span className="text-[8px] text-red-400 font-bold bg-red-400/10 px-1.5 py-0.5 border border-red-400/20">CRITICAL</span>
+              </div>
+              <div className="w-full bg-card/5 h-1 rounded-full overflow-hidden">
+                <div className="bg-red-500 h-full w-[95%]" />
+              </div>
+              <div className="text-[8px] text-foreground/40 mt-1.5 flex justify-between"><span>Risk Score: 95</span><span>T1105</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div className="text-[9px] uppercase tracking-widest text-primary/60 font-bold mb-2">Sources Integration</div>
+          <div className="space-y-1.5 font-mono text-[9px]">
+            <div className="flex justify-between items-center">
+              <span className="text-foreground/50">VirusTotal v3</span>
+              <span className="text-primary font-bold">ACTIVE</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-foreground/50">AbuseIPDB API</span>
+              <span className="text-primary font-bold">ACTIVE</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-foreground/50">Shodan API</span>
+              <span className="text-primary font-bold">ACTIVE</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Middle Column: Knowledge Graph & Alerts */}
+      <div className="lg:col-span-6 flex flex-col gap-5">
+        <div className="flex-1 min-h-[160px] border border-border/50 bg-border0 relative overflow-hidden flex flex-col p-3 rounded-sm shadow-inner">
+          <div className="flex justify-between items-center mb-2">
+            <div className="text-[9px] uppercase tracking-widest text-primary/60 font-bold">Threat Knowledge Graph</div>
+            <div className="text-[8px] font-mono text-foreground/40 flex gap-2"><span>N: 142</span><span>E: 308</span></div>
+          </div>
+          <div className="flex-1 flex items-center justify-center relative border border-border/50 bg-primary/5">
+            {/* Grid Pattern */}
+            <svg className="absolute inset-0 w-full h-full opacity-30">
+              <defs>
+                <pattern id="graph-grid" width="15" height="15" patternUnits="userSpaceOnUse">
+                  <path d="M 15 0 L 0 0 0 15" fill="none" stroke="rgba(20, 184, 166, 0.15)" strokeWidth="0.5" />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#graph-grid)" />
+            </svg>
+
+            <svg className="w-full h-full max-h-[150px] relative z-10 drop-shadow-md" viewBox="0 0 300 130">
+              {/* Complex Connection paths */}
+              <line x1="150" y1="65" x2="80" y2="35" stroke="rgba(20, 184, 166, 0.4)" strokeWidth="1" strokeDasharray="3,3" />
+              <line x1="150" y1="65" x2="220" y2="35" stroke="rgba(20, 184, 166, 0.4)" strokeWidth="1.5" />
+              <line x1="150" y1="65" x2="110" y2="95" stroke="rgba(239, 68, 68, 0.5)" strokeWidth="2" />
+              <line x1="150" y1="65" x2="190" y2="95" stroke="rgba(20, 184, 166, 0.4)" strokeWidth="1" />
+
+              {/* Secondary connections */}
+              <line x1="80" y1="35" x2="40" y2="60" stroke="rgba(20, 184, 166, 0.2)" strokeWidth="0.5" />
+              <line x1="220" y1="35" x2="260" y2="70" stroke="rgba(20, 184, 166, 0.2)" strokeWidth="0.5" />
+              <line x1="110" y1="95" x2="70" y2="110" stroke="rgba(239, 68, 68, 0.3)" strokeWidth="1" strokeDasharray="2,2" />
+              <line x1="190" y1="95" x2="230" y2="120" stroke="rgba(20, 184, 166, 0.2)" strokeWidth="0.5" />
+              <line x1="190" y1="95" x2="220" y2="35" stroke="rgba(20, 184, 166, 0.15)" strokeWidth="0.5" />
+
+              {/* Graph nodes */}
+              {/* Primary */}
+              <circle cx="150" cy="65" r="7" fill="#14b8a6" className="animate-pulse" />
+              <circle cx="80" cy="35" r="5" fill="#f59e0b" />
+              <circle cx="220" cy="35" r="5" fill="#14b8a6" />
+              <circle cx="110" cy="95" r="6" fill="#ef4444" />
+              <circle cx="190" cy="95" r="5" fill="#14b8a6" />
+
+              {/* Secondary */}
+              <circle cx="40" cy="60" r="3" fill="#14b8a6" opacity="0.5" />
+              <circle cx="260" cy="70" r="3" fill="#14b8a6" opacity="0.5" />
+              <circle cx="70" cy="110" r="4" fill="#ef4444" opacity="0.6" />
+              <circle cx="230" cy="120" r="3" fill="#14b8a6" opacity="0.5" />
+
+              {/* Outer rings for visual density */}
+              <circle cx="150" cy="65" r="14" fill="none" stroke="#14b8a6" strokeWidth="0.5" opacity="0.4" strokeDasharray="2,2" />
+              <circle cx="110" cy="95" r="12" fill="none" stroke="#ef4444" strokeWidth="0.5" opacity="0.3" />
+
+              {/* Text labels */}
+              <text x="150" y="52" fill="currentColor" className="text-foreground" fontSize="8" textAnchor="middle" fontFamily="monospace" fontWeight="bold">Invest_09</text>
+              <text x="80" y="24" fill="currentColor" className="text-foreground opacity-60" fontSize="7" textAnchor="middle" fontFamily="monospace">ioc_ip</text>
+              <text x="220" y="24" fill="currentColor" className="text-foreground opacity-60" fontSize="7" textAnchor="middle" fontFamily="monospace">malware</text>
+              <text x="110" y="111" fill="#ef4444" fontSize="8" textAnchor="middle" fontFamily="monospace" fontWeight="bold">APT29_Actor</text>
+              <text x="190" y="111" fill="currentColor" className="text-foreground opacity-60" fontSize="7" textAnchor="middle" fontFamily="monospace">c2_domain</text>
+
+              <text x="40" y="70" fill="currentColor" className="text-foreground opacity-40" fontSize="5" textAnchor="middle" fontFamily="monospace">asn_45</text>
+              <text x="260" y="80" fill="currentColor" className="text-foreground opacity-40" fontSize="5" textAnchor="middle" fontFamily="monospace">dropper_file</text>
+              <text x="70" y="120" fill="#ef4444" className="opacity-60" fontSize="5" textAnchor="middle" fontFamily="monospace">alias_cozy</text>
+            </svg>
+          </div>
+        </div>
+
+        <div className="hidden md:block">
+          <div className="text-[9px] uppercase tracking-widest text-primary/60 font-bold mb-2">Live Ingestion Stream</div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left font-mono text-[9px] border-collapse">
+              <thead>
+                <tr className="border-b border-border text-foreground/40">
+                  <th className="pb-1.5 font-normal">ENTITY VALUE</th>
+                  <th className="pb-1.5 font-normal">TYPE</th>
+                  <th className="pb-1.5 font-normal">SOURCE</th>
+                  <th className="pb-1.5 font-normal">REPUTATION</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5 text-foreground/60">
+                <tr className="hover:bg-card/[0.02] transition-colors cursor-pointer">
+                  <td className="py-2 text-teal-300">185.220.101.5</td>
+                  <td className="py-2">ioc_ip</td>
+                  <td className="py-2">AbuseIPDB</td>
+                  <td className="py-2 text-red-400 font-bold">MALICIOUS (100%)</td>
+                </tr>
+                <tr className="hover:bg-card/[0.02] transition-colors cursor-pointer">
+                  <td className="py-2 text-teal-300">cobalt-c2.net</td>
+                  <td className="py-2">ioc_domain</td>
+                  <td className="py-2">VirusTotal</td>
+                  <td className="py-2 text-amber-400 font-bold">SUSPICIOUS (12/90)</td>
+                </tr>
+                <tr className="hover:bg-card/[0.02] transition-colors cursor-pointer">
+                  <td className="py-2 text-teal-300">CVE-2024-3094</td>
+                  <td className="py-2">vulnerability</td>
+                  <td className="py-2">NVD</td>
+                  <td className="py-2 text-red-500 font-bold">CRITICAL (CVSS 10)</td>
+                </tr>
+                <tr className="hover:bg-card/[0.02] transition-colors cursor-pointer">
+                  <td className="py-2 text-teal-300">a94a8fe5ccb19ba...</td>
+                  <td className="py-2">ioc_hash</td>
+                  <td className="py-2">CrowdStrike</td>
+                  <td className="py-2 text-red-400 font-bold">MALICIOUS</td>
+                </tr>
+                <tr className="hover:bg-card/[0.02] transition-colors cursor-pointer">
+                  <td className="py-2 text-teal-300">sysadmin@corp.io</td>
+                  <td className="py-2">identity</td>
+                  <td className="py-2">Okta Logs</td>
+                  <td className="py-2 text-amber-400 font-bold">ANOMALOUS LOGIN</td>
+                </tr>
+                <tr className="hover:bg-card/[0.02] transition-colors cursor-pointer">
+                  <td className="py-2 text-teal-300">10.0.4.22</td>
+                  <td className="py-2">internal_ip</td>
+                  <td className="py-2">PaloAlto FW</td>
+                  <td className="py-2 text-primary font-bold">CLEAN</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Column: AI Agent & SOAR */}
+      <div className="hidden lg:flex lg:col-span-3 flex-col gap-5 border-l border-border/50 pl-5">
+        <div className="flex-1 flex flex-col justify-between">
+          <div>
+            <div className="text-[9px] uppercase tracking-widest text-primary/60 font-bold mb-2 flex items-center justify-between">
+              <span>AI Copilot Analysis</span>
+              <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse shadow-[0_0_5px_#14b8a6]" />
+            </div>
+            <div className="bg-primary/5 border border-primary/20 p-3 rounded-sm text-[9.5px] text-primary font-mono leading-relaxed relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-0.5 h-full bg-primary" />
+              <div className="space-y-2">
+                <p className="opacity-70">&gt; Correlating 42 events across 3 sources...</p>
+                <p className="opacity-70">&gt; TTP mapping to MITRE ATT&CK matrix...</p>
+                <p>&gt; <span className="text-foreground bg-primary/20 px-1">ALERT:</span> Threat Actor identified as <strong className="text-foreground">APT29 (Cozy Bear)</strong> based on behavioral heuristic graph.</p>
+                <p className="text-amber-400">&gt; Auto-mitigation workflow engaged.</p>
+              </div>
+            </div>
+          </div>
+          <div className="mt-3 text-right">
+            <span className="text-[8px] font-mono text-foreground/30">model: gpt-4o-mini &bull; infer: 124ms &bull; t:{time}</span>
+          </div>
+        </div>
+
+        <div>
+          <div className="text-[9px] uppercase tracking-widest text-primary/60 font-bold mb-3">Playbooks Status</div>
+          <div className="space-y-2 text-[9px] font-mono">
+            <div className="flex justify-between items-center group cursor-default">
+              <span className="text-foreground/60 group-hover:text-foreground transition-colors">Rule_Isolate_IP</span>
+              <span className="text-primary font-bold bg-primary/10 px-1.5 py-0.5 border border-primary/20 rounded-xs">EXECUTED</span>
+            </div>
+            <div className="flex justify-between items-center group cursor-default">
+              <span className="text-foreground/60 group-hover:text-foreground transition-colors">Rule_Slack_Notify</span>
+              <span className="text-primary font-bold bg-primary/10 px-1.5 py-0.5 border border-primary/20 rounded-xs">EXECUTED</span>
+            </div>
+            <div className="flex justify-between items-center group cursor-default">
+              <span className="text-foreground/60 group-hover:text-foreground transition-colors">Rule_Block_Domain</span>
+              <span className="text-amber-400 font-bold bg-amber-400/10 px-1.5 py-0.5 border border-amber-400/20 rounded-xs animate-pulse">PENDING</span>
+            </div>
+            <div className="flex justify-between items-center group cursor-default">
+              <span className="text-foreground/60 group-hover:text-foreground transition-colors">Rule_STIX_Export</span>
+              <span className="text-foreground/40 font-bold bg-card/5 px-1.5 py-0.5 border border-border rounded-xs">IDLE</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function LandingPage() {
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useGSAP(() => {
+    // 1. Hero Mount Animation
+    gsap.from('.gsap-hero-title', {
+      y: 50,
+      opacity: 0,
+      duration: 1.5,
+      ease: 'power4.out',
+      delay: 0.2
+    })
+    gsap.from('.gsap-hero-desc', {
+      y: 30,
+      opacity: 0,
+      duration: 1.5,
+      ease: 'power4.out',
+      delay: 0.4
+    })
+    gsap.from('.gsap-hero-btns', {
+      y: 20,
+      opacity: 0,
+      duration: 1.5,
+      ease: 'power4.out',
+      delay: 0.6
+    })
+
+    // 2. Dashboard Parallax & Perspective Scale
+    gsap.from('.gsap-dashboard-container', {
+      scrollTrigger: {
+        trigger: '.gsap-dashboard-section',
+        start: 'top 85%',
+        end: 'top 20%',
+        scrub: 1,
+      },
+      y: 150,
+      scale: 0.9,
+      opacity: 0.2,
+      rotateX: 15,
+      transformPerspective: 1000,
+      ease: 'power2.out'
+    })
+
+    gsap.to('.gsap-matrix-bg', {
+      scrollTrigger: {
+        trigger: '.gsap-dashboard-section',
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: true,
+      },
+      y: 200,
+      ease: 'none'
+    })
+
+    // 3. Bento Grid Sequential Stagger
+    gsap.from('.gsap-bento-content', {
+      scrollTrigger: {
+        trigger: '.gsap-bento-section',
+        start: 'top 75%',
+      },
+      y: 50,
+      opacity: 0,
+      duration: 1,
+      stagger: 0.2,
+      ease: 'power3.out'
+    })
+
+    // 4. Features Horizontal Scroll
+    const featuresWrap = document.querySelector('.gsap-features-wrapper') as HTMLElement
+    if (featuresWrap) {
+      gsap.to('.gsap-features-wrapper', {
+        x: () => -(featuresWrap.scrollWidth - window.innerWidth),
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '.gsap-features-section',
+          start: 'top top',
+          end: () => '+=' + featuresWrap.scrollWidth,
+          pin: true,
+          scrub: 1,
+          invalidateOnRefresh: true,
+        }
+      })
+    }
+
+    // 5. Huge Typography Horizontal Parallax
+    gsap.to('.gsap-huge-text', {
+      scrollTrigger: {
+        trigger: '.gsap-huge-text-section',
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: true,
+      },
+      xPercent: -15,
+      ease: 'none'
+    })
+
+  }, { scope: containerRef })
+
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* ---------- Header ---------- */}
-      <header className="sticky top-0 z-50 border-b border-[var(--ansein-border)] bg-[var(--ansein-bg)]/80 backdrop-blur-xl">
-        <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
-          <Brand size={32} />
-          <nav className="hidden md:flex items-center gap-8 text-sm text-[var(--ansein-text-muted)]">
-            <a href="#features" className="ansein-underline hover:text-[var(--ansein-text)] transition-colors">
-              Features
-            </a>
-            <a href="#pipeline" className="ansein-underline hover:text-[var(--ansein-text)] transition-colors">
-              Pipeline
-            </a>
-            <a href="#architecture" className="ansein-underline hover:text-[var(--ansein-text)] transition-colors">
-              Architecture
-            </a>
-          </nav>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/login"
-              className="text-sm text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] transition-colors"
-            >
-              Sign in
-            </Link>
-            <Link
-              href="/register"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md bg-[var(--ansein-primary)] text-[var(--ansein-bg)] text-sm font-medium hover:bg-[var(--ansein-primary-hover)] transition-colors"
-            >
-              Get started
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
-        </div>
-      </header>
+    <div ref={containerRef} className="min-h-screen font-serif selection:bg-primary selection:text-foreground bg-background text-foreground overflow-x-hidden">
 
-      {/* ---------- Hero ---------- */}
-      <section className="relative overflow-hidden">
-        {/* Background grid pattern */}
-        <div
-          className="absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage:
-              'linear-gradient(to right, #14b8a6 1px, transparent 1px), linear-gradient(to bottom, #14b8a6 1px, transparent 1px)',
-            backgroundSize: '60px 60px',
-            maskImage: 'radial-gradient(ellipse 80% 50% at 50% 30%, black, transparent)',
-            WebkitMaskImage: 'radial-gradient(ellipse 80% 50% at 50% 30%, black, transparent)',
-          }}
-        />
-        {/* Animated gradient orbs */}
-        <div
-          className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full opacity-[0.07] blur-3xl"
-          style={{ background: 'radial-gradient(circle, #14b8a6, transparent 70%)', animation: 'ansein-float 8s ease-in-out infinite' }}
-        />
-        <div
-          className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full opacity-[0.05] blur-3xl"
-          style={{ background: 'radial-gradient(circle, #f59e0b, transparent 70%)', animation: 'ansein-float 10s ease-in-out infinite reverse' }}
-        />
-
-        <div className="relative mx-auto max-w-7xl px-6 pt-20 pb-24 md:pt-28 md:pb-32">
-          <div className="flex flex-col items-center text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[var(--ansein-border)] bg-[var(--ansein-surface)] mb-8">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-              </span>
-              <span className="ansein-mono text-xs uppercase tracking-widest text-[var(--ansein-text-muted)]">
-                v3.0 · MySQL-ready · Plug-and-play setup
-              </span>
+      <main className="relative z-10 bg-background mb-[100vh] shadow-[0_20px_100px_rgba(0,0,0,0.1)]">
+        {/* ── HEADER ─────────────────────────────────────────────── */}
+        <header className="w-full px-6 md:px-12 py-6 flex items-center justify-between text-[10px] md:text-[11px] font-sans uppercase tracking-[0.2em]">
+          <div className="flex items-center gap-6 md:gap-12">
+            <img 
+              src="/logo.svg" 
+              alt="AnseIn Logo" 
+              className="w-5 h-5 md:w-6 md:h-6 brightness-0 dark:invert opacity-90 transition-all" 
+            />
+            <div className="flex gap-8 md:gap-12">
+              <Link href="/app" className="hover:text-primary transition-colors">App</Link>
+              <a href="https://github.com/rfypych/ansein" className="hover:text-primary transition-colors hidden sm:block">Github</a>
             </div>
+          </div>
 
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight text-[var(--ansein-text)] max-w-4xl leading-[1.05]">
-              Turn raw threat data
-              <br />
-              into <span className="ansein-gradient-text">decisions</span>.
+          <Link href="/" className="flex flex-col items-center">
+            <span className="text-base md:text-lg font-serif tracking-[0.05em]">ANSEIN</span>
+            <span className="text-[7px] tracking-[0.3em] opacity-50 mt-0.5">PLATFORM</span>
+          </Link>
+
+          <div className="flex gap-8 md:gap-10 items-center">
+            <a href="#features" className="hover:text-primary transition-colors hidden sm:block">Features</a>
+            <Link href="/register" className="hover:text-primary transition-colors">Start &rarr;</Link>
+            <ThemeToggle />
+          </div>
+        </header>
+
+        {/* ── HERO ───────────────────────────────────────────────── */}
+        <section className="relative px-6 md:px-12 pt-16 pb-32 overflow-hidden">
+          {/* Full-width wave background */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40 text-lg">
+          <AnimatedWave />
+        </div>
+          {/* Gradient overlay so text stays readable */}
+          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent pointer-events-none" />
+
+          <div className="relative z-10 max-w-[1400px] mx-auto w-full">
+            <p className="text-[9px] font-sans uppercase tracking-[0.3em] text-primary mb-8">
+              Open Source &bull; Self-Hosted &bull; LLM-Powered
+            </p>
+            <h1 className="gsap-hero-title text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-serif leading-[0.9] tracking-tight mb-12">
+              THREAT<br />
+              INTELLIGENCE<br />
+              <span className="text-primary">PLATFORM</span>
             </h1>
-
-            <p className="mt-6 text-lg md:text-xl text-[var(--ansein-text-muted)] max-w-2xl leading-relaxed">
-              A CTI/OSINT platform that extracts, enriches, and visualises threat intelligence —
-              then writes the report for you. Hybrid extraction, knowledge graph, cognitive analysis,
-              and a RAG copilot in one pane of glass.
+            <p className="gsap-hero-desc font-sans text-sm md:text-base text-foreground-muted max-w-md leading-relaxed mb-12">
+              Extract IOCs. Enrich with OSINT. Visualise threat graphs.
+              Generate reports. All from a single investigation workspace.
             </p>
 
-            <div className="mt-10 flex flex-col sm:flex-row items-center gap-3">
+            <div className="gsap-hero-btns flex flex-col sm:flex-row gap-4">
               <Link
                 href="/register"
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-md bg-[var(--ansein-primary)] text-[var(--ansein-bg)] font-medium hover:bg-[var(--ansein-primary-hover)] transition-colors"
+                className="bg-primary text-primary-foreground font-sans text-xs font-bold uppercase tracking-widest px-8 py-4 hover:bg-primary/90 transition-colors flex items-center gap-3"
               >
-                Start investigating
-                <ArrowRight className="h-4 w-4" />
+                Get Started <ArrowRight weight="bold" className="w-4 h-4" />
               </Link>
-              <Link
-                href="/login"
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-md border border-[var(--ansein-border)] bg-[var(--ansein-surface)] text-[var(--ansein-text)] font-medium hover:border-[var(--ansein-border-strong)] transition-colors"
+              <a
+                href="https://github.com/rfypych/ansein"
+                className="border border-border font-sans text-xs uppercase tracking-widest px-8 py-4 hover:border-primary/50 hover:text-primary transition-colors flex items-center gap-3"
               >
-                Sign in
-                <ChevronRight className="h-4 w-4" />
-              </Link>
-            </div>
-
-            {/* Stats strip */}
-            <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-px bg-[var(--ansein-border)] border border-[var(--ansein-border)] rounded-xl overflow-hidden max-w-3xl w-full">
-              {STATS.map((s) => (
-                <div key={s.label} className="bg-[var(--ansein-surface)] px-4 py-5 text-center">
-                  <div className="text-3xl font-semibold ansein-mono text-[var(--ansein-primary)]">
-                    {s.value}
-                  </div>
-                  <div className="text-xs uppercase tracking-widest text-[var(--ansein-text-dim)] mt-1">
-                    {s.label}
-                  </div>
-                </div>
-              ))}
+                <GithubLogo weight="duotone" className="w-5 h-5" /> Source Code
+              </a>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ---------- Features ---------- */}
-      <section id="features" className="border-t border-[var(--ansein-border)]">
-        <div className="mx-auto max-w-7xl px-6 py-24">
-          <div className="max-w-2xl mb-16">
-            <Badge color="primary">Capabilities</Badge>
-            <h2 className="mt-4 text-3xl md:text-4xl font-semibold tracking-tight text-[var(--ansein-text)]">
-              Six pillars of the intelligence pipeline
-            </h2>
-            <p className="mt-3 text-[var(--ansein-text-muted)]">
-              Built from the ground up for analysts who need to move from raw data to defensible
-              decisions — without juggling six different tools.
-            </p>
+        {/* ── TERMINAL DEMO ──────────────────────────────────────── */}
+        <section className="gsap-dashboard-section relative w-full py-32 flex items-center justify-center px-6">
+          {/* Background matrix rain */}
+          <div className="gsap-matrix-bg absolute -top-[30%] -bottom-[30%] left-0 right-0 overflow-hidden flex items-center justify-center opacity-[0.05] pointer-events-none">
+            <MatrixRain color="text-primary" />
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {FEATURES.map((f) => {
-              const Icon = f.icon
-              return (
-                <div
-                  key={f.title}
-                  className="ansein-card ansein-card-hover rounded-xl p-6 group relative overflow-hidden"
-                >
-                  {/* Top accent line */}
-                  <div
-                    className="absolute top-0 left-0 right-0 h-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                    style={{ background: `linear-gradient(90deg, ${f.color}, ${f.color}40)` }}
-                  />
-                  <div
-                    className="flex h-11 w-11 items-center justify-center rounded-lg mb-4 transition-transform group-hover:scale-105"
-                    style={{
-                      background: `${f.color}1a`,
-                      border: `1px solid ${f.color}40`,
-                      color: f.color,
-                    }}
-                  >
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <h3 className="text-base font-semibold text-[var(--ansein-text)] mb-2">
-                    {f.title}
-                  </h3>
-                  <p className="text-sm text-[var(--ansein-text-muted)] leading-relaxed">
-                    {f.description}
-                  </p>
+          <div className="gsap-dashboard-container z-10 w-full max-w-5xl relative">
+            {/* Subtle glow behind the terminal */}
+            <div className="absolute -inset-1 bg-primary/10 blur-2xl rounded-lg pointer-events-none" />
+
+            {/* Decorative telemetry header */}
+            <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-2 sm:gap-0 mb-4 px-2 text-[9px] font-sans uppercase tracking-[0.2em] text-primary/60">
+              <div className="flex gap-4">
+                <span>[STAT: ACTIVE]</span>
+                <span>[NET: SECURE]</span>
+              </div>
+              <span>NODE::GLOBAL_01</span>
+            </div>
+
+            {/* Terminal chrome (Brutalist/Hermes Style) */}
+            <div className="border border-border bg-card shadow-[0_40px_100px_rgba(0,0,0,0.4)] relative">
+              <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border bg-card/[0.02]">
+                <div className="text-[8px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.3em] font-sans text-primary font-bold flex items-center gap-2 sm:gap-3 overflow-hidden">
+                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse flex-shrink-0" />
+                  <span className="truncate">SYSTEM :: ANSEIN_DASHBOARD</span>
                 </div>
-              )
-            })}
+                <div className="flex gap-2 sm:gap-3 text-[10px] font-mono text-foreground/30 tracking-widest select-none flex-shrink-0">
+                  <span className="hover:text-primary cursor-pointer transition-colors">[ _ ]</span>
+                  <span className="hover:text-primary cursor-pointer transition-colors">[ + ]</span>
+                  <span className="hover:text-primary cursor-pointer transition-colors">[ X ]</span>
+                </div>
+              </div>
+              <div className="p-4 sm:p-6 md:p-8 min-h-[150px] md:min-h-[320px]">
+                <DummyDashboard />
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ---------- Pipeline ---------- */}
-      <section id="pipeline" className="border-t border-[var(--ansein-border)] bg-[var(--ansein-surface)]/30">
-        <div className="mx-auto max-w-7xl px-6 py-24">
-          <div className="max-w-2xl mb-16">
-            <Badge color="accent">Workflow</Badge>
-            <h2 className="mt-4 text-3xl md:text-4xl font-semibold tracking-tight text-[var(--ansein-text)]">
-              From raw text to defensible decision
-            </h2>
-            <p className="mt-3 text-[var(--ansein-text-muted)]">
-              A single click triggers a deterministic five-stage pipeline. Each stage is observable,
-              idempotent, and gracefully degrades when optional dependencies are missing.
-            </p>
-          </div>
+        {/* ── DEPLOYMENT OPTIONS — BENTO GRID ────────────────────── */}
+        <section className="gsap-bento-section relative w-full py-16 md:py-24 px-6 md:px-12 overflow-hidden border-y border-border">
+          <div className="max-w-[1400px] mx-auto">
+            <div className="mb-12 md:mb-16">
+              <p className="text-[9px] font-sans uppercase tracking-[0.3em] text-primary mb-4">Deploy Anywhere</p>
+              <h2 className="text-3xl md:text-5xl font-serif tracking-tight leading-[1.1]">
+                Your infrastructure,<br />your rules.
+              </h2>
+            </div>
 
-          <div className="relative">
-            {/* Vertical line on mobile, horizontal on desktop */}
-            <div className="hidden md:block absolute top-12 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--ansein-border-strong)] to-transparent" />
-
-            <div className="grid md:grid-cols-5 gap-6 md:gap-4 relative">
-              {PIPELINE_STEPS.map((step, i) => (
-                <div key={step.n} className="relative">
-                  <div className="flex flex-col items-start">
-                    {/* Step node */}
-                    <div className="relative z-10 flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--ansein-surface-2)] border border-[var(--ansein-border-strong)] mb-4">
-                      <span className="ansein-mono text-sm font-semibold text-[var(--ansein-primary)]">
-                        {step.n}
-                      </span>
-                      {i < PIPELINE_STEPS.length - 1 && (
-                        <ChevronRight className="hidden md:block absolute left-full top-1/2 -translate-y-1/2 translate-x-2 h-4 w-4 text-[var(--ansein-text-dim)]" />
-                      )}
+            {/* Bento Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-card/10">
+              {/* Docker — spans full width on top */}
+              <div className="group relative bg-card p-8 md:p-12 md:col-span-2 overflow-hidden cursor-pointer">
+                <div className="gsap-bento-content w-full h-full relative z-10 flex flex-col md:block">
+                  {/* ASCII: animated container stacks */}
+                  <DockerASCII />
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="w-12 h-12 flex items-center justify-center border border-border bg-card/[0.03] group-hover:border-primary/40 transition-colors">
+                        <Cube weight="duotone" className="w-7 h-7 text-primary" />
+                      </div>
+                      <div className="h-px flex-1 bg-card/10 group-hover:bg-primary/20 transition-colors" />
+                      <span className="text-[9px] font-sans uppercase tracking-[0.2em] text-foreground-muted group-hover:text-primary/70 transition-colors">Recommended</span>
                     </div>
-                    <h3 className="text-sm font-semibold text-[var(--ansein-text)] uppercase tracking-wide mb-1.5">
-                      {step.title}
+                    <h3 className="text-2xl md:text-3xl font-serif tracking-tight mb-3 group-hover:text-primary transition-colors">Docker Container</h3>
+                    <p className="font-sans text-sm text-foreground-muted max-w-md mb-6 group-hover:text-foreground/80 transition-colors">
+                      Production-ready containerised deployment. One command to spin up the entire stack with PostgreSQL, Redis, and the AnseIn engine.
+                    </p>
+                    <div className="font-mono text-[11px] text-primary bg-primary/10 border border-primary/20 group-hover:border-primary/40 px-4 py-2.5 inline-block transition-colors">
+                      $ docker compose up -d
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Cloud Native — bottom left */}
+              <div className="group relative bg-card p-8 md:p-12 overflow-hidden cursor-pointer">
+                <div className="gsap-bento-content w-full h-full relative z-10 flex flex-col md:block">
+                  {/* ASCII: floating cloud particles */}
+                  <CloudASCII />
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="w-12 h-12 flex items-center justify-center border border-border bg-card/[0.03] group-hover:border-primary/40 transition-colors">
+                        <Cloud weight="duotone" className="w-7 h-7 text-primary" />
+                      </div>
+                      <div className="h-px flex-1 bg-card/10 group-hover:bg-primary/20 transition-colors" />
+                      <span className="text-[9px] font-sans uppercase tracking-[0.2em] text-foreground-muted">02</span>
+                    </div>
+                    <h3 className="text-2xl md:text-3xl font-serif tracking-tight mb-3 group-hover:text-primary transition-colors">Cloud Native</h3>
+                    <p className="font-sans text-sm text-foreground-muted mb-6 group-hover:text-foreground/80 transition-colors">
+                      One-click deploy to Vercel, Railway, or AWS. Serverless-ready with zero config.
+                    </p>
+                    <div className="font-mono text-[11px] text-primary bg-primary/10 border border-primary/20 group-hover:border-primary/40 px-4 py-2.5 inline-block transition-colors">
+                      $ vercel deploy --prod
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bare Metal — bottom right */}
+              <div className="group relative bg-card p-8 md:p-12 overflow-hidden cursor-pointer">
+                <div className="gsap-bento-content w-full h-full relative z-10 flex flex-col md:block">
+                  {/* ASCII: circuit board traces */}
+                  <CircuitASCII />
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="w-12 h-12 flex items-center justify-center border border-border bg-card/[0.03] group-hover:border-primary/40 transition-colors">
+                        <HardDrives weight="duotone" className="w-7 h-7 text-primary" />
+                      </div>
+                      <div className="h-px flex-1 bg-card/10 group-hover:bg-primary/20 transition-colors" />
+                      <span className="text-[9px] font-sans uppercase tracking-[0.2em] text-foreground-muted">03</span>
+                    </div>
+                    <h3 className="text-2xl md:text-3xl font-serif tracking-tight mb-3 group-hover:text-primary transition-colors">Bare Metal</h3>
+                    <p className="font-sans text-sm text-foreground-muted mb-6 group-hover:text-foreground/80 transition-colors">
+                      Full control. Clone the repo, configure your environment, and run directly on your hardware.
+                    </p>
+                    <div className="font-mono text-[11px] text-primary bg-primary/10 border border-primary/20 group-hover:border-primary/40 px-4 py-2.5 inline-block transition-colors">
+                      $ git clone &amp;&amp; npm run dev
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── FEATURES HORIZONTAL SCROLL ─────────────────────────── */}
+        <section id="features" className="gsap-features-section relative z-20 bg-background text-foreground h-[100vh] overflow-hidden border-b border-border flex flex-col justify-center">
+          
+          {/* Ambient ASCII Background */}
+          <div className="absolute inset-0 flex items-start justify-end pt-2 md:pt-6 pointer-events-none select-none z-0 opacity-40 overflow-hidden text-primary">
+            <AnimatedGlobe />
+          </div>
+
+          <div className="relative z-10 w-full shrink-0 max-w-[1400px] mx-auto px-6 md:px-12 mb-10 md:mb-16">
+            <div className="max-w-xl">
+              <p className="text-[9px] font-sans uppercase tracking-[0.3em] text-primary mb-4">Features</p>
+              <h2 className="text-4xl md:text-5xl font-serif tracking-tight leading-[1.1]">
+                Everything you need for threat intelligence.
+              </h2>
+            </div>
+          </div>
+
+          <div className="relative z-10 w-full">
+            <div className="gsap-features-wrapper flex gap-4 md:gap-8 px-6 md:px-12 w-max">
+              {FEATURES.map((f, i) => (
+                <div key={i} className="group relative bg-card p-8 md:p-12 overflow-hidden flex flex-col items-start cursor-pointer w-[85vw] md:w-[450px] h-[350px] shrink-0 border border-border hover:border-primary/30 transition-colors shadow-sm hover:shadow-xl">
+                  {/* Hover subtle glow */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-primary/0 group-hover:from-primary/[0.03] group-hover:to-transparent transition-colors opacity-0 group-hover:opacity-100 pointer-events-none" />
+
+                  <div className="gsap-feature-content w-full h-full flex flex-col items-start relative z-10">
+                    <div className="flex items-center gap-4 mb-8 relative z-10 w-full">
+                      <div className="w-12 h-12 flex items-center justify-center border border-border bg-border group-hover:border-primary/40 transition-colors">
+                        <f.icon weight="duotone" className="w-7 h-7 text-primary" />
+                      </div>
+                      <div className="flex-1 h-px bg-card/10 group-hover:bg-primary/30 transition-colors" />
+                      <span className="text-[9px] font-sans uppercase tracking-[0.2em] text-foreground-muted group-hover:text-primary transition-colors">
+                        0{i + 1}
+                      </span>
+                    </div>
+                    <h3 className="text-2xl md:text-3xl font-serif leading-[1.1] tracking-tight mb-3 whitespace-pre-line group-hover:text-primary transition-colors relative z-10">
+                      {f.title}
                     </h3>
-                    <p className="text-sm text-[var(--ansein-text-muted)] leading-relaxed">
-                      {step.description}
+                    <p className="font-sans text-sm leading-relaxed text-foreground-muted group-hover:text-foreground/80 transition-colors relative z-10">
+                      {f.desc}
                     </p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ---------- Architecture ---------- */}
-      <section id="architecture" className="border-t border-[var(--ansein-border)]">
-        <div className="mx-auto max-w-7xl px-6 py-24">
-          <div className="grid lg:grid-cols-2 gap-12 items-start">
-            <div>
-              <Badge color="info">Architecture</Badge>
-              <h2 className="mt-4 text-3xl md:text-4xl font-semibold tracking-tight text-[var(--ansein-text)]">
-                Built for cPanel.
-                <br />
-                Designed for analysts.
-              </h2>
-              <p className="mt-4 text-[var(--ansein-text-muted)] leading-relaxed">
-                AnseIn runs on shared hosting with nothing but a MySQL database and a Python runtime.
-                No Redis required. No Kubernetes. No fancy infrastructure. Just a single deployed
-                Next.js application backed by Prisma.
-              </p>
+      </main>
 
-              <div className="mt-8 space-y-4">
-                {[
-                  { icon: Lock, title: 'BYOK encryption', description: 'API keys encrypted at rest with AES-256-GCM. Keys never logged, never sent to third parties.' },
-                  { icon: Cpu, title: 'Hybrid extraction', description: 'Regex catches the obvious. LLM catches the subtle. Both co-exist in one deduped entity graph.' },
-                  { icon: Activity, title: 'Observable pipeline', description: 'Status transitions (pending → extracting → enriching → analyzing → completed) are visible in real-time.' },
-                ].map((item) => {
-                  const Icon = item.icon
-                  return (
-                    <div key={item.title} className="flex gap-3">
-                      <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-primary)]">
-                        <Icon className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-semibold text-[var(--ansein-text)]">{item.title}</h3>
-                        <p className="text-sm text-[var(--ansein-text-muted)] mt-0.5">{item.description}</p>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
+      {/* ── FIXED REVEAL FOOTER ───────────────────────────────────────── */}
+      <div className="fixed bottom-0 left-0 w-full h-[100vh] z-0 bg-background flex flex-col justify-between overflow-hidden">
 
-            {/* Architecture diagram */}
-            <div className="ansein-card rounded-xl p-6 lg:p-8">
-              <div className="flex items-center gap-2 mb-6">
-                <div className="h-2 w-2 rounded-full bg-rose-500/70" />
-                <div className="h-2 w-2 rounded-full bg-amber-500/70" />
-                <div className="h-2 w-2 rounded-full bg-emerald-500/70" />
-                <span className="ml-auto ansein-mono text-xs text-[var(--ansein-text-dim)]">ansein-v3</span>
-              </div>
-              <pre className="ansein-mono text-[11px] leading-relaxed text-[var(--ansein-text-muted)] overflow-x-auto">
-{`┌──────────────────────────────────────────┐
-│              Next.js 16 App              │
-│  ┌──────────┐  ┌──────────┐  ┌────────┐ │
-│  │ Dashboard│  │ Graph    │  │ Copilot│ │
-│  └────┬─────┘  └────┬─────┘  └───┬────┘ │
-│       └─────┬───────┴────────────┘       │
-│             ▼                            │
-│     ┌──────────────────────┐             │
-│     │  API Route Handlers  │             │
-│     │  /api/v1/*           │             │
-│     └──────────┬───────────┘             │
-└────────────────┼─────────────────────────┘
-                 ▼
-   ┌─────────────────────────────┐
-   │      Engines (pure TS)      │
-   │  extraction · enrichment    │
-   │  analysis · copilot · graph │
-   └──────────────┬──────────────┘
-                  ▼
-        ┌──────────────────┐
-        │   Prisma + SQL   │
-        │  SQLite (dev)    │
-        │  MySQL (cPanel)  │
-        └──────────────────┘`}
-              </pre>
-            </div>
+        {/* Top Section (White) */}
+        <div className="relative flex-1 flex flex-col justify-between overflow-hidden">
+          {/* Animated ASCII Background covering the entire white area */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none select-none z-0 text-primary">
+            <AnimatedTopo />
           </div>
-        </div>
-      </section>
 
-      {/* ---------- Stats section ---------- */}
-      <section className="border-t border-[var(--ansein-border)] bg-[var(--ansein-bg)]">
-        <div className="mx-auto max-w-7xl px-6 py-16">
-          <div className="text-center mb-10">
-            <p className="ansein-mono text-xs uppercase tracking-widest text-[var(--ansein-text-dim)] mb-2">
-              By the numbers
+          {/* CTA Content */}
+          <div className="relative z-20 flex-1 flex flex-col items-center justify-center text-center px-6 pt-24">
+            <p className="text-[10px] font-sans font-bold uppercase tracking-[0.4em] mb-4 text-primary/80">
+              FREE &bull; PLUS &bull; SUPER &bull; ULTRA
             </p>
-            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-[var(--ansein-text)]">
-              Built for analyst-grade work
+            <h2 className="text-5xl md:text-7xl font-serif tracking-tight mb-8 leading-[1.1] text-foreground">
+              Ready to extract<br />intelligence?
             </h2>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { icon: Layers, value: '13', label: 'Entity types', desc: 'IOCs, actors, malware, TTPs', color: '#14b8a6' },
-              { icon: Globe, value: '4', label: 'Enrichment providers', desc: 'VirusTotal, AbuseIPDB, Shodan, +LLM', color: '#f59e0b' },
-              { icon: Download, value: '3', label: 'Export formats', desc: 'STIX 2.1, JSON, printable PDF', color: '#a78bfa' },
-              { icon: Zap, value: '11', label: 'Regex patterns', desc: 'IPv4/6, domains, hashes, CVE, BTC', color: '#f43f5e' },
-            ].map((stat, i) => {
-              const Icon = stat.icon
-              return (
-                <div
-                  key={i}
-                  className="ansein-card rounded-xl p-5 relative overflow-hidden group hover:border-[var(--ansein-border-strong)] transition-colors"
-                >
-                  <div
-                    className="absolute top-0 left-0 right-0 h-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                    style={{ background: stat.color }}
-                  />
-                  <div
-                    className="flex h-9 w-9 items-center justify-center rounded-lg mb-3"
-                    style={{ background: `${stat.color}15`, color: stat.color, border: `1px solid ${stat.color}30` }}
-                  >
-                    <Icon className="h-4 w-4" />
-                  </div>
-                  <p className="text-3xl font-semibold ansein-mono text-[var(--ansein-text)]">
-                    {stat.value}
-                  </p>
-                  <p className="text-sm font-medium text-[var(--ansein-text)] mt-1">{stat.label}</p>
-                  <p className="text-xs text-[var(--ansein-text-dim)] mt-0.5">{stat.desc}</p>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ---------- Comparison section ---------- */}
-      <section className="border-t border-[var(--ansein-border)] bg-[var(--ansein-surface)]/20">
-        <div className="mx-auto max-w-5xl px-6 py-20">
-          <div className="text-center mb-10">
-            <p className="ansein-mono text-xs uppercase tracking-widest text-[var(--ansein-text-dim)] mb-2">
-              Why AnseIn
-            </p>
-            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-[var(--ansein-text)]">
-              One pane of glass vs. six tools
-            </h2>
-            <p className="mt-3 text-[var(--ansein-text-muted)] max-w-2xl mx-auto">
-              Stop juggling OpenCTI for storage, VirusTotal for enrichment, ChatGPT for analysis, and STIX lib for export. AnseIn unifies the workflow.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-2 gap-4">
-            {/* Without AnseIn */}
-            <div className="ansein-card rounded-xl p-6 border-rose-500/20">
-              <div className="flex items-center gap-2 mb-4 pb-3 border-b border-[var(--ansein-border)]">
-                <div className="flex h-8 w-8 items-center justify-center rounded-md bg-rose-500/10 border border-rose-500/30">
-                  <XCircle className="h-4 w-4 text-rose-400" />
-                </div>
-                <h3 className="text-sm font-semibold text-[var(--ansein-text)]">
-                  Without AnseIn
-                </h3>
-              </div>
-              <ul className="space-y-2.5">
-                {[
-                  'Manual copy-paste between 4+ tools',
-                  'No audit trail of analyst decisions',
-                  'Inconsistent severity scoring',
-                  'Per-seat licences for each tool',
-                  'No grounded RAG chat on your data',
-                  'Manual STIX bundle construction',
-                ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-[var(--ansein-text-muted)]">
-                    <XCircle className="h-3.5 w-3.5 text-rose-400 flex-shrink-0 mt-0.5" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            {/* With AnseIn */}
-            <div className="ansein-card rounded-xl p-6 border-emerald-500/30 relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500/60 via-teal-400/80 to-emerald-500/60" />
-              <div className="flex items-center gap-2 mb-4 pb-3 border-b border-[var(--ansein-border)]">
-                <div className="flex h-8 w-8 items-center justify-center rounded-md bg-emerald-500/10 border border-emerald-500/30">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                </div>
-                <h3 className="text-sm font-semibold text-[var(--ansein-text)]">
-                  With AnseIn
-                </h3>
-                <Badge color="success" className="ml-auto">Recommended</Badge>
-              </div>
-              <ul className="space-y-2.5">
-                {[
-                  'One-click pipeline: ingest → extract → enrich → analyse',
-                  'Tamper-evident audit log of every action',
-                  'LLM severity scores 0–100 + Admiralty codes',
-                  'BYOK — bring your own API keys, multi-tenant',
-                  'RAG Copilot grounded strictly in your data',
-                  'STIX 2.1, JSON, and PDF export built-in',
-                ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-[var(--ansein-text)]">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ---------- Tech stack section ---------- */}
-      <section className="border-t border-[var(--ansein-border)]">
-        <div className="mx-auto max-w-5xl px-6 py-16">
-          <div className="text-center mb-8">
-            <p className="ansein-mono text-xs uppercase tracking-widest text-[var(--ansein-text-dim)] mb-2">
-              Under the hood
-            </p>
-            <h2 className="text-2xl font-semibold tracking-tight text-[var(--ansein-text)]">
-              Modern, deployable, open
-            </h2>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[
-              { icon: Code2, label: 'Next.js 16', sub: 'App Router + TS' },
-              { icon: Database, label: 'Prisma ORM', sub: 'SQLite → MySQL' },
-              { icon: Server, label: 'cPanel-ready', sub: 'Shared hosting' },
-              { icon: GitBranch, label: 'Open source', sub: 'MIT licence' },
-            ].map((tech, i) => {
-              const Icon = tech.icon
-              return (
-                <div
-                  key={i}
-                  className="ansein-card rounded-lg p-4 text-center hover:border-[var(--ansein-primary)]/40 transition-colors"
-                >
-                  <Icon className="h-5 w-5 text-[var(--ansein-primary)] mx-auto mb-2" />
-                  <p className="text-sm font-medium text-[var(--ansein-text)]">{tech.label}</p>
-                  <p className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] mt-0.5">
-                    {tech.sub}
-                  </p>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ---------- CTA ---------- */}
-      <section className="border-t border-[var(--ansein-border)] bg-[var(--ansein-surface)]/30">
-        <div className="mx-auto max-w-4xl px-6 py-20 text-center">
-          <h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-[var(--ansein-text)]">
-            Ready to extract intelligence?
-          </h2>
-          <p className="mt-3 text-[var(--ansein-text-muted)]">
-            The first account you create becomes the administrator. No CLI, no env wrangling, no
-            infrastructure setup required.
-          </p>
-          <div className="mt-8 flex justify-center gap-3">
-            <Link
-              href="/register"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-md bg-[var(--ansein-primary)] text-[var(--ansein-bg)] font-medium hover:bg-[var(--ansein-primary-hover)] transition-colors"
-            >
-              Create your account
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="/login"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-md border border-[var(--ansein-border)] bg-[var(--ansein-surface)] text-[var(--ansein-text)] font-medium hover:border-[var(--ansein-border-strong)] transition-colors"
-            >
-              I already have one
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ---------- Footer ---------- */}
-      <footer className="mt-auto border-t border-[var(--ansein-border)] bg-[var(--ansein-bg)]">
-        <div className="mx-auto max-w-7xl px-6 py-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <Brand size={28} />
-            <div className="flex items-center gap-6 text-sm text-[var(--ansein-text-dim)]">
-              <a
-                href="https://github.com/rfypych/ansein"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1.5 hover:text-[var(--ansein-text-muted)] transition-colors"
+            <div className="flex flex-col sm:flex-row gap-6 justify-center w-full max-w-md">
+              <Link
+                href="/register"
+                className="bg-primary text-primary-foreground font-sans text-xs font-bold uppercase tracking-widest px-8 py-5 hover:bg-primary/90 hover:scale-105 transition-all w-full sm:w-auto shadow-xl"
               >
-                <Github className="h-4 w-4" />
-                <span>Source</span>
-              </a>
-              <span className="ansein-mono text-xs">v3.0.0</span>
+                View All Our Plans
+              </Link>
             </div>
           </div>
-          <p className="mt-6 text-xs text-[var(--ansein-text-dim)] text-center md:text-left">
-            © {new Date().getFullYear()} AnseIn. Open-source CTI/OSINT platform. Built with
-            Next.js 16, Prisma, and the z-ai SDK.
-          </p>
+
+          {/* Huge Watermark (Seamless Merge) */}
+          <div className="w-full flex justify-center items-end px-6 relative z-10 pointer-events-none select-none overflow-hidden translate-y-[calc(3%+5px)]">
+            {/* Removed artificial horizontal scaling to preserve the font's beautiful natural high-contrast strokes. Tightened tracking to match Hermes. */}
+            <h1 className="text-[25vw] leading-[0.72] font-serif tracking-tighter whitespace-nowrap text-primary origin-bottom font-light">
+              ANSEIN
+            </h1>
+          </div>
         </div>
-      </footer>
+
+        {/* Footer Links (Solid Blue) */}
+        <footer className="relative z-20 w-full px-6 md:px-12 py-8 bg-primary">
+          {/* Animated ASCII Background inside the blue footer */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none select-none z-0 overflow-hidden">
+            <AnimatedTopo />
+          </div>
+
+          <div className="relative z-10 max-w-[1400px] mx-auto flex flex-col md:flex-row justify-between items-center gap-6 md:gap-4">
+            <span className="font-sans text-[9px] md:text-[10px] uppercase tracking-[0.2em] font-bold text-primary-foreground/70 text-center md:text-left">
+              &copy; 2026 AnseIn &mdash; Open Source Threat Intelligence
+            </span>
+            <div className="flex flex-wrap justify-center md:justify-end gap-6 md:gap-8 font-sans text-[9px] md:text-[10px] font-bold uppercase tracking-[0.2em] text-primary-foreground/60">
+              <a href="https://github.com/rfypych/ansein" className="hover:text-primary-foreground transition-colors">Github</a>
+              <Link href="/login" className="hover:text-primary-foreground transition-colors">Login</Link>
+              <Link href="/register" className="hover:text-primary-foreground transition-colors">Register</Link>
+            </div>
+          </div>
+        </footer>
+      </div>
     </div>
   )
 }

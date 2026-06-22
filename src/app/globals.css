@@ -6,8 +6,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-courier), monospace;
+  --font-mono: var(--font-courier), monospace;
+  --font-serif: var(--font-sigurd), ui-serif, Georgia, serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -45,111 +46,73 @@
 
 /* ------------------------------------------------------------------
    AnseIn — "Intelligence Terminal" palette
-   Sophisticated noir charcoal with emerald-teal primary accent.
-   Deliberately avoids generic blue/indigo SaaS look.
+   Light mode: Crisp corporate aesthetics
+   Dark mode: Hermes Agent deep green/beige aesthetic
 ------------------------------------------------------------------ */
 :root {
   --radius: 0.625rem;
 
-  /* Background layers — deep noir with subtle warm-neutral undertone */
-  --background: #0a0e16;
-  --foreground: #e8ecf4;
+  /* Background layers — Light Mode */
+  --background: #f5f5f5;
+  --foreground: #060912;
 
-  --card: #131825;
-  --card-foreground: #e8ecf4;
+  --card: #ffffff;
+  --card-foreground: #060912;
 
-  --popover: #181d2c;
-  --popover-foreground: #e8ecf4;
+  --popover: #ffffff;
+  --popover-foreground: #060912;
 
-  /* Primary: emerald-teal — evokes intelligence, extraction, "active signal" */
-  --primary: #14b8a6;
-  --primary-foreground: #0a0e16;
+  --primary: #0055ff;
+  --primary-foreground: #ffffff;
 
-  --secondary: #1d2333;
-  --secondary-foreground: #cbd5e1;
+  --secondary: #e2e8f0;
+  --secondary-foreground: #060912;
 
-  --muted: #1a2030;
-  --muted-foreground: #8b94a8;
+  --muted: #e2e8f0;
+  --muted-foreground: #64748b;
 
-  --accent: #f59e0b;
-  --accent-foreground: #0a0e16;
+  --accent: #0055ff;
+  --accent-foreground: #ffffff;
 
   --destructive: #f43f5e;
 
-  --border: #1f2538;
-  --input: #1f2538;
-  --ring: #14b8a6;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #0055ff;
 
-  --chart-1: #14b8a6;
-  --chart-2: #f59e0b;
-  --chart-3: #f43f5e;
-  --chart-4: #a78bfa;
-  --chart-5: #38bdf8;
-
-  --sidebar: #0d111c;
-  --sidebar-foreground: #cbd5e1;
-  --sidebar-primary: #14b8a6;
-  --sidebar-primary-foreground: #0a0e16;
-  --sidebar-accent: #1a2030;
-  --sidebar-accent-foreground: #e8ecf4;
-  --sidebar-border: #1f2538;
-  --sidebar-ring: #14b8a6;
-
-  /* AnseIn custom palette */
-  --ansein-bg: #0a0e16;
-  --ansein-surface: #131825;
-  --ansein-surface-2: #181d2c;
-  --ansein-surface-hover: #1d2333;
-  --ansein-border: #1f2538;
-  --ansein-border-strong: #2a3349;
-  --ansein-text: #e8ecf4;
-  --ansein-text-muted: #8b94a8;
-  --ansein-text-dim: #5a6478;
-  --ansein-primary: #14b8a6;
-  --ansein-primary-hover: #0d9488;
-  --ansein-primary-dim: #0f3d3a;
-  --ansein-accent: #f59e0b;
-  --ansein-danger: #f43f5e;
-  --ansein-success: #10b981;
-  --ansein-warning: #f59e0b;
-  --ansein-info: #38bdf8;
-
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 .dark {
-  /* Same as :root — the app is dark-only by design */
-  --background: #0a0e16;
-  --foreground: #e8ecf4;
-  --card: #131825;
-  --card-foreground: #e8ecf4;
-  --popover: #181d2c;
-  --popover-foreground: #e8ecf4;
-  --primary: #14b8a6;
-  --primary-foreground: #0a0e16;
-  --secondary: #1d2333;
-  --secondary-foreground: #cbd5e1;
-  --muted: #1a2030;
-  --muted-foreground: #8b94a8;
-  --accent: #f59e0b;
-  --accent-foreground: #0a0e16;
+  /* Hermes Agent Palette */
+  --background: #041c1c;
+  --foreground: #ffe6cb;
+
+  --card: #0b211f;
+  --card-foreground: #ffe6cb;
+
+  --popover: #0b211f;
+  --popover-foreground: #ffe6cb;
+
+  --primary: #c4da7d;
+  --primary-foreground: #041c1c;
+
+  --secondary: #3a4740;
+  --secondary-foreground: #ffe6cb;
+
+  --muted: #0b211f;
+  --muted-foreground: #e3d3be;
+
+  --accent: #bcd184;
+  --accent-foreground: #041c1c;
+
   --destructive: #f43f5e;
-  --border: #1f2538;
-  --input: #1f2538;
-  --ring: #14b8a6;
-  --chart-1: #14b8a6;
-  --chart-2: #f59e0b;
-  --chart-3: #f43f5e;
-  --chart-4: #a78bfa;
-  --chart-5: #38bdf8;
-  --sidebar: #0d111c;
-  --sidebar-foreground: #cbd5e1;
-  --sidebar-primary: #14b8a6;
-  --sidebar-primary-foreground: #0a0e16;
-  --sidebar-accent: #1a2030;
-  --sidebar-accent-foreground: #e8ecf4;
-  --sidebar-border: #1f2538;
-  --sidebar-ring: #14b8a6;
+
+  --border: #3a4740;
+  --input: #3a4740;
+  --ring: #c4da7d;
+
+  color-scheme: dark;
 }
 
 @layer base {
@@ -157,15 +120,13 @@
     @apply border-border outline-ring/50;
   }
   html {
-    color-scheme: dark;
+    color-scheme: light dark;
   }
   body {
-    @apply bg-background text-foreground;
-    background:
-      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(20, 184, 166, 0.08), transparent 60%),
-      radial-gradient(ellipse 60% 50% at 100% 100%, rgba(245, 158, 11, 0.04), transparent 50%),
-      #0a0e16;
+    @apply bg-background text-foreground transition-colors duration-300;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
     background-attachment: fixed;
+    background-size: 120px 120px;
     font-feature-settings: "ss01", "cv11";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -203,20 +164,26 @@
 @layer components {
   /* Glass card with subtle border + backdrop blur + refined shadow */
   .ansein-card {
-    background: linear-gradient(180deg, rgba(24, 29, 44, 0.5) 0%, rgba(19, 24, 37, 0.5) 100%);
-    border: 1px solid var(--ansein-border);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.02);
+    background: linear-gradient(180deg, rgba(24, 29, 44, 0.5) 0%, rgba(13, 17, 28, 0.8) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 
+      inset 0 1px 1px rgba(255, 255, 255, 0.06),
+      0 4px 20px -2px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(16px) saturate(1.2);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
   }
 
   .ansein-card-hover {
-    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .ansein-card-hover:hover {
-    border-color: var(--ansein-border-strong);
-    box-shadow: 0 0 0 1px rgba(20, 184, 166, 0.08), 0 12px 32px -12px rgba(0, 0, 0, 0.5);
-    transform: translateY(-1px);
+    background: linear-gradient(180deg, rgba(28, 34, 51, 0.6) 0%, rgba(15, 20, 31, 0.9) 100%);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 
+      inset 0 1px 1px rgba(255, 255, 255, 0.1),
+      0 0 0 1px rgba(20, 184, 166, 0.1),
+      0 8px 32px -8px rgba(0, 0, 0, 0.5);
+    transform: translateY(-2px);
   }
 
   /* Subtle inner glow on primary surfaces */
@@ -401,4 +368,68 @@
 }
 .prose-ansein > :last-child {
   margin-bottom: 0;
+}
+
+/* =========================================================== 4D Timeline Slider
+ * Styled range input for the knowledge-graph temporal playback.
+ * Uses the AnseIn teal accent + noir surface tokens so the slider matches
+ * the rest of the "intelligence terminal" aesthetic.
+ */
+.ansein-timeline-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(
+    to right,
+    var(--ansein-primary) 0%,
+    var(--ansein-primary) var(--ansein-timeline-fill, 100%),
+    var(--ansein-surface) var(--ansein-timeline-fill, 100%),
+    var(--ansein-surface) 100%
+  );
+  border: 1px solid var(--ansein-border);
+  outline: none;
+  cursor: pointer;
+}
+.ansein-timeline-slider:hover {
+  border-color: var(--ansein-border-strong);
+}
+/* WebKit thumb */
+.ansein-timeline-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--ansein-primary);
+  border: 2px solid var(--ansein-bg);
+  box-shadow: 0 0 0 1px var(--ansein-primary), 0 0 8px rgba(20, 184, 166, 0.5);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.ansein-timeline-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 0 1px var(--ansein-primary), 0 0 12px rgba(20, 184, 166, 0.7);
+}
+.ansein-timeline-slider::-webkit-slider-thumb:active {
+  transform: scale(1.15);
+}
+/* Firefox thumb */
+.ansein-timeline-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--ansein-primary);
+  border: 2px solid var(--ansein-bg);
+  box-shadow: 0 0 0 1px var(--ansein-primary), 0 0 8px rgba(20, 184, 166, 0.5);
+  cursor: pointer;
+}
+.ansein-timeline-slider::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--ansein-surface);
+  border: 1px solid var(--ansein-border);
+}
+.ansein-timeline-slider:focus {
+  box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.2);
 }

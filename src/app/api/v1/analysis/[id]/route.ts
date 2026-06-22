@@ -25,6 +25,7 @@ async function handler(req: NextRequest, ctx: { params: Promise<{ id: string }> 
     actor_hypothesis: safeParseJson<Record<string, unknown>>(latest.actorHypothesis, {}),
     severity_score: latest.severityScore,
     recommendations: safeParseJson<string[]>(latest.recommendations, []),
+    hypotheses: safeParseJson<Array<{ scenario: string; confidence: number; reasoning: string; next_steps: string[] }>>(latest.hypotheses, []),
     admiralty_code: latest.admiraltyCode,
     confidence: latest.confidence,
     model_used: latest.modelUsed,

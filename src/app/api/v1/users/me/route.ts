@@ -1,6 +1,8 @@
 import { NextRequest } from 'next/server'
 import { db } from '@/lib/db'
 import { ok, jsonError, withErrorHandler, requireUser, getClientIp, safeStringifyJson } from '@/lib/api'
+import { getUserRole } from '@/lib/rbac'
+import { appendAuditLog } from '@/lib/audit-chain'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,18 +12,14 @@ async function getMe(req: NextRequest) {
     db.investigation.count({ where: { userId: user.id } }),
     db.chatSession.count({ where: { userId: user.id } }),
   ])
-  // Write an audit log entry for the profile view (lightweight)
-  await db.auditLog.create({
-    data: {
-      userId: user.id,
-      action: 'profile.view',
-      targetType: 'user',
-      targetId: user.id,
-      ipAddress: getClientIp(req),
-      extraMetadata: safeStringifyJson({ ts: new Date().toISOString() }),
-    },
-  }).catch(() => {
-    // audit log failure should not break the request
+  // Write an audit log entry for the profile view (lightweight, hash-chained)
+  await appendAuditLog(db, {
+    userId: user.id,
+    action: 'profile.view',
+    targetType: 'user',
+    targetId: user.id,
+    ipAddress: getClientIp(req),
+    extraMetadata: safeStringifyJson({ ts: new Date().toISOString() }),
   })
   return ok({
     id: user.id,
@@ -29,6 +27,7 @@ async function getMe(req: NextRequest) {
     full_name: user.fullName,
     is_active: user.isActive,
     is_superuser: user.isSuperuser,
+    role: getUserRole(user),
     created_at: user.createdAt.toISOString(),
     last_login_at: user.lastLoginAt ? user.lastLoginAt.toISOString() : null,
     stats: {

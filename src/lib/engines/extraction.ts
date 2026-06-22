@@ -39,6 +39,10 @@ export interface UserKeys {
   openai_api_key?: string
   groq_api_key?: string
   preferred_llm?: string
+  // Custom OpenAI-compatible LLM provider
+  custom_llm_api_key?: string
+  custom_llm_base_url?: string
+  custom_llm_model?: string
 }
 
 // ---------------------------------------------------------------- regexes

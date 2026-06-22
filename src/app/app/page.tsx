@@ -23,6 +23,7 @@ import {
   Star,
   Target,
   Network,
+  BarChart3,
 } from 'lucide-react'
 import { http } from '@/lib/http'
 import { useAuthStore } from '@/lib/auth-store'
@@ -57,6 +58,7 @@ interface UserSettings {
   has_virustotal: boolean
   has_abuseipdb: boolean
   has_shodan: boolean
+  has_custom_llm: boolean
   preferred_llm: string
 }
 
@@ -87,6 +89,18 @@ interface StatsOverview {
   total_relationships: number
 }
 
+interface TimelineDay {
+  date: string
+  count: number
+  avg_severity: number
+}
+interface TimelineResponse {
+  scope: 'workspace' | 'own'
+  days: TimelineDay[]
+  total_in_window: number
+  window_days: number
+}
+
 export default function DashboardPage() {
   const user = useAuthStore((s) => s.user)
   const investigations = useQuery({
@@ -114,6 +128,11 @@ export default function DashboardPage() {
     queryKey: ['stats-overview'],
     queryFn: () => http.get<StatsOverview>('/stats/overview'),
   })
+  const timeline = useQuery({
+    queryKey: ['stats-timeline'],
+    queryFn: () => http.get<TimelineResponse>('/stats/timeline'),
+    refetchInterval: 60_000,
+  })
 
   const recentInv = investigations.data?.items || []
   const totalInv = investigations.data?.total || 0
@@ -121,6 +140,7 @@ export default function DashboardPage() {
     ? [
         settings.data.has_openai,
         settings.data.has_groq,
+        settings.data.has_custom_llm,
         settings.data.has_virustotal,
         settings.data.has_abuseipdb,
         settings.data.has_shodan,
@@ -223,7 +243,7 @@ export default function DashboardPage() {
         />
         <StatCard
           label="API keys"
-          value={`${keysConfigured}/5`}
+          value={`${keysConfigured}/6`}
           sub={keysConfigured === 0 ? 'configure in settings' : 'keys configured'}
           icon={<KeyRound className="h-4 w-4" />}
           accent={keysConfigured === 0 ? 'rose' : 'emerald'}
@@ -344,6 +364,14 @@ export default function DashboardPage() {
               </p>
             )}
           </div>
+
+          {/* Investigation Activity — 30-day bar chart */}
+          <InvestigationActivityCard
+            days={timeline.data?.days || []}
+            scope={timeline.data?.scope || 'own'}
+            totalInWindow={timeline.data?.total_in_window || 0}
+            loading={timeline.isLoading}
+          />
 
           {/* Severity distribution */}
           <div className="ansein-card rounded-xl p-6">
@@ -582,6 +610,7 @@ export default function DashboardPage() {
               {[
                 { name: 'OpenAI', ok: settings.data?.has_openai },
                 { name: 'Groq', ok: settings.data?.has_groq },
+                { name: 'Custom LLM', ok: settings.data?.has_custom_llm },
                 { name: 'VirusTotal', ok: settings.data?.has_virustotal },
                 { name: 'AbuseIPDB', ok: settings.data?.has_abuseipdb },
                 { name: 'Shodan', ok: settings.data?.has_shodan },
@@ -663,6 +692,192 @@ function StatCard({
         </div>
         {sub && <div className="text-xs text-[var(--ansein-text-muted)] mt-1.5 truncate">{sub}</div>}
       </div>
+    </div>
+  )
+}
+
+/* ============================================ Investigation Activity card */
+
+/**
+ * 30-day investigation-creation bar chart.
+ *
+ *   - Each bar = one day (oldest → newest, left to right)
+ *   - Bar height = number of investigations created that day
+ *   - Bar color intensity = average severity score for that day
+ *   - Hover tooltip = date, count, avg severity
+ *
+ * Pure inline SVG — no external chart library needed.
+ */
+function InvestigationActivityCard({
+  days,
+  scope,
+  totalInWindow,
+  loading,
+}: {
+  days: TimelineDay[]
+  scope: 'workspace' | 'own'
+  totalInWindow: number
+  loading: boolean
+}) {
+  // Chart geometry
+  const width = 280
+  const height = 96
+  const padding = { top: 8, right: 4, bottom: 18, left: 4 }
+  const innerW = width - padding.left - padding.right
+  const innerH = height - padding.top - padding.bottom
+  const barCount = days.length || 30
+  const gap = 2
+  const barW = Math.max(2, (innerW - (barCount - 1) * gap) / barCount)
+  const maxCount = Math.max(1, ...days.map((d) => d.count))
+
+  // Find peak day (for the "most active" callout)
+  const peak = days.reduce<TimelineDay | null>(
+    (best, d) => (!best || d.count > best.count ? d : best),
+    null
+  )
+  const peakDate = peak && peak.count > 0 ? new Date(peak.date) : null
+
+  // Average severity across the whole window (weighted by count)
+  const weightedSum = days.reduce((s, d) => s + d.avg_severity * d.count, 0)
+  const windowAvg = totalInWindow > 0 ? Math.round(weightedSum / totalInWindow) : 0
+
+  return (
+    <div className="ansein-card rounded-xl p-6">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-semibold text-[var(--ansein-text)] flex items-center gap-2">
+          <BarChart3 className="h-4 w-4 text-[var(--ansein-primary)]" />
+          Investigation activity
+        </h3>
+        <span className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] ansein-mono">
+          30d · {scope}
+        </span>
+      </div>
+
+      {loading ? (
+        <div className="py-8 flex justify-center">
+          <Spinner />
+        </div>
+      ) : totalInWindow === 0 ? (
+        <p className="text-xs text-[var(--ansein-text-dim)] text-center py-6">
+          No investigations created in the last 30 days.
+        </p>
+      ) : (
+        <>
+          {/* Summary row */}
+          <div className="flex items-end justify-between mb-3">
+            <div>
+              <div className="text-2xl font-semibold ansein-mono text-[var(--ansein-text)] tabular-nums">
+                <AnimatedNumber value={totalInWindow} />
+              </div>
+              <div className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] mt-0.5">
+                New in 30d
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-lg font-semibold ansein-mono tabular-nums" style={{ color: severityColor(windowAvg).label === 'HIGH' ? '#f43f5e' : severityColor(windowAvg).label === 'MEDIUM' ? '#f59e0b' : windowAvg > 0 ? '#10b981' : '#64748b' }}>
+                {windowAvg}
+              </div>
+              <div className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] mt-0.5">
+                Avg severity
+              </div>
+            </div>
+          </div>
+
+          {/* SVG bar chart */}
+          <div className="relative">
+            <svg
+              viewBox={`0 0 ${width} ${height}`}
+              width="100%"
+              height={height}
+              role="img"
+              aria-label="30-day investigation creation bar chart"
+              preserveAspectRatio="none"
+              style={{ display: 'block' }}
+            >
+              {/* Baseline */}
+              <line
+                x1={padding.left}
+                y1={padding.top + innerH}
+                x2={padding.left + innerW}
+                y2={padding.top + innerH}
+                stroke="var(--ansein-border)"
+                strokeWidth={1}
+              />
+
+              {days.map((d, i) => {
+                const x = padding.left + i * (barW + gap)
+                const h = maxCount > 0 ? (d.count / maxCount) * innerH : 0
+                const y = padding.top + innerH - h
+                // Color intensity from avg severity: 0 = dim teal, 100 = bright rose
+                const sev = d.avg_severity || 0
+                const color = severityColor(sev)
+                const baseColor =
+                  sev >= 70 ? '#f43f5e' : sev >= 40 ? '#f59e0b' : sev > 0 ? '#10b981' : '#14b8a6'
+                // Opacity scales with how recent (peak highlight) — but mostly with count magnitude
+                const opacity = d.count === 0 ? 0.18 : 0.55 + 0.45 * (d.count / maxCount)
+                return (
+                  <g key={d.date} className="ansein-activity-bar">
+                    <title>{`${d.date} · ${d.count} investigation${d.count === 1 ? '' : 's'}${d.count > 0 ? ` · avg severity ${d.avg_severity.toFixed(0)} (${color.label})` : ''}`}</title>
+                    {/* Hit area (transparent) so the entire column is hoverable */}
+                    <rect
+                      x={x - gap / 2}
+                      y={padding.top}
+                      width={barW + gap}
+                      height={innerH}
+                      fill="transparent"
+                    />
+                    {d.count > 0 && (
+                      <rect
+                        x={x}
+                        y={y}
+                        width={barW}
+                        height={Math.max(1, h)}
+                        fill={baseColor}
+                        opacity={opacity}
+                        rx={1}
+                      />
+                    )}
+                  </g>
+                )
+              })}
+            </svg>
+          </div>
+
+          {/* X-axis labels */}
+          <div className="mt-1 flex justify-between text-[9px] text-[var(--ansein-text-dim)] ansein-mono">
+            <span>{days[0] ? new Date(days[0].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : ''}</span>
+            <span>{days[Math.floor(days.length / 2)] ? new Date(days[Math.floor(days.length / 2)].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : ''}</span>
+            <span>{days[days.length - 1] ? new Date(days[days.length - 1].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : ''}</span>
+          </div>
+
+          {/* Legend / peak callout */}
+          <div className="mt-3 pt-3 border-t border-[var(--ansein-border)] flex items-center justify-between text-[10px] text-[var(--ansein-text-dim)]">
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-1">
+                <span className="h-2 w-2 rounded-sm" style={{ background: '#14b8a6', opacity: 0.5 }} />
+                None
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="h-2 w-2 rounded-sm" style={{ background: '#10b981' }} />
+                Low
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="h-2 w-2 rounded-sm" style={{ background: '#f59e0b' }} />
+                Medium
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="h-2 w-2 rounded-sm" style={{ background: '#f43f5e' }} />
+                High
+              </span>
+            </div>
+            {peakDate && peak && peak.count > 0 && (
+              <span className="ansein-mono">
+                Peak: {peakDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} · {peak.count}
+              </span>
+            )}
+          </div>
+        </>
+      )}
     </div>
   )
 }

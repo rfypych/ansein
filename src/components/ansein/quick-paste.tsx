@@ -87,7 +87,7 @@ export function QuickPasteModal({ open, onClose }: { open: boolean; onClose: () 
   // Auto-focus textarea when opened
   useEffect(() => {
     if (open && textareaRef.current) {
-      setTimeout(() => textareaRef.current.focus(), 100)
+      setTimeout(() => textareaRef.current?.focus(), 100)
     }
   }, [open])
 

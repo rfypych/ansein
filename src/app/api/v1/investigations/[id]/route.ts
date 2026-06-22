@@ -11,6 +11,8 @@ import {
   getClientIp,
   handlePrismaError,
 } from '@/lib/api'
+import { appendAuditLog } from '@/lib/audit-chain'
+import { canEditAnyInvestigation } from '@/lib/rbac'
 
 export const dynamic = 'force-dynamic'
 
@@ -55,7 +57,9 @@ async function getOne(req: NextRequest, ctx: { params: Promise<{ id: string }> }
   const { id } = await ctx.params
   const invId = Number(id)
   if (!Number.isFinite(invId)) return jsonError(400, 'invalid_id', 'Invalid investigation ID')
-  const inv = await db.investigation.findFirst({ where: { id: invId, userId: user.id } })
+  // Analysts see only their own; editors+ can view any.
+  const where = canEditAnyInvestigation(user) ? { id: invId } : { id: invId, userId: user.id }
+  const inv = await db.investigation.findFirst({ where })
   if (!inv) return jsonError(404, 'not_found', 'Investigation not found')
   const [sourceCount, entityCount, relCount] = await Promise.all([
     db.source.count({ where: { investigationId: invId } }),
@@ -75,7 +79,9 @@ async function update(req: NextRequest, ctx: { params: Promise<{ id: string }> }
   const { id } = await ctx.params
   const invId = Number(id)
   if (!Number.isFinite(invId)) return jsonError(400, 'invalid_id', 'Invalid investigation ID')
-  const existing = await db.investigation.findFirst({ where: { id: invId, userId: user.id } })
+  // Analysts can only update their own; editors+ can update any.
+  const where = canEditAnyInvestigation(user) ? { id: invId } : { id: invId, userId: user.id }
+  const existing = await db.investigation.findFirst({ where })
   if (!existing) return jsonError(404, 'not_found', 'Investigation not found')
 
   let body: unknown
@@ -97,18 +103,16 @@ async function update(req: NextRequest, ctx: { params: Promise<{ id: string }> }
 
   try {
     const inv = await db.investigation.update({ where: { id: invId }, data })
-    // Audit log for star/unstar toggle (best-effort)
+    // Audit log for star/unstar toggle (best-effort, hash-chained)
     if (parsed.data.is_starred !== undefined) {
-      await db.auditLog.create({
-        data: {
-          userId: user.id,
-          action: parsed.data.is_starred ? 'investigation.star' : 'investigation.unstar',
-          targetType: 'investigation',
-          targetId: invId,
-          ipAddress: getClientIp(req),
-          extraMetadata: safeStringifyJson({ investigation_id: invId }),
-        },
-      }).catch(() => {})
+      await appendAuditLog(db, {
+        userId: user.id,
+        action: parsed.data.is_starred ? 'investigation.star' : 'investigation.unstar',
+        targetType: 'investigation',
+        targetId: invId,
+        ipAddress: getClientIp(req),
+        extraMetadata: safeStringifyJson({ investigation_id: invId }),
+      })
     }
     return ok(investigationOut(inv))
   } catch (e) {
@@ -122,9 +126,23 @@ async function remove(req: NextRequest, ctx: { params: Promise<{ id: string }> }
   const { id } = await ctx.params
   const invId = Number(id)
   if (!Number.isFinite(invId)) return jsonError(400, 'invalid_id', 'Invalid investigation ID')
-  const existing = await db.investigation.findFirst({ where: { id: invId, userId: user.id } })
+  // Analysts can only delete their own; editors+ can delete any.
+  const where = canEditAnyInvestigation(user) ? { id: invId } : { id: invId, userId: user.id }
+  const existing = await db.investigation.findFirst({ where })
   if (!existing) return jsonError(404, 'not_found', 'Investigation not found')
   await db.investigation.delete({ where: { id: invId } })
+  await appendAuditLog(db, {
+    userId: user.id,
+    action: 'investigation.delete',
+    targetType: 'investigation',
+    targetId: invId,
+    ipAddress: getClientIp(req),
+    extraMetadata: safeStringifyJson({
+      investigation_id: invId,
+      title: existing.title,
+      scope: canEditAnyInvestigation(user) ? 'any' : 'own',
+    }),
+  })
   return ok({ message: 'Deleted' })
 }
 

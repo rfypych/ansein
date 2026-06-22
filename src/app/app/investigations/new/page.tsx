@@ -181,7 +181,7 @@ export default function NewInvestigationPage() {
   }
 
   return (
-    <div className="px-6 py-8 max-w-4xl mx-auto">
+    <div className="px-6 py-8 max-w-5xl mx-auto">
       <Link
         href="/app/investigations"
         className="inline-flex items-center gap-1.5 text-sm text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] transition-colors mb-6"

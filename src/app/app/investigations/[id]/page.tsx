@@ -68,6 +68,8 @@ import { EntityDetailModal } from '@/components/ansein/entity-detail-modal'
 import { ExportLink } from '@/components/ansein/export-link'
 import { Markdown } from '@/components/ansein/markdown'
 import { GraphView } from '@/components/graph/graph-view'
+import { VirtualizedEntityTable } from '@/components/ansein/virtualized-entity-table'
+import { VoiceInputButton } from '@/components/ansein/voice-input-button'
 import {
   statusColor,
   formatRelative,
@@ -165,6 +167,13 @@ interface Relationship {
   evidence: string
 }
 
+interface ThreatHypothesis {
+  scenario: string
+  confidence: number
+  reasoning: string
+  next_steps: string[]
+}
+
 interface Analysis {
   id: number
   narrative: string
@@ -176,6 +185,7 @@ interface Analysis {
   model_used: string
   tokens_used: number
   created_at: string
+  hypotheses?: ThreatHypothesis[]
 }
 
 interface ChatMessage {
@@ -1422,9 +1432,17 @@ function SourcePreviewModal({ source, onClose }: { source: Source; onClose: () =
 
 /* ============================================ Graph tab */
 function GraphTab({ invId }: { invId: number }) {
+  // The graph API returns nodes/edges with `created_at` ISO timestamps plus
+  // minDate/maxDate on the root — those power the 4D temporal slider. We pass
+  // the full payload straight through to GraphView (no client-side reshape).
   const { data, isLoading } = useQuery({
     queryKey: ['graph', invId],
-    queryFn: () => http.get<{ nodes: any[]; edges: any[] }>(`/graph/${invId}`),
+    queryFn: () => http.get<{
+      nodes: Array<{ id: number; createdAt?: string; created_at?: string }>
+      edges: Array<{ source: number; target: number; createdAt?: string; created_at?: string }>
+      minDate?: string | null
+      maxDate?: string | null
+    }>(`/graph/${invId}`),
   })
 
   if (isLoading) {
@@ -1448,7 +1466,23 @@ function GraphTab({ invId }: { invId: number }) {
     )
   }
 
-  return <GraphView data={data} height="calc(100vh - 360px)" />
+  // The graph API serialises `createdAt` as `createdAt` (camelCase, from the
+  // GraphNode interface). If a future version changes the wire format, we
+  // normalise both snake_case and camelCase here so the GraphView stays
+  // compatible.
+  const normalised = {
+    ...data,
+    nodes: data.nodes.map((n) => ({
+      ...n,
+      createdAt: n.createdAt ?? (n as { created_at?: string }).created_at,
+    })),
+    edges: data.edges.map((e) => ({
+      ...e,
+      createdAt: e.createdAt ?? (e as { created_at?: string }).created_at,
+    })),
+  }
+
+  return <GraphView data={normalised as any} height="calc(100vh - 360px)" />
 }
 
 /* ============================================ Entities tab */
@@ -1756,7 +1790,11 @@ function EntitiesTab({ invId }: { invId: number }) {
           No entities match your filter.
         </div>
       ) : viewMode === 'table' ? (
-        <EntityTableView entities={filtered} onSelect={(id) => setSelectedEntityId(id)} />
+        <VirtualizedEntityTable
+          entities={filtered}
+          onSelect={(id) => setSelectedEntityId(id)}
+          height={560}
+        />
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
           {filtered.map((e) => {
@@ -2092,6 +2130,62 @@ function AnalysisTab({ invId }: { invId: number }) {
         </div>
       )}
 
+      {/* Attack Hypotheses */}
+      {data.hypotheses && data.hypotheses.length > 0 && (
+        <div className="ansein-card rounded-xl p-6">
+          <h3 className="text-sm font-semibold text-[var(--ansein-text)] mb-4 flex items-center gap-2">
+            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-rose-500/15 border border-rose-500/30">
+              <AlertTriangle className="h-3.5 w-3.5 text-rose-400" />
+            </div>
+            Attack hypotheses
+          </h3>
+          <div className="space-y-3">
+            {data.hypotheses.map((h, i) => {
+              const confColor = h.confidence >= 70 ? '#f43f5e' : h.confidence >= 40 ? '#f59e0b' : '#64748b'
+              return (
+                <div
+                  key={i}
+                  className="rounded-lg p-4 bg-[var(--ansein-surface)] border border-[var(--ansein-border)] relative overflow-hidden"
+                  style={{ borderLeft: `3px solid ${confColor}` }}
+                >
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <p className="text-sm font-semibold text-[var(--ansein-text)]">{h.scenario}</p>
+                    <span
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold ansein-mono flex-shrink-0"
+                      style={{ background: `${confColor}20`, color: confColor, border: `1px solid ${confColor}40` }}
+                    >
+                      {h.confidence}%
+                    </span>
+                  </div>
+                  {h.reasoning && (
+                    <div className="text-xs text-[var(--ansein-text-muted)] leading-relaxed mb-2">
+                      <Markdown content={h.reasoning} />
+                    </div>
+                  )}
+                  {h.next_steps && h.next_steps.length > 0 && (
+                    <div className="mt-2 pt-2 border-t border-[var(--ansein-border)]">
+                      <p className="text-[10px] uppercase tracking-[0.15em] text-[var(--ansein-text-dim)] ansein-mono mb-1.5">
+                        Recommended next steps
+                      </p>
+                      <ol className="space-y-1">
+                        {h.next_steps.map((step, j) => (
+                          <li key={j} className="flex items-start gap-2 text-xs text-[var(--ansein-text-muted)]">
+                            <span className="flex h-4 w-4 items-center justify-center rounded bg-[var(--ansein-bg)] border border-[var(--ansein-border)] ansein-mono text-[9px] text-[var(--ansein-primary)] flex-shrink-0 mt-0.5">
+                              {j + 1}
+                            </span>
+                            <span>{step}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Recommendations */}
       {data.recommendations && data.recommendations.length > 0 && (
         <div className="ansein-card rounded-xl p-6">
@@ -2141,6 +2235,10 @@ function CopilotInline({
   const [sending, setSending] = useState(false)
   const [currentSessionId, setCurrentSessionId] = useState<number | null>(sessionId)
   const scrollRef = useRef<HTMLDivElement>(null)
+  // Voice input: snapshot of the input value when listening started, so we
+  // can append transcribed text rather than overwriting whatever the analyst
+  // had already typed.
+  const voiceAnchorRef = useRef('')
 
   useEffect(() => {
     if (!currentSessionId) return
@@ -2161,6 +2259,7 @@ function CopilotInline({
     if (!input.trim() || sending) return
     const userMsg = input.trim()
     setInput('')
+    voiceAnchorRef.current = ''
     setSending(true)
 
     // Optimistic add user message
@@ -2324,9 +2423,25 @@ function CopilotInline({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKey}
-              placeholder="Ask about this investigation…"
+              placeholder="Ask about this investigation (type or speak)…"
               className="flex-1 px-3 py-2 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-sm text-[var(--ansein-text)] placeholder:text-[var(--ansein-text-dim)] focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)] resize-none max-h-32"
               style={{ minHeight: '38px' }}
+            />
+            <VoiceInputButton
+              disabled={sending}
+              onTranscript={(interim) => {
+                if (!voiceAnchorRef.current && !input) {
+                  voiceAnchorRef.current = input
+                }
+                const base = voiceAnchorRef.current || input
+                const merged = base ? `${base} ${interim}`.trim() : interim
+                setInput(merged)
+              }}
+              onFinal={(finalChunk) => {
+                const base = voiceAnchorRef.current || input
+                voiceAnchorRef.current = base ? `${base} ${finalChunk}`.trim() : finalChunk
+                setInput(voiceAnchorRef.current)
+              }}
             />
             <button
               onClick={handleSend}
@@ -2337,7 +2452,7 @@ function CopilotInline({
             </button>
           </div>
           <p className="text-[10px] text-[var(--ansein-text-dim)] mt-1.5 text-center">
-            Press Enter to send · Shift+Enter for new line · Answers are grounded in this investigation's data only.
+            Press Enter to send · Shift+Enter for new line · Click the mic to speak · Answers are grounded in this investigation's data only.
           </p>
         </div>
       </div>
@@ -2704,7 +2819,7 @@ function NoteCard({
 }
 
 /* ============================================ Activity Tab */
-const ACTIVITY_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+const ACTIVITY_ICONS: Record<string, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
   'investigation.pipeline.start': Play,
   'investigation.pipeline.complete': CheckCircle2,
   'investigation.pipeline.failed': AlertTriangle,

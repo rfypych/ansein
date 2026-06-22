@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import Link from 'next/link'
 import {
   User as UserIcon,
   Mail,
@@ -17,11 +18,15 @@ import {
   FolderSearch,
   Bot,
   Calendar,
+  Crown,
+  Shield,
 } from 'lucide-react'
 import { http } from '@/lib/http'
-import { useAuthStore, type AuthUser } from '@/lib/auth-store'
+import { useAuthStore, type AuthUser, authUserRole, type Role } from '@/lib/auth-store'
 import { Badge, Spinner, AnimatedNumber } from '@/components/ansein/ui'
 import { formatDate } from '@/lib/format'
+import { ROLE_DESCRIPTIONS, ROLE_COLORS, type Role as RbacRole } from '@/lib/rbac'
+import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
 interface ProfileData {
@@ -30,6 +35,7 @@ interface ProfileData {
   full_name: string
   is_active: boolean
   is_superuser: boolean
+  role: Role
   created_at: string
   last_login_at: string | null
   stats: {
@@ -41,6 +47,8 @@ interface ProfileData {
 export default function ProfilePage() {
   const qc = useQueryClient()
   const setUser = useAuthStore((s) => s.setUser)
+  const authUser = useAuthStore((s) => s.user)
+  const role = authUserRole(authUser)
   const [fullName, setFullName] = useState('')
   const [fullNameLoaded, setFullNameLoaded] = useState(false)
   const [currentPw, setCurrentPw] = useState('')
@@ -118,7 +126,7 @@ export default function ProfilePage() {
 
   if (profileQuery.isLoading) {
     return (
-      <div className="px-6 py-8 max-w-3xl mx-auto flex justify-center py-16">
+      <div className="px-6 py-8 max-w-5xl mx-auto flex justify-center py-16">
         <Spinner />
       </div>
     )
@@ -127,13 +135,16 @@ export default function ProfilePage() {
   const p = profileQuery.data
   if (!p) {
     return (
-      <div className="px-6 py-8 max-w-3xl mx-auto">
+      <div className="px-6 py-8 max-w-5xl mx-auto">
         <div className="ansein-card rounded-xl p-8 text-center text-[var(--ansein-text-muted)]">
           Could not load profile.
         </div>
       </div>
     )
   }
+
+  const displayRole: Role = (p.role || (p.is_superuser ? 'admin' : 'analyst')) as Role
+  const roleColors = ROLE_COLORS[displayRole as RbacRole]
 
   const initials = (p.full_name || p.email)[0]?.toUpperCase() || 'A'
 
@@ -160,7 +171,7 @@ export default function ProfilePage() {
   })()
 
   return (
-    <div className="px-6 py-8 max-w-3xl mx-auto">
+    <div className="px-6 py-8 max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-8">
         <p className="ansein-mono text-xs uppercase tracking-widest text-[var(--ansein-text-dim)] mb-1">
@@ -193,12 +204,19 @@ export default function ProfilePage() {
               <h2 className="text-lg font-semibold text-[var(--ansein-text)]">
                 {p.full_name || 'Analyst'}
               </h2>
-              {p.is_superuser && (
-                <Badge color="primary" dot>
-                  <ShieldCheck className="h-3 w-3" />
-                  Administrator
-                </Badge>
-              )}
+              {/* Role badge — RBAC */}
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium border capitalize',
+                  roleColors.bg,
+                  roleColors.fg,
+                  roleColors.border
+                )}
+                title={ROLE_DESCRIPTIONS[displayRole as RbacRole]}
+              >
+                {displayRole === 'admin' ? <Crown className="h-3 w-3" /> : <Shield className="h-3 w-3" />}
+                {displayRole}
+              </span>
               {!p.is_active && <Badge color="danger">Inactive</Badge>}
             </div>
             <p className="text-sm text-[var(--ansein-text-muted)] mt-0.5 ansein-mono">{p.email}</p>
@@ -248,6 +266,24 @@ export default function ProfilePage() {
                 Copilot chats
               </p>
             </div>
+          </div>
+        </div>
+
+        {/* Role description row */}
+        <div className="mt-4 pt-4 border-t border-[var(--ansein-border)] flex items-start gap-2.5">
+          <ShieldCheck className="h-3.5 w-3.5 text-[var(--ansein-primary)] flex-shrink-0 mt-0.5" />
+          <div className="text-xs text-[var(--ansein-text-muted)] leading-relaxed">
+            <span className="font-medium text-[var(--ansein-text)] capitalize">{displayRole}</span>
+            <span className="text-[var(--ansein-text-dim)]"> · </span>
+            <span>{ROLE_DESCRIPTIONS[displayRole as RbacRole]}</span>
+            {displayRole === 'admin' && (
+              <>
+                {' · '}
+                <Link href="/app/admin" className="text-[var(--ansein-primary)] hover:text-[var(--ansein-primary-hover)] underline underline-offset-2">
+                  Admin console →
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>

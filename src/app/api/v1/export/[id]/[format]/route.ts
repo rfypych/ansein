@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { db } from '@/lib/db'
 import { ok, jsonError, withErrorHandler, requireUser } from '@/lib/api'
 import { buildJsonExport, buildStixBundle, buildPdfHtml } from '@/lib/services/export'
+import { canEditAnyInvestigation } from '@/lib/rbac'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,8 +12,10 @@ async function handler(req: NextRequest, ctx: { params: Promise<{ id: string; fo
   const invId = Number(id)
   if (!Number.isFinite(invId)) return jsonError(400, 'invalid_id', 'Invalid investigation ID')
 
+  // Analysts can only export their own; editors+ can export any investigation.
+  const where = canEditAnyInvestigation(user) ? { id: invId } : { id: invId, userId: user.id }
   const inv = await db.investigation.findFirst({
-    where: { id: invId, userId: user.id },
+    where,
     include: {
       sources: true,
       entities: true,

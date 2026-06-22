@@ -42,3 +42,8 @@ next-env.d.ts
 *.db
 *.sqlite
 *.sqlite3
+
+# IDE and local AI logs
+.codeflicker/
+worklog.md
+platform_mega_improvements.md

@@ -10,7 +10,6 @@ import {
   Settings as SettingsIcon,
   LogOut,
   Plus,
-  ShieldCheck,
   Menu,
   X,
   User as UserIcon,
@@ -19,9 +18,13 @@ import {
   Zap,
   Keyboard as KeyboardIcon,
   FlaskConical,
+  Workflow,
+  ShieldCheck,
+  Shield,
 } from 'lucide-react'
 import { Brand, BrandMark } from '@/components/ansein/brand'
-import { useAuthStore } from '@/lib/auth-store'
+import { useAuthStore, authUserRole, type AuthUser } from '@/lib/auth-store'
+import { ROLE_COLORS } from '@/lib/rbac'
 import { cn } from '@/lib/utils'
 import { AuthGuard } from '@/components/ansein/auth-guard'
 import { CommandPalette, useCommandPalette } from '@/components/ansein/command-palette'
@@ -39,7 +42,9 @@ const NAV_ITEMS = [
 ]
 
 const ADMIN_ITEMS = [
-  { href: '/app/audit', label: 'Audit log', icon: ShieldAlert },
+  { href: '/app/admin', label: 'Admin console', icon: Shield, minRole: 'admin' as const },
+  { href: '/app/playbooks', label: 'Playbooks', icon: Workflow, minRole: 'admin' as const },
+  { href: '/app/audit', label: 'Audit log', icon: ShieldAlert, minRole: 'editor' as const },
 ]
 
 export default function AppLayout({ children }: { children: ReactNode }) {
@@ -101,7 +106,7 @@ function AppShell({ children }: { children: ReactNode }) {
       <GlobalShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
 
       {/* ---------- Sidebar (desktop) ---------- */}
-      <aside className="hidden md:flex w-64 flex-shrink-0 flex-col bg-[var(--ansein-sidebar)] border-r border-[var(--ansein-border)]">
+      <aside className="hidden md:flex w-64 flex-shrink-0 flex-col bg-[var(--ansein-sidebar)]/60 backdrop-blur-2xl border-r border-white/5 shadow-2xl z-20">
         <SidebarContent
           pathname={pathname}
           user={user}
@@ -116,10 +121,10 @@ function AppShell({ children }: { children: ReactNode }) {
       {mobileOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/60 backdrop-blur-md"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="absolute left-0 top-0 bottom-0 w-64 bg-[var(--ansein-sidebar)] border-r border-[var(--ansein-border)] flex flex-col ansein-fade-in">
+          <aside className="absolute left-0 top-0 bottom-0 w-64 bg-[var(--ansein-sidebar)]/80 backdrop-blur-2xl border-r border-white/5 flex flex-col ansein-fade-in shadow-2xl">
             <button
               className="absolute top-4 right-4 text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)]"
               onClick={() => setMobileOpen(false)}
@@ -141,7 +146,7 @@ function AppShell({ children }: { children: ReactNode }) {
       {/* ---------- Main content ---------- */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Mobile top bar */}
-        <div className="md:hidden flex items-center justify-between h-14 px-4 border-b border-[var(--ansein-border)] bg-[var(--ansein-surface)]">
+        <div className="md:hidden flex items-center justify-between h-14 px-4 border-b border-white/5 bg-[var(--ansein-surface)]/60 backdrop-blur-xl z-20">
           <button
             onClick={() => setMobileOpen(true)}
             className="p-1.5 rounded-md hover:bg-[var(--ansein-surface-hover)] text-[var(--ansein-text-muted)]"
@@ -184,12 +189,25 @@ function SidebarContent({
   onOpenQuickPaste,
 }: {
   pathname: string
-  user: { email: string; full_name: string; is_superuser: boolean } | null
+  user: AuthUser | null
   initials: string
   onLogout: () => void
   onOpenPalette: () => void
   onOpenQuickPaste: () => void
 }) {
+  const role = authUserRole(user)
+  // editor+ can see the audit log. Analysts are blocked from the page
+  // server-side too, but we also hide the sidebar entry so the navigation
+  // reflects their actual capabilities.
+  const canSeeAudit = role === 'editor' || role === 'admin'
+  const roleColors = ROLE_COLORS[role]
+  // Filter ADMIN_ITEMS by each item's minimum role. Playbooks require admin;
+  // audit log is editor+. Both groups render under the "Administration"
+  // header (shown when at least one item is visible).
+  const roleRank: Record<string, number> = { analyst: 0, editor: 1, admin: 2 }
+  const visibleAdminItems = ADMIN_ITEMS.filter(
+    (item) => roleRank[role] >= roleRank[item.minRole]
+  )
   return (
     <>
       {/* Logo */}
@@ -257,8 +275,8 @@ function SidebarContent({
               className={cn(
                 'flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-all group relative',
                 active
-                  ? 'bg-[var(--ansein-surface-hover)] text-[var(--ansein-text)]'
-                  : 'text-[var(--ansein-text-muted)] hover:bg-[var(--ansein-surface)] hover:text-[var(--ansein-text)]'
+                  ? 'bg-white/5 border border-white/5 text-[var(--ansein-text)] shadow-sm'
+                  : 'text-[var(--ansein-text-muted)] border border-transparent hover:bg-white/[0.02] hover:text-[var(--ansein-text)]'
               )}
             >
               {active && (
@@ -278,13 +296,13 @@ function SidebarContent({
           )
         })}
 
-        {/* Admin section */}
-        {user?.is_superuser && (
+        {/* Admin section — visible to editor+ roles (per-item minimum) */}
+        {visibleAdminItems.length > 0 && (
           <>
             <p className="px-2 pt-5 pb-2 text-[10px] font-medium uppercase tracking-[0.15em] text-[var(--ansein-text-dim)]">
               Administration
             </p>
-            {ADMIN_ITEMS.map((item) => {
+            {visibleAdminItems.map((item) => {
               const Icon = item.icon
               const active = pathname.startsWith(item.href)
               return (
@@ -294,8 +312,8 @@ function SidebarContent({
                   className={cn(
                     'flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-all group relative',
                     active
-                      ? 'bg-[var(--ansein-surface-hover)] text-[var(--ansein-text)]'
-                      : 'text-[var(--ansein-text-muted)] hover:bg-[var(--ansein-surface)] hover:text-[var(--ansein-text)]'
+                      ? 'bg-white/5 border border-white/5 text-[var(--ansein-text)] shadow-sm'
+                      : 'text-[var(--ansein-text-muted)] border border-transparent hover:bg-white/[0.02] hover:text-[var(--ansein-text)]'
                   )}
                 >
                   {active && (
@@ -342,14 +360,11 @@ function SidebarContent({
             <p className="text-xs font-medium text-[var(--ansein-text)] truncate">
               {user?.full_name || user?.email || 'Analyst'}
             </p>
-            <p className="text-[10px] uppercase tracking-wider text-[var(--ansein-text-dim)] flex items-center gap-1">
-              {user?.is_superuser ? (
-                <>
-                  <ShieldCheck className="h-2.5 w-2.5 text-amber-400" /> Administrator
-                </>
-              ) : (
-                'Analyst'
-              )}
+            <p className="text-[10px] uppercase tracking-wider flex items-center gap-1">
+              <span className={cn('inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium border', roleColors.bg, roleColors.fg, roleColors.border)}>
+                <span className={cn('h-1 w-1 rounded-full', roleColors.dot)} />
+                {role}
+              </span>
             </p>
           </div>
           <LogOut

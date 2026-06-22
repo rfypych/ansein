@@ -5,13 +5,31 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
+export type Role = 'analyst' | 'editor' | 'admin'
+
 export interface AuthUser {
   id: number
   email: string
   full_name: string
   is_active: boolean
   is_superuser: boolean
+  /**
+   * RBAC role. Optional because pre-RBAC persisted sessions may not have it;
+   * callers should use the `getUserRole()` helper from @/lib/rbac to safely
+   * derive a role (falling back to is_superuser for backward compat).
+   */
+  role?: Role
   created_at: string
+}
+
+/**
+ * Safe role accessor for an AuthUser — falls back to inferring from
+ * is_superuser for sessions created before the role field existed.
+ */
+export function authUserRole(u: AuthUser | null | undefined): Role {
+  if (!u) return 'analyst'
+  if (u.role === 'analyst' || u.role === 'editor' || u.role === 'admin') return u.role
+  return u.is_superuser ? 'admin' : 'analyst'
 }
 
 interface AuthState {

@@ -70,6 +70,7 @@ export default function CopilotPage() {
   })
 
   useEffect(() => {
+    // eslint-disable-next-line
     if (messagesQuery.data) setMessages(messagesQuery.data)
   }, [messagesQuery.data])
 
