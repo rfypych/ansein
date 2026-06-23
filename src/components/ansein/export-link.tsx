@@ -116,7 +116,7 @@ export function ExportLink({
       onClick={handleDownload}
       disabled={loading}
       className={cn(
-        'inline-flex items-center gap-1.5 px-3 py-2 rounded-md border border-[var(--ansein-border)] bg-[var(--ansein-surface)] text-sm text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] hover:border-[var(--ansein-border-strong)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors',
+        'inline-flex items-center gap-1.5 px-3 py-2 rounded-md border border-border bg-card text-sm text-muted-foreground hover:text-foreground hover:border-primary/50 disabled:opacity-60 disabled:cursor-not-allowed transition-colors',
         className
       )}
     >

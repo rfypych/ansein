@@ -116,13 +116,13 @@ export default function IOCPlaygroundPage() {
     <div className="px-6 py-8 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <p className="ansein-mono text-xs uppercase tracking-[0.15em] text-[var(--ansein-text-dim)] mb-1">
+        <p className="ansein-mono text-xs uppercase tracking-[0.15em] text-muted-foreground/50 mb-1">
           Quick analysis
         </p>
-        <h1 className="text-2xl font-bold tracking-tight text-[var(--ansein-text)]">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
           IOC Playground
         </h1>
-        <p className="text-sm text-[var(--ansein-text-muted)] mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           Paste raw text to instantly extract and enrich IOCs — no investigation needed.
         </p>
       </div>
@@ -130,22 +130,22 @@ export default function IOCPlaygroundPage() {
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Left: Input */}
         <div className="space-y-4">
-          <div className="ansein-card rounded-xl p-5">
+          <div className="bg-card border border-border rounded-xl p-5">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-[var(--ansein-text)] flex items-center gap-2">
-                <Search className="h-4 w-4 text-[var(--ansein-primary)]" />
+              <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <Search className="h-4 w-4 text-primary" />
                 Input text
               </h3>
               <div className="flex items-center gap-1.5">
                 <button
                   onClick={handleSample}
-                  className="text-[10px] text-[var(--ansein-primary)] hover:text-[var(--ansein-primary-hover)] transition-colors px-2 py-1 rounded-md hover:bg-[var(--ansein-surface)]"
+                  className="text-[10px] text-primary hover:text-primary/90 transition-colors px-2 py-1 rounded-md hover:bg-card"
                 >
                   Load sample
                 </button>
                 <button
                   onClick={handleClear}
-                  className="text-[10px] text-[var(--ansein-text-dim)] hover:text-[var(--ansein-text)] transition-colors px-2 py-1 rounded-md hover:bg-[var(--ansein-surface)]"
+                  className="text-[10px] text-muted-foreground/50 hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-card"
                 >
                   Clear
                 </button>
@@ -156,16 +156,16 @@ export default function IOCPlaygroundPage() {
               onChange={(e) => setText(e.target.value)}
               placeholder="Paste threat data, IOCs, suspicious text…&#10;&#10;Supported: IPv4/IPv6, domains, URLs, hashes (MD5/SHA1/SHA256/SHA512), CVEs, BTC wallets"
               rows={12}
-              className="w-full px-3 py-2.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-sm text-[var(--ansein-text)] placeholder:text-[var(--ansein-text-dim)] focus:outline-none focus:border-[var(--ansein-primary)] resize-y min-h-[200px] ansein-mono text-xs"
+              className="w-full px-3 py-2.5 rounded-md bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary resize-y min-h-[200px] ansein-mono text-xs"
             />
             <div className="flex items-center justify-between mt-3">
-              <p className="text-[10px] text-[var(--ansein-text-dim)]">
+              <p className="text-[10px] text-muted-foreground/50">
                 {text.length.toLocaleString()} chars
               </p>
               <button
                 onClick={handleAnalyze}
                 disabled={!text.trim() || analyzeMutation.isPending}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-[var(--ansein-primary)] text-[var(--ansein-bg)] text-sm font-medium hover:bg-[var(--ansein-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {analyzeMutation.isPending ? (
                   <>
@@ -184,22 +184,22 @@ export default function IOCPlaygroundPage() {
 
           {/* Summary card */}
           {summary && (
-            <div className="ansein-card rounded-xl p-5 ansein-slide-up">
-              <h3 className="text-sm font-semibold text-[var(--ansein-text)] mb-3">Summary</h3>
+            <div className="bg-card border border-border rounded-xl p-5 ansein-slide-up">
+              <h3 className="text-sm font-semibold text-foreground mb-3">Summary</h3>
               <div className="grid grid-cols-3 gap-3">
                 <div className="text-center">
-                  <p className="text-2xl font-bold ansein-mono text-[var(--ansein-text)] tabular-nums">
+                  <p className="text-2xl font-bold ansein-mono text-foreground tabular-nums">
                     {summary.total_extracted}
                   </p>
-                  <p className="text-[10px] uppercase tracking-[0.15em] text-[var(--ansein-text-dim)] mt-0.5">
+                  <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/50 mt-0.5">
                     Extracted
                   </p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold ansein-mono text-[var(--ansein-primary)] tabular-nums">
+                  <p className="text-2xl font-bold ansein-mono text-primary tabular-nums">
                     {summary.enriched}
                   </p>
-                  <p className="text-[10px] uppercase tracking-[0.15em] text-[var(--ansein-text-dim)] mt-0.5">
+                  <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/50 mt-0.5">
                     Enriched
                   </p>
                 </div>
@@ -207,7 +207,7 @@ export default function IOCPlaygroundPage() {
                   <p className="text-2xl font-bold ansein-mono text-rose-400 tabular-nums">
                     {summary.malicious}
                   </p>
-                  <p className="text-[10px] uppercase tracking-[0.15em] text-[var(--ansein-text-dim)] mt-0.5">
+                  <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/50 mt-0.5">
                     Malicious
                   </p>
                 </div>
@@ -215,7 +215,7 @@ export default function IOCPlaygroundPage() {
               {results && results.length > 0 && (
                 <button
                   onClick={exportResults}
-                  className="mt-4 w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md border border-[var(--ansein-border)] bg-[var(--ansein-surface)] text-xs text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] hover:border-[var(--ansein-border-strong)] transition-colors"
+                  className="mt-4 w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md border border-border bg-card text-xs text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
                 >
                   <Download className="h-3 w-3" />
                   Export results (JSON)
@@ -228,8 +228,8 @@ export default function IOCPlaygroundPage() {
         {/* Right: Results */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-[var(--ansein-text)] flex items-center gap-2">
-              <Shield className="h-4 w-4 text-[var(--ansein-primary)]" />
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <Shield className="h-4 w-4 text-primary" />
               Results
               {results && results.length > 0 && (
                 <Badge color="primary">{results.length}</Badge>
@@ -238,16 +238,16 @@ export default function IOCPlaygroundPage() {
           </div>
 
           {analyzeMutation.isPending ? (
-            <div className="ansein-card rounded-xl py-16 flex justify-center">
+            <div className="bg-card border border-border rounded-xl py-16 flex justify-center">
               <div className="flex flex-col items-center gap-3">
                 <Spinner className="h-6 w-6" />
-                <p className="text-xs text-[var(--ansein-text-muted)]">Extracting and enriching IOCs…</p>
+                <p className="text-xs text-muted-foreground">Extracting and enriching IOCs…</p>
               </div>
             </div>
           ) : !results ? (
-            <div className="ansein-card rounded-xl">
+            <div className="bg-card border border-border rounded-xl">
               <EmptyState
-                icon={<Zap className="h-5 w-5 text-[var(--ansein-primary)]" />}
+                icon={<Zap className="h-5 w-5 text-primary" />}
                 title="No results yet"
                 description="Paste text on the left and click Analyze to extract IOCs."
                 variant="branded"
@@ -255,9 +255,9 @@ export default function IOCPlaygroundPage() {
               />
             </div>
           ) : results.length === 0 ? (
-            <div className="ansein-card rounded-xl">
+            <div className="bg-card border border-border rounded-xl">
               <EmptyState
-                icon={<Search className="h-5 w-5 text-[var(--ansein-text-dim)]" />}
+                icon={<Search className="h-5 w-5 text-muted-foreground/50" />}
                 title="No IOCs detected"
                 description="The provided text doesn't contain any recognizable IOCs (IPs, domains, URLs, hashes, CVEs)."
                 className="py-16"
@@ -329,7 +329,7 @@ function IocCard({
   return (
     <div
       className={cn(
-        'ansein-card rounded-lg p-4 relative overflow-hidden',
+        'bg-card border border-border rounded-lg p-4 relative overflow-hidden',
         isMalicious && 'border-rose-500/30'
       )}
     >
@@ -348,7 +348,7 @@ function IocCard({
             <span className="text-[10px] uppercase tracking-[0.15em] ansein-mono font-medium" style={{ color }}>
               {label}
             </span>
-            <span className="text-[9px] ansein-mono px-1 py-0.5 rounded bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text-dim)]">
+            <span className="text-[9px] ansein-mono px-1 py-0.5 rounded bg-card border border-border text-muted-foreground/50">
               {ioc.admiralty}
             </span>
             {isMalicious && (
@@ -358,15 +358,15 @@ function IocCard({
               </span>
             )}
           </div>
-          <p className="text-sm font-medium text-[var(--ansein-text)] ansein-mono break-all">
+          <p className="text-sm font-medium text-foreground ansein-mono break-all">
             {ioc.value}
           </p>
           <div className="flex items-center gap-3 mt-1.5">
-            <span className="text-[10px] text-[var(--ansein-text-dim)]">
+            <span className="text-[10px] text-muted-foreground/50">
               confidence: {(ioc.confidence * 100).toFixed(0)}%
             </span>
             {enrKeys.length > 0 && (
-              <span className="text-[10px] text-[var(--ansein-text-dim)]">
+              <span className="text-[10px] text-muted-foreground/50">
                 enriched: {enrKeys.join(', ')}
               </span>
             )}
@@ -374,7 +374,7 @@ function IocCard({
 
           {/* Enrichment details */}
           {enrKeys.length > 0 && (
-            <div className="mt-2 pt-2 border-t border-[var(--ansein-border)] space-y-1.5">
+            <div className="mt-2 pt-2 border-t border-border space-y-1.5">
               {enrKeys.map((provider) => {
                 const data = ioc.enrichment[provider] as Record<string, unknown>
                 const entries = Object.entries(data).filter(
@@ -382,7 +382,7 @@ function IocCard({
                 )
                 return (
                   <div key={provider}>
-                    <p className="text-[9px] uppercase tracking-widest text-[var(--ansein-text-dim)] ansein-mono mb-1">
+                    <p className="text-[9px] uppercase tracking-widest text-muted-foreground/50 ansein-mono mb-1">
                       {provider}
                     </p>
                     <div className="flex flex-wrap gap-1">
@@ -398,7 +398,7 @@ function IocCard({
                                 ? 'bg-rose-500/10 text-rose-400 border-rose-500/30'
                                 : isClean
                                 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                                : 'bg-[var(--ansein-surface)] text-[var(--ansein-text-muted)] border-[var(--ansein-border)]'
+                                : 'bg-card text-muted-foreground border-border'
                             )}
                           >
                             {key}: {String(val).slice(0, 40)}
@@ -414,7 +414,7 @@ function IocCard({
         </div>
         <button
           onClick={onCopy}
-          className="p-1.5 text-[var(--ansein-text-dim)] hover:text-[var(--ansein-text)] transition-colors flex-shrink-0"
+          className="p-1.5 text-muted-foreground/50 hover:text-foreground transition-colors flex-shrink-0"
           title="Copy value"
         >
           {copied ? (

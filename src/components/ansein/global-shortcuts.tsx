@@ -52,20 +52,20 @@ export function GlobalShortcutsModal({ open, onClose }: { open: boolean; onClose
     >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
-        className="relative w-full max-w-md ansein-card rounded-xl border-[var(--ansein-border-strong)] ansein-slide-up"
+        className="relative w-full max-w-md bg-card border border-border rounded-xl border-primary/50 ansein-slide-up"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--ansein-border)]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--ansein-primary)]/15 border border-[var(--ansein-primary)]/30">
-              <Keyboard className="h-4 w-4 text-[var(--ansein-primary)]" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/15 border border-primary/30">
+              <Keyboard className="h-4 w-4 text-primary" />
             </div>
-            <h2 className="text-base font-semibold text-[var(--ansein-text)]">Keyboard shortcuts</h2>
+            <h2 className="text-base font-semibold text-foreground">Keyboard shortcuts</h2>
           </div>
           <button
             onClick={onClose}
-            className="text-[var(--ansein-text-dim)] hover:text-[var(--ansein-text)] transition-colors p-1 rounded-md hover:bg-[var(--ansein-surface)]"
+            className="text-muted-foreground/50 hover:text-foreground transition-colors p-1 rounded-md hover:bg-card"
           >
             <X className="h-4 w-4" />
           </button>
@@ -75,21 +75,21 @@ export function GlobalShortcutsModal({ open, onClose }: { open: boolean; onClose
         <div className="p-5 space-y-5 max-h-[60vh] overflow-y-auto ansein-scrollbar">
           {categories.map((cat) => (
             <div key={cat}>
-              <p className="text-[10px] uppercase tracking-[0.15em] text-[var(--ansein-text-dim)] ansein-mono mb-2.5 font-medium">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50 ansein-mono mb-2.5 font-medium">
                 {cat}
               </p>
               <div className="space-y-1.5">
                 {SHORTCUTS.filter((s) => s.category === cat).map((s, i) => (
                   <div
                     key={i}
-                    className="flex items-center justify-between py-1.5 px-2 rounded-md hover:bg-[var(--ansein-surface)] transition-colors"
+                    className="flex items-center justify-between py-1.5 px-2 rounded-md hover:bg-card transition-colors"
                   >
-                    <span className="text-sm text-[var(--ansein-text-muted)]">{s.desc}</span>
+                    <span className="text-sm text-muted-foreground">{s.desc}</span>
                     <div className="flex items-center gap-1">
                       {s.keys.map((k, j) => (
                         <kbd
                           key={j}
-                          className="ansein-mono text-[10px] px-1.5 py-0.5 rounded border border-[var(--ansein-border)] bg-[var(--ansein-surface)] text-[var(--ansein-text)]"
+                          className="ansein-mono text-[10px] px-1.5 py-0.5 rounded border border-border bg-card text-foreground"
                         >
                           {k}
                         </kbd>
@@ -103,8 +103,8 @@ export function GlobalShortcutsModal({ open, onClose }: { open: boolean; onClose
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-3 border-t border-[var(--ansein-border)] bg-[var(--ansein-surface)]/30">
-          <p className="text-[10px] text-[var(--ansein-text-dim)] text-center">
+        <div className="px-5 py-3 border-t border-border bg-card/30">
+          <p className="text-[10px] text-muted-foreground/50 text-center">
             Shortcuts are disabled while typing in input fields.
           </p>
         </div>

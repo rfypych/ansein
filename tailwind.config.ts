@@ -2,67 +2,70 @@ import type { Config } from "tailwindcss";
 import tailwindcssAnimate from "tailwindcss-animate";
 
 const config: Config = {
-    darkMode: "class",
-    content: [
+  darkMode: "class",
+  content: [
+    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-  	extend: {
-  		colors: {
-  			background: 'var()',
-  			foreground: 'var()',
-  			card: {
-  				DEFAULT: 'var()',
-  				foreground: 'var()'
-  			},
-  			popover: {
-  				DEFAULT: 'var()',
-  				foreground: 'var()'
-  			},
-  			primary: {
-  				DEFAULT: 'var()',
-  				foreground: 'var()'
-  			},
-  			secondary: {
-  				DEFAULT: 'var()',
-  				foreground: 'var()'
-  			},
-  			muted: {
-  				DEFAULT: 'var()',
-  				foreground: 'var()'
-  			},
-  			accent: {
-  				DEFAULT: 'var()',
-  				foreground: 'var()'
-  			},
-  			destructive: {
-  				DEFAULT: 'var()',
-  				foreground: 'var()'
-  			},
-  			border: 'var()',
-  			input: 'var()',
-  			ring: 'var()',
-  			chart: {
-  				'1': 'var()',
-  				'2': 'var()',
-  				'3': 'var()',
-  				'4': 'var()',
-  				'5': 'var()'
-  			}
-  		},
-  		borderRadius: {
-  			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
-  		},
-        fontFamily: {
-            sans: ['var(--font-courier)', 'monospace'],
-            mono: ['var(--font-courier)', 'monospace'],
-            serif: ['var(--font-sigurd)', 'ui-serif', 'Georgia', 'Cambria', '"Times New Roman"', 'Times', 'serif'],
-        }
-  	}
+    extend: {
+      colors: {
+        background: 'var(--background)',
+        foreground: 'var(--foreground)',
+        card: {
+          DEFAULT: 'var(--card)',
+          foreground: 'var(--card-foreground)',
+        },
+        popover: {
+          DEFAULT: 'var(--popover)',
+          foreground: 'var(--popover-foreground)',
+        },
+        primary: {
+          DEFAULT: 'var(--primary)',
+          foreground: 'var(--primary-foreground)',
+        },
+        secondary: {
+          DEFAULT: 'var(--secondary)',
+          foreground: 'var(--secondary-foreground)',
+        },
+        muted: {
+          DEFAULT: 'var(--muted)',
+          foreground: 'var(--muted-foreground)',
+        },
+        accent: {
+          DEFAULT: 'var(--accent)',
+          foreground: 'var(--accent-foreground)',
+        },
+        destructive: {
+          DEFAULT: 'var(--destructive)',
+          foreground: 'var(--destructive-foreground)',
+        },
+        border: 'var(--border)',
+        input: 'var(--input)',
+        ring: 'var(--ring)',
+        chart: {
+          '1': 'var(--chart-1)',
+          '2': 'var(--chart-2)',
+          '3': 'var(--chart-3)',
+          '4': 'var(--chart-4)',
+          '5': 'var(--chart-5)',
+        },
+      },
+      borderRadius: {
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
+      },
+      fontFamily: {
+        sans: ['var(--font-courier)', 'monospace'],
+        mono: ['var(--font-courier)', 'monospace'],
+        serif: ['var(--font-sigurd)', 'ui-serif', 'Georgia', 'Cambria', '"Times New Roman"', 'Times', 'serif'],
+      },
+    },
   },
   plugins: [tailwindcssAnimate],
 };

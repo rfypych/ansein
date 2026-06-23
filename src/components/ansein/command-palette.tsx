@@ -408,12 +408,12 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
     >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm ansein-fade-in" />
       <div
-        className="relative w-full max-w-xl ansein-card rounded-xl shadow-2xl overflow-hidden"
+        className="relative w-full max-w-xl bg-card border border-border rounded-xl shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search input */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-[var(--ansein-border)]">
-          <Search className="h-4 w-4 text-[var(--ansein-text-dim)]" />
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
+          <Search className="h-4 w-4 text-muted-foreground/50" />
           <input
             ref={inputRef}
             type="text"
@@ -423,9 +423,9 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
               setActiveIndex(0)
             }}
             placeholder="Search commands, pages, and actions…"
-            className="flex-1 bg-transparent text-sm text-[var(--ansein-text)] placeholder:text-[var(--ansein-text-dim)] focus:outline-none"
+            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
           />
-          <kbd className="ansein-mono text-[10px] px-1.5 py-0.5 rounded border border-[var(--ansein-border)] bg-[var(--ansein-surface)] text-[var(--ansein-text-dim)]">
+          <kbd className="ansein-mono text-[10px] px-1.5 py-0.5 rounded border border-border bg-card text-muted-foreground/50">
             ESC
           </kbd>
         </div>
@@ -433,7 +433,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
         {/* Results */}
         <div ref={listRef} className="max-h-[50vh] overflow-y-auto p-2">
           {grouped.length === 0 ? (
-            <div className="py-8 text-center text-sm text-[var(--ansein-text-muted)]">
+            <div className="py-8 text-center text-sm text-muted-foreground">
               No matching commands.
             </div>
           ) : (
@@ -441,7 +441,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
               <div key={group} className="mb-2 last:mb-0">
                 <div className="flex items-center gap-1.5 px-2 py-1">
                   {group === 'Actions' && <Zap className="h-2.5 w-2.5 text-amber-400" />}
-                  <p className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] ansein-mono">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50 ansein-mono">
                     {group}
                   </p>
                 </div>
@@ -459,8 +459,8 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                       className={cn(
                         'w-full flex items-center gap-3 px-2 py-2 rounded-md text-left transition-colors',
                         active
-                          ? 'bg-[var(--ansein-surface-hover)]'
-                          : 'hover:bg-[var(--ansein-surface)]'
+                          ? 'bg-card/80'
+                          : 'hover:bg-card'
                       )}
                     >
                       <div
@@ -469,21 +469,21 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                           active
                             ? isAction
                               ? 'bg-amber-500/15 text-amber-400'
-                              : 'bg-[var(--ansein-primary)]/15 text-[var(--ansein-primary)]'
-                            : 'bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text-muted)]'
+                              : 'bg-primary/15 text-primary'
+                            : 'bg-card border border-border text-muted-foreground'
                         )}
                       >
                         <Icon className="h-3.5 w-3.5" />
                         {isAction && (
-                          <span className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full bg-amber-500 flex items-center justify-center border border-[var(--ansein-bg)]">
-                            <Zap className="h-2 w-2 text-[var(--ansein-bg)]" />
+                          <span className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full bg-amber-500 flex items-center justify-center border border-[background]">
+                            <Zap className="h-2 w-2 text-primary-foreground" />
                           </span>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-[var(--ansein-text)] truncate">{item.label}</p>
+                        <p className="text-sm text-foreground truncate">{item.label}</p>
                         {item.hint && (
-                          <p className="text-[11px] text-[var(--ansein-text-dim)] truncate">
+                          <p className="text-[11px] text-muted-foreground/50 truncate">
                             {item.hint}
                           </p>
                         )}
@@ -494,7 +494,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                         </span>
                       )}
                       {active && (
-                        <CornerDownLeft className="h-3.5 w-3.5 text-[var(--ansein-text-dim)] flex-shrink-0" />
+                        <CornerDownLeft className="h-3.5 w-3.5 text-muted-foreground/50 flex-shrink-0" />
                       )}
                     </button>
                   )
@@ -505,7 +505,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-2 border-t border-[var(--ansein-border)] flex items-center justify-between text-[10px] text-[var(--ansein-text-dim)]">
+        <div className="px-4 py-2 border-t border-border flex items-center justify-between text-[10px] text-muted-foreground/50">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1">
               <ArrowUp className="h-2.5 w-2.5" />

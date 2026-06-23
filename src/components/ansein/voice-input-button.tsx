@@ -236,8 +236,8 @@ export function VoiceInputButton({
         'inline-flex items-center justify-center h-9 w-9 rounded-md border transition-colors flex-shrink-0',
         listening
           ? 'bg-rose-500/15 text-rose-400 border-rose-500/40'
-          : 'bg-[var(--ansein-surface)] text-[var(--ansein-text-muted)] border-[var(--ansein-border)] hover:text-[var(--ansein-text)] hover:border-[var(--ansein-border-strong)]',
-        isDisabled && 'opacity-40 cursor-not-allowed hover:text-[var(--ansein-text-muted)] hover:border-[var(--ansein-border)]',
+          : 'bg-card text-muted-foreground border-border hover:text-foreground hover:border-primary/50',
+        isDisabled && 'opacity-40 cursor-not-allowed hover:text-muted-foreground hover:border-border',
         className,
       )}
     >

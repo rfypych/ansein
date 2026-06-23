@@ -143,25 +143,25 @@ export function QuickPasteModal({ open, onClose }: { open: boolean; onClose: () 
     >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
-        className="relative w-full max-w-2xl ansein-card rounded-xl border-[var(--ansein-border-strong)] overflow-hidden ansein-slide-up"
+        className="relative w-full max-w-2xl bg-card border border-border rounded-xl border-primary/50 overflow-hidden ansein-slide-up"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--ansein-border)]">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-border">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[var(--ansein-primary)]/15 border border-[var(--ansein-primary)]/30">
-              <Zap className="h-3.5 w-3.5 text-[var(--ansein-primary)]" />
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/15 border border-primary/30">
+              <Zap className="h-3.5 w-3.5 text-primary" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-[var(--ansein-text)]">Quick paste</h2>
-              <p className="text-[10px] text-[var(--ansein-text-dim)]">
+              <h2 className="text-sm font-semibold text-foreground">Quick paste</h2>
+              <p className="text-[10px] text-muted-foreground/50">
                 Add raw text as a source to any investigation
               </p>
             </div>
           </div>
           <button
             onClick={handleClose}
-            className="text-[var(--ansein-text-dim)] hover:text-[var(--ansein-text)] transition-colors p-1 rounded-md hover:bg-[var(--ansein-surface)]"
+            className="text-muted-foreground/50 hover:text-foreground transition-colors p-1 rounded-md hover:bg-card"
           >
             <X className="h-4 w-4" />
           </button>
@@ -171,7 +171,7 @@ export function QuickPasteModal({ open, onClose }: { open: boolean; onClose: () 
         <div className="p-5 space-y-4 max-h-[60vh] overflow-y-auto ansein-scrollbar">
           {/* Title input */}
           <div>
-            <label className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] ansein-mono mb-1.5 block">
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground/50 ansein-mono mb-1.5 block">
               Source title (optional)
             </label>
             <input
@@ -179,13 +179,13 @@ export function QuickPasteModal({ open, onClose }: { open: boolean; onClose: () 
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Threat report excerpt, IOC list, pasted email…"
-              className="w-full px-3 py-2 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-sm text-[var(--ansein-text)] placeholder:text-[var(--ansein-text-dim)] focus:outline-none focus:border-[var(--ansein-primary)] transition-colors"
+              className="w-full px-3 py-2 rounded-md bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary transition-colors"
             />
           </div>
 
           {/* Text content */}
           <div>
-            <label className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] ansein-mono mb-1.5 block">
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground/50 ansein-mono mb-1.5 block">
               Content
             </label>
             <textarea
@@ -194,39 +194,39 @@ export function QuickPasteModal({ open, onClose }: { open: boolean; onClose: () 
               onChange={(e) => setText(e.target.value)}
               placeholder="Paste raw threat data here — IOCs, malware names, threat actor info, URLs…"
               rows={6}
-              className="w-full px-3 py-2.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-sm text-[var(--ansein-text)] placeholder:text-[var(--ansein-text-dim)] focus:outline-none focus:border-[var(--ansein-primary)] resize-y min-h-[120px] ansein-mono text-xs"
+              className="w-full px-3 py-2.5 rounded-md bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary resize-y min-h-[120px] ansein-mono text-xs"
             />
-            <p className="text-[10px] text-[var(--ansein-text-dim)] mt-1">
+            <p className="text-[10px] text-muted-foreground/50 mt-1">
               {text.length.toLocaleString()} chars
             </p>
           </div>
 
           {/* Investigation selector */}
           <div>
-            <label className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] ansein-mono mb-1.5 block">
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground/50 ansein-mono mb-1.5 block">
               Add to investigation
             </label>
             {invQuery.isLoading ? (
               <div className="py-4 flex justify-center">
-                <Loader2 className="h-4 w-4 animate-spin text-[var(--ansein-text-dim)]" />
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground/50" />
               </div>
             ) : investigations.length === 0 ? (
-              <p className="text-xs text-[var(--ansein-text-dim)] py-3 text-center">
+              <p className="text-xs text-muted-foreground/50 py-3 text-center">
                 No investigations yet. Create one first.
               </p>
             ) : (
               <>
                 <div className="relative mb-2">
-                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-[var(--ansein-text-dim)]" />
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/50" />
                   <input
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Search investigations…"
-                    className="w-full pl-8 pr-3 py-1.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-xs text-[var(--ansein-text)] placeholder:text-[var(--ansein-text-dim)] focus:outline-none focus:border-[var(--ansein-primary)]"
+                    className="w-full pl-8 pr-3 py-1.5 rounded-md bg-card border border-border text-xs text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary"
                   />
                 </div>
-                <div className="max-h-40 overflow-y-auto ansein-scrollbar space-y-0.5 rounded-md border border-[var(--ansein-border)]">
+                <div className="max-h-40 overflow-y-auto ansein-scrollbar space-y-0.5 rounded-md border border-border">
                   {filtered.slice(0, 20).map((inv) => (
                     <button
                       key={inv.id}
@@ -234,17 +234,17 @@ export function QuickPasteModal({ open, onClose }: { open: boolean; onClose: () 
                       className={cn(
                         'w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors',
                         selectedInvId === inv.id
-                          ? 'bg-[var(--ansein-primary)]/10 text-[var(--ansein-text)]'
-                          : 'hover:bg-[var(--ansein-surface)] text-[var(--ansein-text-muted)]'
+                          ? 'bg-primary/10 text-foreground'
+                          : 'hover:bg-card text-muted-foreground'
                       )}
                     >
-                      <FileText className="h-3 w-3 flex-shrink-0 text-[var(--ansein-text-dim)]" />
+                      <FileText className="h-3 w-3 flex-shrink-0 text-muted-foreground/50" />
                       <span className="text-xs font-medium truncate flex-1">{inv.title}</span>
                       {inv.is_starred && (
                         <span className="text-amber-400 text-[10px]">★</span>
                       )}
                       {selectedInvId === inv.id && (
-                        <ChevronRight className="h-3 w-3 text-[var(--ansein-primary)] flex-shrink-0" />
+                        <ChevronRight className="h-3 w-3 text-primary flex-shrink-0" />
                       )}
                     </button>
                   ))}
@@ -260,9 +260,9 @@ export function QuickPasteModal({ open, onClose }: { open: boolean; onClose: () 
                 type="checkbox"
                 checked={runPipeline}
                 onChange={(e) => setRunPipeline(e.target.checked)}
-                className="h-4 w-4 rounded border-[var(--ansein-border)] bg-[var(--ansein-surface)] accent-[var(--ansein-primary)]"
+                className="h-4 w-4 rounded border-border bg-card accent-[primary]"
               />
-              <span className="text-xs text-[var(--ansein-text-muted)] group-hover:text-[var(--ansein-text)] transition-colors">
+              <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">
                 Run extraction pipeline after adding (takes ~30-60s)
               </span>
             </label>
@@ -270,21 +270,21 @@ export function QuickPasteModal({ open, onClose }: { open: boolean; onClose: () 
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between gap-3 px-5 py-3 border-t border-[var(--ansein-border)] bg-[var(--ansein-surface)]/30">
-          <p className="text-[10px] text-[var(--ansein-text-dim)] ansein-mono">
+        <div className="flex items-center justify-between gap-3 px-5 py-3 border-t border-border bg-card/30">
+          <p className="text-[10px] text-muted-foreground/50 ansein-mono">
             Esc to close
           </p>
           <div className="flex items-center gap-2">
             <button
               onClick={handleClose}
-              className="px-3 py-1.5 rounded-md text-xs text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] transition-colors"
+              className="px-3 py-1.5 rounded-md text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleSubmit}
               disabled={!text.trim() || !selectedInvId || addMutation.isPending}
-              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md bg-[var(--ansein-primary)] text-[var(--ansein-bg)] text-xs font-medium hover:bg-[var(--ansein-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {addMutation.isPending ? (
                 <Loader2 className="h-3 w-3 animate-spin" />

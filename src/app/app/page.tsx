@@ -206,13 +206,13 @@ export default function DashboardPage() {
     <div className="px-6 py-8 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <p className="ansein-mono text-xs uppercase tracking-widest text-[var(--ansein-text-dim)] mb-1">
+        <p className="ansein-mono text-xs uppercase tracking-widest text-muted-foreground/50 mb-1">
           Workspace overview
         </p>
-        <h1 className="text-2xl font-semibold tracking-tight text-[var(--ansein-text)]">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
           Welcome back, {user?.full_name || user?.email?.split('@')[0] || 'Analyst'}
         </h1>
-        <p className="text-sm text-[var(--ansein-text-muted)] mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           Here&apos;s what&apos;s happening across your threat intelligence workspace.
         </p>
       </div>
@@ -254,19 +254,19 @@ export default function DashboardPage() {
       {/* Main content area */}
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Recent investigations */}
-        <div className="lg:col-span-2 ansein-card rounded-xl p-6">
-          <div className="flex items-center justify-between pb-4 border-b border-[var(--ansein-border)]">
+        <div className="lg:col-span-2 bg-card border border-border rounded-xl p-6">
+          <div className="flex items-center justify-between pb-4 border-b border-border">
             <div>
-              <h2 className="text-base font-semibold text-[var(--ansein-text)]">
+              <h2 className="text-base font-semibold text-foreground">
                 Recent investigations
               </h2>
-              <p className="text-sm text-[var(--ansein-text-muted)] mt-0.5">
+              <p className="text-sm text-muted-foreground mt-0.5">
                 Your most recently updated cases.
               </p>
             </div>
             <Link
               href="/app/investigations"
-              className="text-xs text-[var(--ansein-primary)] hover:text-[var(--ansein-primary-hover)] inline-flex items-center gap-1"
+              className="text-xs text-primary hover:text-primary/90 inline-flex items-center gap-1"
             >
               View all
               <ArrowRight className="h-3 w-3" />
@@ -279,13 +279,13 @@ export default function DashboardPage() {
             </div>
           ) : recentInv.length === 0 ? (
             <EmptyState
-              icon={<FolderSearch className="h-5 w-5 text-[var(--ansein-text-dim)]" />}
+              icon={<FolderSearch className="h-5 w-5 text-muted-foreground/50" />}
               title="No investigations yet"
               description="Create your first investigation to start extracting threat intelligence from raw data."
               action={
                 <Link
                   href="/app/investigations/new"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[var(--ansein-primary)] text-[var(--ansein-bg)] text-sm font-medium hover:bg-[var(--ansein-primary-hover)] transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   New investigation
@@ -293,7 +293,7 @@ export default function DashboardPage() {
               }
             />
           ) : (
-            <div className="divide-y divide-[var(--ansein-border)]">
+            <div className="divide-y divide-border">
               {recentInv.map((inv) => {
                 const s = statusColor(inv.status)
                 const sev = severityColor(inv.severity_score)
@@ -301,11 +301,11 @@ export default function DashboardPage() {
                   <Link
                     key={inv.id}
                     href={`/app/investigations/${inv.id}`}
-                    className="flex items-center gap-4 py-3.5 group hover:bg-[var(--ansein-surface)]/50 -mx-2 px-2 rounded-md transition-colors"
+                    className="flex items-center gap-4 py-3.5 group hover:bg-card/50 -mx-2 px-2 rounded-md transition-colors"
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h3 className="text-sm font-medium text-[var(--ansein-text)] truncate group-hover:text-[var(--ansein-primary)] transition-colors">
+                        <h3 className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">
                           {inv.title}
                         </h3>
                         <span className={cn('inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border', s.bg, s.text, s.border)}>
@@ -313,7 +313,7 @@ export default function DashboardPage() {
                           {inv.status}
                         </span>
                       </div>
-                      <p className="text-xs text-[var(--ansein-text-dim)] mt-0.5">
+                      <p className="text-xs text-muted-foreground/50 mt-0.5">
                         {inv.entity_count} entities · {inv.relationship_count} relationships · {inv.source_count} sources · updated {formatRelative(inv.updated_at)}
                       </p>
                     </div>
@@ -328,13 +328,13 @@ export default function DashboardPage() {
         {/* Right column */}
         <div className="space-y-6">
           {/* Severity trend sparkline */}
-          <div className="ansein-card rounded-xl p-6">
+          <div className="bg-card border border-border rounded-xl p-6">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-[var(--ansein-text)] flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-[var(--ansein-primary)]" />
+              <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-primary" />
                 Severity trend
               </h3>
-              <span className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] ansein-mono">
+              <span className="text-[10px] uppercase tracking-widest text-muted-foreground/50 ansein-mono">
                 14d
               </span>
             </div>
@@ -343,23 +343,23 @@ export default function DashboardPage() {
                 <div className="flex items-end gap-3 mb-3">
                   <Sparkline data={trendData} width={220} height={48} color="#f43f5e" fillOpacity={0.2} strokeWidth={2} />
                   <div className="ml-auto text-right">
-                    <p className="text-2xl font-semibold ansein-mono text-[var(--ansein-text)]">
+                    <p className="text-2xl font-semibold ansein-mono text-foreground">
                       {trendData.filter((v) => v > 0).length > 0
                         ? Math.round(trendData.reduce((s, v) => s + v, 0) / trendData.filter((v) => v > 0).length)
                         : 0}
                     </p>
-                    <p className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)]">
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50">
                       Avg score
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center justify-between text-[10px] text-[var(--ansein-text-dim)] ansein-mono">
+                <div className="flex items-center justify-between text-[10px] text-muted-foreground/50 ansein-mono">
                   <span>{trendBuckets[0].date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
                   <span>{trendBuckets[trendBuckets.length - 1].date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
                 </div>
               </>
             ) : (
-              <p className="text-xs text-[var(--ansein-text-dim)] text-center py-4">
+              <p className="text-xs text-muted-foreground/50 text-center py-4">
                 No recent activity to trend
               </p>
             )}
@@ -374,19 +374,19 @@ export default function DashboardPage() {
           />
 
           {/* Severity distribution */}
-          <div className="ansein-card rounded-xl p-6">
-            <h3 className="text-sm font-semibold text-[var(--ansein-text)] mb-4 flex items-center gap-2">
-              <ShieldAlert className="h-4 w-4 text-[var(--ansein-primary)]" />
+          <div className="bg-card border border-border rounded-xl p-6">
+            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+              <ShieldAlert className="h-4 w-4 text-primary" />
               Severity distribution
             </h3>
             {allInv.length === 0 ? (
-              <p className="text-xs text-[var(--ansein-text-dim)] text-center py-4">
+              <p className="text-xs text-muted-foreground/50 text-center py-4">
                 No investigation data yet
               </p>
             ) : (
               <>
                 {/* Progress ring showing high-severity percentage */}
-                <div className="flex items-center justify-center mb-5 pb-4 border-b border-[var(--ansein-border)]">
+                <div className="flex items-center justify-center mb-5 pb-4 border-b border-border">
                   <ProgressRing
                     value={Math.round((severityBuckets.HIGH / totalForChart) * 100)}
                     size={84}
@@ -410,11 +410,11 @@ export default function DashboardPage() {
                         <div className="flex items-center justify-between mb-1">
                           <div className="flex items-center gap-2">
                             <span className="h-2 w-2 rounded-full" style={{ background: tier.color }} />
-                            <span className="text-xs font-medium text-[var(--ansein-text)]">{tier.label}</span>
+                            <span className="text-xs font-medium text-foreground">{tier.label}</span>
                           </div>
-                          <span className="text-xs ansein-mono text-[var(--ansein-text-muted)]">{count} ({pct}%)</span>
+                          <span className="text-xs ansein-mono text-muted-foreground">{count} ({pct}%)</span>
                         </div>
-                        <div className="h-1.5 rounded-full bg-[var(--ansein-border)] overflow-hidden">
+                        <div className="h-1.5 rounded-full bg-[border] overflow-hidden">
                           <div
                             className="h-full rounded-full transition-all duration-500"
                             style={{ width: `${pct}%`, background: tier.color }}
@@ -429,9 +429,9 @@ export default function DashboardPage() {
           </div>
 
           {/* Recent activity feed */}
-          <div className="ansein-card rounded-xl p-6">
-            <h3 className="text-sm font-semibold text-[var(--ansein-text)] mb-4 flex items-center gap-2">
-              <Clock className="h-4 w-4 text-[var(--ansein-primary)]" />
+          <div className="bg-card border border-border rounded-xl p-6">
+            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+              <Clock className="h-4 w-4 text-primary" />
               Activity feed
             </h3>
             {audit.isLoading ? (
@@ -439,7 +439,7 @@ export default function DashboardPage() {
                 <Spinner />
               </div>
             ) : audit.data?.items?.length === 0 ? (
-              <p className="text-xs text-[var(--ansein-text-dim)] text-center py-4">
+              <p className="text-xs text-muted-foreground/50 text-center py-4">
                 No activity recorded yet
               </p>
             ) : (
@@ -463,12 +463,12 @@ export default function DashboardPage() {
                   else actionLabel = entry.action.split(/[._]/).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
                   return (
                     <div key={entry.id} className="flex items-start gap-2.5">
-                      <div className="flex h-6 w-6 items-center justify-center rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] flex-shrink-0 mt-0.5">
-                        <Icon className="h-3 w-3 text-[var(--ansein-primary)]" />
+                      <div className="flex h-6 w-6 items-center justify-center rounded-md bg-card border border-border flex-shrink-0 mt-0.5">
+                        <Icon className="h-3 w-3 text-primary" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs text-[var(--ansein-text)] truncate">{actionLabel}</p>
-                        <p className="text-[10px] text-[var(--ansein-text-dim)]">{formatRelative(entry.created_at)}</p>
+                        <p className="text-xs text-foreground truncate">{actionLabel}</p>
+                        <p className="text-[10px] text-muted-foreground/50">{formatRelative(entry.created_at)}</p>
                       </div>
                     </div>
                   )
@@ -478,9 +478,9 @@ export default function DashboardPage() {
           </div>
 
           {/* Quick start */}
-          <div className="ansein-card rounded-xl p-6">
-            <h3 className="text-sm font-semibold text-[var(--ansein-text)] mb-4 flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-[var(--ansein-primary)]" />
+          <div className="bg-card border border-border rounded-xl p-6">
+            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-primary" />
               Quick start
             </h3>
             <ol className="space-y-3">
@@ -493,9 +493,9 @@ export default function DashboardPage() {
                 <li key={s.step}>
                   <Link
                     href={s.href}
-                    className="flex items-center gap-3 text-sm text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] transition-colors"
+                    className="flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    <span className="flex h-6 w-6 items-center justify-center rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] ansein-mono text-xs text-[var(--ansein-primary)] flex-shrink-0">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-md bg-card border border-border ansein-mono text-xs text-primary flex-shrink-0">
                       {s.step}
                     </span>
                     {s.text}
@@ -515,8 +515,8 @@ export default function DashboardPage() {
             const sevHex = (score: number) =>
               score >= 70 ? '#f43f5e' : score >= 40 ? '#f59e0b' : '#10b981'
             return (
-              <div className="ansein-card rounded-xl p-6">
-                <h3 className="text-sm font-semibold text-[var(--ansein-text)] mb-4 flex items-center gap-2">
+              <div className="bg-card border border-border rounded-xl p-6">
+                <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
                   <Target className="h-4 w-4 text-rose-400" />
                   Top threats
                 </h3>
@@ -528,7 +528,7 @@ export default function DashboardPage() {
                       <Link
                         key={inv.id}
                         href={`/app/investigations/${inv.id}`}
-                        className="flex items-center gap-2.5 p-2 rounded-md hover:bg-[var(--ansein-surface)] transition-colors group"
+                        className="flex items-center gap-2.5 p-2 rounded-md hover:bg-card transition-colors group"
                       >
                         <div
                           className="flex h-8 w-8 items-center justify-center rounded-md text-xs font-bold ansein-mono flex-shrink-0"
@@ -537,10 +537,10 @@ export default function DashboardPage() {
                           {Math.round(inv.severity_score)}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium text-[var(--ansein-text)] truncate group-hover:text-[var(--ansein-primary)] transition-colors">
+                          <p className="text-xs font-medium text-foreground truncate group-hover:text-primary transition-colors">
                             {inv.title}
                           </p>
-                          <p className="text-[10px] text-[var(--ansein-text-dim)] uppercase tracking-wider">
+                          <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider">
                             {sev.label} · {inv.entity_count} entities
                           </p>
                         </div>
@@ -566,9 +566,9 @@ export default function DashboardPage() {
             }))
             const totalEntities = stats.data?.total_entities || 0
             return (
-              <div className="ansein-card rounded-xl p-6">
-                <h3 className="text-sm font-semibold text-[var(--ansein-text)] mb-4 flex items-center gap-2">
-                  <Network className="h-4 w-4 text-[var(--ansein-primary)]" />
+              <div className="bg-card border border-border rounded-xl p-6">
+                <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <Network className="h-4 w-4 text-primary" />
                   Entity types
                 </h3>
                 <div className="flex items-center gap-4">
@@ -584,11 +584,11 @@ export default function DashboardPage() {
                       <div key={d.label} className="flex items-center justify-between gap-2 text-xs">
                         <div className="flex items-center gap-2 min-w-0">
                           <span className="h-2 w-2 rounded-full flex-shrink-0" style={{ background: d.color }} />
-                          <span className="text-[var(--ansein-text-muted)] truncate">{d.label}</span>
+                          <span className="text-muted-foreground truncate">{d.label}</span>
                         </div>
-                        <span className="ansein-mono text-[var(--ansein-text)] flex-shrink-0">
+                        <span className="ansein-mono text-foreground flex-shrink-0">
                           {d.value}
-                          <span className="text-[var(--ansein-text-dim)] ml-1">
+                          <span className="text-muted-foreground/50 ml-1">
                             ({Math.round((d.value / (totalEntities || 1)) * 100)}%)
                           </span>
                         </span>
@@ -601,9 +601,9 @@ export default function DashboardPage() {
           })()}
 
           {/* BYOK status */}
-          <div className="ansein-card rounded-xl p-6">
-            <h3 className="text-sm font-semibold text-[var(--ansein-text)] mb-4 flex items-center gap-2">
-              <KeyRound className="h-4 w-4 text-[var(--ansein-primary)]" />
+          <div className="bg-card border border-border rounded-xl p-6">
+            <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+              <KeyRound className="h-4 w-4 text-primary" />
               BYOK status
             </h3>
             <div className="space-y-2">
@@ -616,7 +616,7 @@ export default function DashboardPage() {
                 { name: 'Shodan', ok: settings.data?.has_shodan },
               ].map((k) => (
                 <div key={k.name} className="flex items-center justify-between text-sm">
-                  <span className="text-[var(--ansein-text-muted)]">{k.name}</span>
+                  <span className="text-muted-foreground">{k.name}</span>
                   {k.ok === undefined ? (
                     <Spinner className="h-3.5 w-3.5" />
                   ) : k.ok ? (
@@ -633,7 +633,7 @@ export default function DashboardPage() {
             </div>
             <Link
               href="/app/settings"
-              className="mt-4 inline-flex items-center gap-1 text-xs text-[var(--ansein-primary)] hover:text-[var(--ansein-primary-hover)]"
+              className="mt-4 inline-flex items-center gap-1 text-xs text-primary hover:text-primary/90"
             >
               Manage keys
               <ArrowRight className="h-3 w-3" />
@@ -669,7 +669,7 @@ function StatCard({
   }
   const color = accentColorMap[accent]
   return (
-    <div className="ansein-card ansein-card-hover rounded-xl p-5 group">
+    <div className="bg-card border border-border hover:border-primary/50 transition-colors rounded-xl p-5 group">
       <div className="flex items-start justify-between mb-3">
         <div
           className="flex h-9 w-9 items-center justify-center rounded-lg transition-colors"
@@ -684,13 +684,13 @@ function StatCard({
         {loading && <Spinner className="h-3.5 w-3.5" />}
       </div>
       <div>
-        <div className="text-2xl font-semibold ansein-mono text-[var(--ansein-text)] tabular-nums">
+        <div className="text-2xl font-semibold ansein-mono text-foreground tabular-nums">
           {typeof value === 'number' ? <AnimatedNumber value={value} /> : value}
         </div>
-        <div className="text-[10px] uppercase tracking-[0.15em] text-[var(--ansein-text-dim)] mt-1.5 font-medium">
+        <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/50 mt-1.5 font-medium">
           {label}
         </div>
-        {sub && <div className="text-xs text-[var(--ansein-text-muted)] mt-1.5 truncate">{sub}</div>}
+        {sub && <div className="text-xs text-muted-foreground mt-1.5 truncate">{sub}</div>}
       </div>
     </div>
   )
@@ -742,13 +742,13 @@ function InvestigationActivityCard({
   const windowAvg = totalInWindow > 0 ? Math.round(weightedSum / totalInWindow) : 0
 
   return (
-    <div className="ansein-card rounded-xl p-6">
+    <div className="bg-card border border-border rounded-xl p-6">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-[var(--ansein-text)] flex items-center gap-2">
-          <BarChart3 className="h-4 w-4 text-[var(--ansein-primary)]" />
+        <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+          <BarChart3 className="h-4 w-4 text-primary" />
           Investigation activity
         </h3>
-        <span className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] ansein-mono">
+        <span className="text-[10px] uppercase tracking-widest text-muted-foreground/50 ansein-mono">
           30d · {scope}
         </span>
       </div>
@@ -758,7 +758,7 @@ function InvestigationActivityCard({
           <Spinner />
         </div>
       ) : totalInWindow === 0 ? (
-        <p className="text-xs text-[var(--ansein-text-dim)] text-center py-6">
+        <p className="text-xs text-muted-foreground/50 text-center py-6">
           No investigations created in the last 30 days.
         </p>
       ) : (
@@ -766,10 +766,10 @@ function InvestigationActivityCard({
           {/* Summary row */}
           <div className="flex items-end justify-between mb-3">
             <div>
-              <div className="text-2xl font-semibold ansein-mono text-[var(--ansein-text)] tabular-nums">
+              <div className="text-2xl font-semibold ansein-mono text-foreground tabular-nums">
                 <AnimatedNumber value={totalInWindow} />
               </div>
-              <div className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] mt-0.5">
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground/50 mt-0.5">
                 New in 30d
               </div>
             </div>
@@ -777,7 +777,7 @@ function InvestigationActivityCard({
               <div className="text-lg font-semibold ansein-mono tabular-nums" style={{ color: severityColor(windowAvg).label === 'HIGH' ? '#f43f5e' : severityColor(windowAvg).label === 'MEDIUM' ? '#f59e0b' : windowAvg > 0 ? '#10b981' : '#64748b' }}>
                 {windowAvg}
               </div>
-              <div className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] mt-0.5">
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground/50 mt-0.5">
                 Avg severity
               </div>
             </div>
@@ -800,7 +800,7 @@ function InvestigationActivityCard({
                 y1={padding.top + innerH}
                 x2={padding.left + innerW}
                 y2={padding.top + innerH}
-                stroke="var(--ansein-border)"
+                stroke="border"
                 strokeWidth={1}
               />
 
@@ -844,14 +844,14 @@ function InvestigationActivityCard({
           </div>
 
           {/* X-axis labels */}
-          <div className="mt-1 flex justify-between text-[9px] text-[var(--ansein-text-dim)] ansein-mono">
+          <div className="mt-1 flex justify-between text-[9px] text-muted-foreground/50 ansein-mono">
             <span>{days[0] ? new Date(days[0].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : ''}</span>
             <span>{days[Math.floor(days.length / 2)] ? new Date(days[Math.floor(days.length / 2)].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : ''}</span>
             <span>{days[days.length - 1] ? new Date(days[days.length - 1].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : ''}</span>
           </div>
 
           {/* Legend / peak callout */}
-          <div className="mt-3 pt-3 border-t border-[var(--ansein-border)] flex items-center justify-between text-[10px] text-[var(--ansein-text-dim)]">
+          <div className="mt-3 pt-3 border-t border-border flex items-center justify-between text-[10px] text-muted-foreground/50">
             <div className="flex items-center gap-3">
               <span className="flex items-center gap-1">
                 <span className="h-2 w-2 rounded-sm" style={{ background: '#14b8a6', opacity: 0.5 }} />

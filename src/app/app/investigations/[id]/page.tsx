@@ -335,7 +335,7 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
           action={
             <Link
               href="/app/investigations"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-sm"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-card border border-border text-sm"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Back to list
@@ -354,7 +354,7 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
       {/* Header */}
       <Link
         href="/app/investigations"
-        className="inline-flex items-center gap-1.5 text-sm text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] transition-colors mb-4"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         All investigations
@@ -375,10 +375,10 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
                     <span className={cn('h-1.5 w-1.5 rounded-full', statusColor(inv.status).dot, isRunning && 'animate-pulse')} />
                     {inv.status}
                   </span>
-                  <span className="ansein-mono text-[10px] uppercase tracking-[0.15em] text-[var(--ansein-text-dim)]">
+                  <span className="ansein-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground/50">
                     Case #{inv.id}
                   </span>
-                  <span className="text-[10px] text-[var(--ansein-text-dim)]">
+                  <span className="text-[10px] text-muted-foreground/50">
                     · Updated {formatRelative(inv.updated_at)}
                   </span>
                   {inv.is_starred && (
@@ -388,18 +388,18 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
                     </span>
                   )}
                 </div>
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[var(--ansein-text)]">
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
                   {inv.title}
                 </h1>
                 {inv.description && (
-                  <p className="text-sm text-[var(--ansein-text-muted)] mt-2 max-w-2xl leading-relaxed">
+                  <p className="text-sm text-muted-foreground mt-2 max-w-2xl leading-relaxed">
                     {inv.description}
                   </p>
                 )}
                 {inv.tags?.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-3">
                     {inv.tags.map((t, i) => (
-                      <span key={i} className="ansein-mono text-[10px] px-1.5 py-0.5 rounded bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text-dim)]">
+                      <span key={i} className="ansein-mono text-[10px] px-1.5 py-0.5 rounded bg-card border border-border text-muted-foreground/50">
                         #{t}
                       </span>
                     ))}
@@ -413,7 +413,7 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
                 <button
                   onClick={() => pipelineMutation.mutate()}
                   disabled={isRunning || pipelineMutation.isPending}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-[var(--ansein-primary)] text-[var(--ansein-bg)] text-sm font-medium hover:bg-[var(--ansein-primary-hover)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
                 >
                   {isRunning || pipelineMutation.isPending ? (
                     <>
@@ -429,7 +429,7 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
                 </button>
 
                 {/* Divider */}
-                <div className="h-6 w-px bg-[var(--ansein-border)] mx-0.5 hidden md:block" />
+                <div className="h-6 w-px bg-[border] mx-0.5 hidden md:block" />
 
                 {/* Star toggle */}
                 <button
@@ -439,7 +439,7 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
                     'inline-flex items-center justify-center h-[38px] w-[38px] rounded-md border transition-colors disabled:opacity-60 disabled:cursor-not-allowed',
                     inv.is_starred
                       ? 'border-amber-500/40 bg-amber-500/10 text-amber-400 hover:bg-amber-500/15'
-                      : 'border-[var(--ansein-border)] bg-[var(--ansein-surface)] text-[var(--ansein-text-muted)] hover:text-amber-400 hover:border-amber-500/30'
+                      : 'border-border bg-card text-muted-foreground hover:text-amber-400 hover:border-amber-500/30'
                   )}
                   title={inv.is_starred ? 'Remove star' : 'Star this investigation'}
                   aria-label={inv.is_starred ? 'Remove star' : 'Star this investigation'}
@@ -448,7 +448,7 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
                 </button>
 
                 {/* Divider */}
-                <div className="h-6 w-px bg-[var(--ansein-border)] mx-0.5 hidden md:block" />
+                <div className="h-6 w-px bg-[border] mx-0.5 hidden md:block" />
 
                 {/* Export group */}
                 <ExportLink
@@ -474,13 +474,13 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
                 />
 
                 {/* Divider */}
-                <div className="h-6 w-px bg-[var(--ansein-border)] mx-0.5 hidden md:block" />
+                <div className="h-6 w-px bg-[border] mx-0.5 hidden md:block" />
 
                 {/* Duplicate + Delete */}
                 <button
                   onClick={() => duplicateMutation.mutate()}
                   disabled={duplicateMutation.isPending}
-                  className="inline-flex items-center justify-center h-[38px] w-[38px] rounded-md border border-[var(--ansein-border)] bg-[var(--ansein-surface)] text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] hover:border-[var(--ansein-border-strong)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                  className="inline-flex items-center justify-center h-[38px] w-[38px] rounded-md border border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/50 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
                   title="Duplicate investigation"
                 >
                   {duplicateMutation.isPending ? (
@@ -495,7 +495,7 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
                       deleteMutation.mutate()
                     }
                   }}
-                  className="inline-flex items-center justify-center h-[38px] w-[38px] rounded-md border border-[var(--ansein-border)] bg-[var(--ansein-surface)] text-rose-400 hover:bg-rose-500/10 hover:border-rose-500/30 transition-colors"
+                  className="inline-flex items-center justify-center h-[38px] w-[38px] rounded-md border border-border bg-card text-rose-400 hover:bg-rose-500/10 hover:border-rose-500/30 transition-colors"
                   title="Delete investigation"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
@@ -509,14 +509,14 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
             <StatTile label="Sources" value={inv.source_count} icon={<FileText className="h-3.5 w-3.5" />} />
             <StatTile label="Entities" value={inv.entity_count} icon={<Network className="h-3.5 w-3.5" />} />
             <StatTile label="Relationships" value={inv.relationship_count} icon={<Activity className="h-3.5 w-3.5" />} />
-            <div className="ansein-card rounded-lg p-3">
-              <p className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] mb-1">Severity</p>
+            <div className="bg-card border border-border rounded-lg p-3">
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50 mb-1">Severity</p>
               <SeverityMeter score={inv.severity_score} size="sm" />
             </div>
           </div>
 
           {/* Tabs */}
-          <div className="border-b border-[var(--ansein-border)] mb-6">
+          <div className="border-b border-border mb-6">
             <div className="flex items-center gap-1 -mb-px overflow-x-auto ansein-no-scrollbar">
               {([
                 ['overview', 'Overview', '1'],
@@ -534,8 +534,8 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
                   className={cn(
                     'group inline-flex items-center gap-1.5 px-3.5 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap',
                     tab === t
-                      ? 'border-[var(--ansein-primary)] text-[var(--ansein-text)]'
-                      : 'border-transparent text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)]'
+                      ? 'border-primary text-foreground'
+                      : 'border-transparent text-muted-foreground hover:text-foreground'
                   )}
                 >
                   {label}
@@ -543,8 +543,8 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
                     className={cn(
                       'hidden md:inline-block ansein-mono text-[9px] px-1 py-0.5 rounded border transition-colors',
                       tab === t
-                        ? 'bg-[var(--ansein-surface-hover)] border-[var(--ansein-border-strong)] text-[var(--ansein-text-dim)]'
-                        : 'bg-transparent border-[var(--ansein-border)] text-[var(--ansein-text-dim)] group-hover:border-[var(--ansein-border-strong)]'
+                        ? 'bg-card/80 border-primary/50 text-muted-foreground/50'
+                        : 'bg-transparent border-border text-muted-foreground/50 group-hover:border-primary/50'
                     )}
                   >
                     {shortcut}
@@ -579,7 +579,7 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
       {/* Floating shortcuts button */}
       <button
         onClick={() => setShowShortcuts(true)}
-        className="fixed bottom-4 right-4 flex h-9 w-9 items-center justify-center rounded-full bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] hover:border-[var(--ansein-border-strong)] transition-colors z-40"
+        className="fixed bottom-4 right-4 flex h-9 w-9 items-center justify-center rounded-full bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors z-40"
         title="Keyboard shortcuts (?)"
       >
         <Keyboard className="h-4 w-4" />
@@ -591,18 +591,18 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
 /* ============================================ Breadcrumb */
 function Breadcrumb({ items }: { items: { label: string; href?: string }[] }) {
   return (
-    <nav className="flex items-center gap-1.5 text-xs text-[var(--ansein-text-dim)] mb-4">
+    <nav className="flex items-center gap-1.5 text-xs text-muted-foreground/50 mb-4">
       {items.map((item, i) => (
         <span key={i} className="flex items-center gap-1.5">
           {item.href ? (
             <Link
               href={item.href}
-              className="hover:text-[var(--ansein-text-muted)] transition-colors"
+              className="hover:text-muted-foreground transition-colors"
             >
               {item.label}
             </Link>
           ) : (
-            <span className="text-[var(--ansein-text-muted)]">{item.label}</span>
+            <span className="text-muted-foreground">{item.label}</span>
           )}
           {i < items.length - 1 && <ChevronRight className="h-3 w-3" />}
         </span>
@@ -633,19 +633,19 @@ function ShortcutsHelpModal({ onClose }: { onClose: () => void }) {
     >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
-        className="relative w-full max-w-md ansein-card rounded-xl p-6 border-[var(--ansein-border-strong)]"
+        className="relative w-full max-w-md bg-card border border-border rounded-xl p-6 border-primary/50"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--ansein-primary)]/15 border border-[var(--ansein-primary)]/30">
-              <Keyboard className="h-4 w-4 text-[var(--ansein-primary)]" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/15 border border-primary/30">
+              <Keyboard className="h-4 w-4 text-primary" />
             </div>
-            <h2 className="text-base font-semibold text-[var(--ansein-text)]">Keyboard shortcuts</h2>
+            <h2 className="text-base font-semibold text-foreground">Keyboard shortcuts</h2>
           </div>
           <button
             onClick={onClose}
-            className="text-[var(--ansein-text-dim)] hover:text-[var(--ansein-text)] transition-colors"
+            className="text-muted-foreground/50 hover:text-foreground transition-colors"
           >
             <XIcon className="h-4 w-4" />
           </button>
@@ -654,14 +654,14 @@ function ShortcutsHelpModal({ onClose }: { onClose: () => void }) {
           {shortcuts.map((s, i) => (
             <div
               key={i}
-              className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-[var(--ansein-surface)] transition-colors"
+              className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-card transition-colors"
             >
-              <span className="text-sm text-[var(--ansein-text-muted)]">{s.desc}</span>
+              <span className="text-sm text-muted-foreground">{s.desc}</span>
               <div className="flex items-center gap-1">
                 {s.keys.map((k, j) => (
                   <kbd
                     key={j}
-                    className="ansein-mono text-[10px] px-1.5 py-0.5 rounded border border-[var(--ansein-border)] bg-[var(--ansein-surface)] text-[var(--ansein-text)]"
+                    className="ansein-mono text-[10px] px-1.5 py-0.5 rounded border border-border bg-card text-foreground"
                   >
                     {k}
                   </kbd>
@@ -670,7 +670,7 @@ function ShortcutsHelpModal({ onClose }: { onClose: () => void }) {
             </div>
           ))}
         </div>
-        <p className="text-[10px] text-[var(--ansein-text-dim)] mt-4 text-center">
+        <p className="text-[10px] text-muted-foreground/50 mt-4 text-center">
           Shortcuts are disabled while typing in input fields.
         </p>
       </div>
@@ -747,46 +747,46 @@ function OverviewTab({ inv, onSwitchTab }: { inv: Investigation; onSwitchTab: (t
     <div className="grid lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2 space-y-6">
         {/* Pipeline timeline */}
-        <div className="ansein-card rounded-xl p-6">
-          <h3 className="text-sm font-semibold text-[var(--ansein-text)] mb-5 flex items-center gap-2">
-            <Activity className="h-4 w-4 text-[var(--ansein-primary)]" />
+        <div className="bg-card border border-border rounded-xl p-6">
+          <h3 className="text-sm font-semibold text-foreground mb-5 flex items-center gap-2">
+            <Activity className="h-4 w-4 text-primary" />
             Pipeline progress
           </h3>
           <PipelineTimeline status={inv.status} />
         </div>
 
         {/* Investigation summary */}
-        <div className="ansein-card rounded-xl p-6">
-          <h3 className="text-sm font-semibold text-[var(--ansein-text)] mb-4 flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-[var(--ansein-primary)]" />
+        <div className="bg-card border border-border rounded-xl p-6">
+          <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary" />
             Investigation summary
           </h3>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <p className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] mb-1">Status</p>
-              <p className="text-[var(--ansein-text)] capitalize">{inv.status}</p>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50 mb-1">Status</p>
+              <p className="text-foreground capitalize">{inv.status}</p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] mb-1">Created</p>
-              <p className="text-[var(--ansein-text)]">{formatDate(inv.created_at)}</p>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50 mb-1">Created</p>
+              <p className="text-foreground">{formatDate(inv.created_at)}</p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] mb-1">Last updated</p>
-              <p className="text-[var(--ansein-text)]">{formatDate(inv.updated_at)}</p>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50 mb-1">Last updated</p>
+              <p className="text-foreground">{formatDate(inv.updated_at)}</p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] mb-1">Severity</p>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50 mb-1">Severity</p>
               <SeverityMeter score={inv.severity_score} size="sm" />
             </div>
           </div>
 
           {/* Tags */}
-          <div className="mt-5 pt-4 border-t border-[var(--ansein-border)]">
+          <div className="mt-5 pt-4 border-t border-border">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)]">Tags</p>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50">Tags</p>
               <button
                 onClick={() => setShowTagInput(!showTagInput)}
-                className="text-[10px] text-[var(--ansein-primary)] hover:text-[var(--ansein-primary-hover)] flex items-center gap-1"
+                className="text-[10px] text-primary hover:text-primary/90 flex items-center gap-1"
               >
                 <Plus className="h-2.5 w-2.5" />
                 Add
@@ -800,12 +800,12 @@ function OverviewTab({ inv, onSwitchTab }: { inv: Investigation; onSwitchTab: (t
                   onChange={(e) => setNewTag(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') handleAddTag() }}
                   placeholder="new-tag"
-                  className="flex-1 px-2 py-1 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-xs focus:outline-none focus:border-[var(--ansein-primary)]"
+                  className="flex-1 px-2 py-1 rounded-md bg-card border border-border text-xs focus:outline-none focus:border-primary"
                 />
                 <button
                   onClick={handleAddTag}
                   disabled={!newTag.trim() || addTagMutation.isPending}
-                  className="px-2 py-1 rounded-md bg-[var(--ansein-primary)] text-[var(--ansein-bg)] text-xs font-medium hover:bg-[var(--ansein-primary-hover)] disabled:opacity-50"
+                  className="px-2 py-1 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 disabled:opacity-50"
                 >
                   Add
                 </button>
@@ -816,12 +816,12 @@ function OverviewTab({ inv, onSwitchTab }: { inv: Investigation; onSwitchTab: (t
                 {inv.tags.map((t, i) => (
                   <span
                     key={i}
-                    className="inline-flex items-center gap-1 ansein-mono text-[10px] px-2 py-0.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text-muted)] group hover:border-[var(--ansein-border-strong)]"
+                    className="inline-flex items-center gap-1 ansein-mono text-[10px] px-2 py-0.5 rounded-md bg-card border border-border text-muted-foreground group hover:border-primary/50"
                   >
                     #{t}
                     <button
                       onClick={() => handleRemoveTag(t)}
-                      className="opacity-0 group-hover:opacity-100 text-[var(--ansein-text-dim)] hover:text-rose-400 transition-all"
+                      className="opacity-0 group-hover:opacity-100 text-muted-foreground/50 hover:text-rose-400 transition-all"
                     >
                       <XIcon className="h-2.5 w-2.5" />
                     </button>
@@ -829,13 +829,13 @@ function OverviewTab({ inv, onSwitchTab }: { inv: Investigation; onSwitchTab: (t
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-[var(--ansein-text-dim)]">No tags yet</p>
+              <p className="text-xs text-muted-foreground/50">No tags yet</p>
             )}
           </div>
         </div>
 
-        <div className="ansein-card rounded-xl p-6">
-          <h3 className="text-sm font-semibold text-[var(--ansein-text)] mb-4">How to investigate</h3>
+        <div className="bg-card border border-border rounded-xl p-6">
+          <h3 className="text-sm font-semibold text-foreground mb-4">How to investigate</h3>
           <ol className="space-y-3">
             <Step n={1} title="Add sources" desc="Paste raw text, upload files, or reference URLs in the Sources tab." action={() => onSwitchTab('sources')} />
             <Step n={2} title="Run the pipeline" desc="Click 'Run pipeline' above. Extraction → enrichment → analysis runs in one click." />
@@ -849,9 +849,9 @@ function OverviewTab({ inv, onSwitchTab }: { inv: Investigation; onSwitchTab: (t
       <div className="space-y-6">
         {/* IOC summary card */}
         {iocEntities.length > 0 && (
-          <div className="ansein-card rounded-xl p-6">
+          <div className="bg-card border border-border rounded-xl p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-[var(--ansein-text)] flex items-center gap-2">
+              <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
                 <div className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-500/15 border border-amber-500/30">
                   <Crosshair className="h-3.5 w-3.5 text-amber-400" />
                 </div>
@@ -859,7 +859,7 @@ function OverviewTab({ inv, onSwitchTab }: { inv: Investigation; onSwitchTab: (t
               </h3>
               <button
                 onClick={copyAllIOCs}
-                className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[10px] text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] hover:border-[var(--ansein-border-strong)] transition-colors"
+                className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-card border border-border text-[10px] text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
                 title="Copy all IOC values to clipboard"
               >
                 {copiedAll ? (
@@ -884,15 +884,15 @@ function OverviewTab({ inv, onSwitchTab }: { inv: Investigation; onSwitchTab: (t
                   return (
                     <div
                       key={type}
-                      className="flex items-center justify-between p-2 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)]"
+                      className="flex items-center justify-between p-2 rounded-md bg-card border border-border"
                     >
                       <div className="flex items-center gap-1.5">
                         <span className="h-1.5 w-1.5 rounded-full" style={{ background: color }} />
-                        <span className="text-[10px] uppercase tracking-wider text-[var(--ansein-text-muted)] ansein-mono">
+                        <span className="text-[10px] uppercase tracking-wider text-muted-foreground ansein-mono">
                           {label}
                         </span>
                       </div>
-                      <span className="text-sm font-semibold ansein-mono text-[var(--ansein-text)]">
+                      <span className="text-sm font-semibold ansein-mono text-foreground">
                         {count}
                       </span>
                     </div>
@@ -901,15 +901,15 @@ function OverviewTab({ inv, onSwitchTab }: { inv: Investigation; onSwitchTab: (t
             </div>
             <button
               onClick={() => onSwitchTab('entities')}
-              className="w-full text-[10px] text-[var(--ansein-primary)] hover:text-[var(--ansein-primary-hover)] text-center transition-colors"
+              className="w-full text-[10px] text-primary hover:text-primary/90 text-center transition-colors"
             >
               View all entities →
             </button>
           </div>
         )}
 
-        <div className="ansein-card rounded-xl p-6">
-          <h3 className="text-sm font-semibold text-[var(--ansein-text)] mb-4">Quick actions</h3>
+        <div className="bg-card border border-border rounded-xl p-6">
+          <h3 className="text-sm font-semibold text-foreground mb-4">Quick actions</h3>
           <div className="space-y-2">
             <QuickAction icon={<FileText className="h-3.5 w-3.5" />} label="Add a source" onClick={() => onSwitchTab('sources')} />
             <QuickAction icon={<Network className="h-3.5 w-3.5" />} label="View graph" onClick={() => onSwitchTab('graph')} />
@@ -919,7 +919,7 @@ function OverviewTab({ inv, onSwitchTab }: { inv: Investigation; onSwitchTab: (t
               filename={`ansein-investigation-${inv.id}.json`}
               mimeType="application/json"
               variant="link"
-              className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-md text-sm text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] hover:bg-[var(--ansein-surface)] transition-colors"
+              className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-card transition-colors"
               icon={<span className="flex items-center gap-2"><FileJson className="h-3.5 w-3.5" />Export JSON</span>}
             />
             <ExportLink
@@ -927,7 +927,7 @@ function OverviewTab({ inv, onSwitchTab }: { inv: Investigation; onSwitchTab: (t
               filename={`ansein-investigation-${inv.id}-stix.json`}
               mimeType="application/json"
               variant="link"
-              className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-md text-sm text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] hover:bg-[var(--ansein-surface)] transition-colors"
+              className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-card transition-colors"
               icon={<span className="flex items-center gap-2"><FileCode className="h-3.5 w-3.5" />Export STIX 2.1</span>}
             />
           </div>
@@ -974,32 +974,32 @@ function PipelineTimeline({ status }: { status: string }) {
                 className={cn(
                   'flex h-9 w-9 items-center justify-center rounded-full border-2 transition-all',
                   isCompleted
-                    ? 'border-[var(--ansein-primary)] bg-[var(--ansein-primary)]/15'
+                    ? 'border-primary bg-primary/15'
                     : isCurrent
-                    ? 'border-[var(--ansein-primary)] bg-[var(--ansein-primary)]/20 ansein-glow'
+                    ? 'border-primary bg-primary/20 '
                     : isFailed && i === currentIndex
                     ? 'border-rose-500 bg-rose-500/15'
-                    : 'border-[var(--ansein-border)] bg-[var(--ansein-surface)]'
+                    : 'border-border bg-card'
                 )}
               >
                 {isCurrent && status !== 'completed' ? (
                   <Loader2 className="h-4 w-4 animate-spin" style={{ color: step.color }} />
                 ) : isCompleted ? (
-                  <CheckCircle2 className="h-4 w-4 text-[var(--ansein-primary)]" />
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
                 ) : isFailed && i === currentIndex ? (
                   <AlertTriangle className="h-4 w-4 text-rose-400" />
                 ) : (
-                  <StepIcon className="h-4 w-4 text-[var(--ansein-text-dim)]" />
+                  <StepIcon className="h-4 w-4 text-muted-foreground/50" />
                 )}
               </div>
               <span
                 className={cn(
                   'text-[10px] ansein-mono uppercase tracking-wider whitespace-nowrap',
                   isCompleted
-                    ? 'text-[var(--ansein-primary)]'
+                    ? 'text-primary'
                     : isCurrent
-                    ? 'text-[var(--ansein-text)] font-semibold'
-                    : 'text-[var(--ansein-text-dim)]'
+                    ? 'text-foreground font-semibold'
+                    : 'text-muted-foreground/50'
                 )}
               >
                 {step.label}
@@ -1011,10 +1011,10 @@ function PipelineTimeline({ status }: { status: string }) {
                   className={cn(
                     'h-full rounded-full transition-all',
                     isCompleted
-                      ? 'bg-[var(--ansein-primary)]'
+                      ? 'bg-primary'
                       : isCurrent
-                      ? 'bg-gradient-to-r from-[var(--ansein-primary)] to-[var(--ansein-border)]'
-                      : 'bg-[var(--ansein-border)]'
+                      ? 'bg-gradient-to-r from-[primary] to-[border]'
+                      : 'bg-[border]'
                   )}
                 />
               </div>
@@ -1029,14 +1029,14 @@ function PipelineTimeline({ status }: { status: string }) {
 function Step({ n, title, desc, action }: { n: number; title: string; desc: string; action?: () => void }) {
   return (
     <li className="flex gap-3">
-      <span className="flex h-6 w-6 items-center justify-center rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] ansein-mono text-xs text-[var(--ansein-primary)] flex-shrink-0">
+      <span className="flex h-6 w-6 items-center justify-center rounded-md bg-card border border-border ansein-mono text-xs text-primary flex-shrink-0">
         {n}
       </span>
       <div className="flex-1">
-        <p className="text-sm font-medium text-[var(--ansein-text)]">{title}</p>
-        <p className="text-xs text-[var(--ansein-text-muted)] mt-0.5">{desc}</p>
+        <p className="text-sm font-medium text-foreground">{title}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">{desc}</p>
         {action && (
-          <button onClick={action} className="mt-1 text-xs text-[var(--ansein-primary)] hover:text-[var(--ansein-primary-hover)]">
+          <button onClick={action} className="mt-1 text-xs text-primary hover:text-primary/90">
             Go →
           </button>
         )}
@@ -1049,25 +1049,25 @@ function QuickAction({ icon, label, onClick }: { icon: React.ReactNode; label: s
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-md text-sm text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] hover:bg-[var(--ansein-surface)] transition-colors"
+      className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-card transition-colors"
     >
       <span className="flex items-center gap-2">
         {icon}
         {label}
       </span>
-      <ChevronRight className="h-3.5 w-3.5 text-[var(--ansein-text-dim)]" />
+      <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50" />
     </button>
   )
 }
 
 function StatTile({ label, value, icon }: { label: string; value: number | string; icon: React.ReactNode }) {
   return (
-    <div className="ansein-card rounded-lg p-3.5">
-      <div className="flex items-center gap-1.5 text-[var(--ansein-text-dim)] mb-1.5">
+    <div className="bg-card border border-border rounded-lg p-3.5">
+      <div className="flex items-center gap-1.5 text-muted-foreground/50 mb-1.5">
         {icon}
         <span className="text-[10px] uppercase tracking-[0.15em] font-medium">{label}</span>
       </div>
-      <p className="text-xl font-semibold ansein-mono text-[var(--ansein-text)] tabular-nums">{value}</p>
+      <p className="text-xl font-semibold ansein-mono text-foreground tabular-nums">{value}</p>
     </div>
   )
 }
@@ -1169,17 +1169,17 @@ function SourcesTab({ invId }: { invId: number }) {
     <>
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Add source */}
-        <div className="ansein-card rounded-xl p-6">
-          <h3 className="text-sm font-semibold text-[var(--ansein-text)] mb-4 flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-[var(--ansein-primary)]/15 border border-[var(--ansein-primary)]/30">
-              <Plus className="h-3.5 w-3.5 text-[var(--ansein-primary)]" />
+        <div className="bg-card border border-border rounded-xl p-6">
+          <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/15 border border-primary/30">
+              <Plus className="h-3.5 w-3.5 text-primary" />
             </div>
             Add source
           </h3>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-[var(--ansein-text-muted)] uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5">
                 Title
               </label>
               <input
@@ -1187,11 +1187,11 @@ function SourcesTab({ invId }: { invId: number }) {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Phishing email body"
-                className="w-full px-3 py-2 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-sm focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)]"
+                className="w-full px-3 py-2 rounded-md bg-card border border-border text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-[var(--ansein-text-muted)] uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5">
                 Content
               </label>
               <textarea
@@ -1199,9 +1199,9 @@ function SourcesTab({ invId }: { invId: number }) {
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Paste raw threat intelligence text here — IOCs, malware descriptions, threat reports, etc."
-                className="w-full px-3 py-2 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-sm ansein-mono focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)] resize-y"
+                className="w-full px-3 py-2 rounded-md bg-card border border-border text-sm ansein-mono focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-y"
               />
-              <p className="text-[10px] text-[var(--ansein-text-dim)] mt-1">
+              <p className="text-[10px] text-muted-foreground/50 mt-1">
                 {content.length} characters
               </p>
             </div>
@@ -1210,7 +1210,7 @@ function SourcesTab({ invId }: { invId: number }) {
               <button
                 onClick={handleAdd}
                 disabled={!content.trim() || adding}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md bg-[var(--ansein-primary)] text-[var(--ansein-bg)] text-sm font-medium hover:bg-[var(--ansein-primary-hover)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
               >
                 {adding ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
                 Add text source
@@ -1218,7 +1218,7 @@ function SourcesTab({ invId }: { invId: number }) {
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploadMutation.isPending}
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md border border-[var(--ansein-border)] bg-[var(--ansein-surface)] text-sm text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] hover:border-[var(--ansein-border-strong)] disabled:opacity-60 transition-colors"
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md border border-border bg-card text-sm text-muted-foreground hover:text-foreground hover:border-primary/50 disabled:opacity-60 transition-colors"
               >
                 {uploadMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
                 Upload file (5MB)
@@ -1235,11 +1235,11 @@ function SourcesTab({ invId }: { invId: number }) {
         </div>
 
         {/* Sources list */}
-        <div className="ansein-card rounded-xl p-6">
-          <h3 className="text-sm font-semibold text-[var(--ansein-text)] mb-4 flex items-center justify-between">
+        <div className="bg-card border border-border rounded-xl p-6">
+          <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center justify-between">
             <span className="flex items-center gap-2">
-              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-[var(--ansein-primary)]/15 border border-[var(--ansein-primary)]/30">
-                <FileText className="h-3.5 w-3.5 text-[var(--ansein-primary)]" />
+              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/15 border border-primary/30">
+                <FileText className="h-3.5 w-3.5 text-primary" />
               </div>
               Sources
               <Badge color="slate">{sources.length}</Badge>
@@ -1252,7 +1252,7 @@ function SourcesTab({ invId }: { invId: number }) {
             </div>
           ) : sources.length === 0 ? (
             <EmptyState
-              icon={<FileText className="h-5 w-5 text-[var(--ansein-primary)]" />}
+              icon={<FileText className="h-5 w-5 text-primary" />}
               title="No sources yet"
               description="Add a text source or upload a file to populate this investigation."
               variant="branded"
@@ -1266,24 +1266,24 @@ function SourcesTab({ invId }: { invId: number }) {
                   <div
                     key={s.id}
                     onClick={() => setPreviewSource(s)}
-                    className="p-3 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] hover:border-[var(--ansein-border-strong)] transition-colors cursor-pointer group"
+                    className="p-3 rounded-md bg-card border border-border hover:border-primary/50 transition-colors cursor-pointer group"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <div className="flex h-6 w-6 items-center justify-center rounded bg-[var(--ansein-bg)] border border-[var(--ansein-border)] group-hover:border-[var(--ansein-border-strong)] transition-colors">
-                            <FileIcon className="h-3 w-3 text-[var(--ansein-primary)]" />
+                          <div className="flex h-6 w-6 items-center justify-center rounded bg-background border border-border group-hover:border-primary/50 transition-colors">
+                            <FileIcon className="h-3 w-3 text-primary" />
                           </div>
                           <Badge color="primary">{s.source_type}</Badge>
-                          <p className="text-sm font-medium text-[var(--ansein-text)] truncate group-hover:text-[var(--ansein-primary)] transition-colors">
+                          <p className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">
                             {s.title}
                           </p>
                         </div>
-                        <p className="text-[10px] text-[var(--ansein-text-dim)] mt-1.5 ansein-mono pl-8">
+                        <p className="text-[10px] text-muted-foreground/50 mt-1.5 ansein-mono pl-8">
                           {(s.size_bytes / 1024).toFixed(1)} KB · {s.mime_type} · {formatRelative(s.created_at)}
                         </p>
                         {s.content && (
-                          <p className="text-xs text-[var(--ansein-text-muted)] mt-2 line-clamp-2 ansein-mono pl-8">
+                          <p className="text-xs text-muted-foreground mt-2 line-clamp-2 ansein-mono pl-8">
                             {s.content.slice(0, 200)}
                             {s.content.length > 200 ? '…' : ''}
                           </p>
@@ -1295,7 +1295,7 @@ function SourcesTab({ invId }: { invId: number }) {
                             ev.stopPropagation()
                             setPreviewSource(s)
                           }}
-                          className="text-[var(--ansein-text-dim)] hover:text-[var(--ansein-primary)] transition-colors p-1"
+                          className="text-muted-foreground/50 hover:text-primary transition-colors p-1"
                           title="View full source"
                         >
                           <Eye className="h-3.5 w-3.5" />
@@ -1305,7 +1305,7 @@ function SourcesTab({ invId }: { invId: number }) {
                             ev.stopPropagation()
                             if (confirm('Delete this source?')) deleteMutation.mutate(s.id)
                           }}
-                          className="text-[var(--ansein-text-dim)] hover:text-rose-400 transition-colors p-1"
+                          className="text-muted-foreground/50 hover:text-rose-400 transition-colors p-1"
                           title="Delete source"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -1355,18 +1355,18 @@ function SourcePreviewModal({ source, onClose }: { source: Source; onClose: () =
     >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
-        className="relative w-full max-w-3xl max-h-[85vh] ansein-card rounded-xl flex flex-col overflow-hidden"
+        className="relative w-full max-w-3xl max-h-[85vh] bg-card border border-border rounded-xl flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-5 py-4 border-b border-[var(--ansein-border)] flex items-center justify-between gap-3">
+        <div className="px-5 py-4 border-b border-border flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-[var(--ansein-primary)]/15 border border-[var(--ansein-primary)]/30 flex-shrink-0">
-              <FileText className="h-4 w-4 text-[var(--ansein-primary)]" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/15 border border-primary/30 flex-shrink-0">
+              <FileText className="h-4 w-4 text-primary" />
             </div>
             <div className="min-w-0">
-              <h2 className="text-sm font-semibold text-[var(--ansein-text)] truncate">{source.title}</h2>
-              <p className="text-[10px] text-[var(--ansein-text-dim)] ansein-mono">
+              <h2 className="text-sm font-semibold text-foreground truncate">{source.title}</h2>
+              <p className="text-[10px] text-muted-foreground/50 ansein-mono">
                 {source.source_type} · {(source.size_bytes / 1024).toFixed(1)} KB · {source.mime_type} · {formatDate(source.created_at)}
               </p>
             </div>
@@ -1375,7 +1375,7 @@ function SourcePreviewModal({ source, onClose }: { source: Source; onClose: () =
             {source.content && (
               <button
                 onClick={copyContent}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-[var(--ansein-border)] bg-[var(--ansein-surface)] text-xs text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] hover:border-[var(--ansein-border-strong)] transition-colors"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-border bg-card text-xs text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
               >
                 {copied ? (
                   <>
@@ -1392,7 +1392,7 @@ function SourcePreviewModal({ source, onClose }: { source: Source; onClose: () =
             )}
             <button
               onClick={onClose}
-              className="text-[var(--ansein-text-dim)] hover:text-[var(--ansein-text)] transition-colors p-1.5"
+              className="text-muted-foreground/50 hover:text-foreground transition-colors p-1.5"
             >
               <XIcon className="h-4 w-4" />
             </button>
@@ -1402,14 +1402,14 @@ function SourcePreviewModal({ source, onClose }: { source: Source; onClose: () =
         {/* Content */}
         <div className="flex-1 overflow-auto p-5">
           {source.content ? (
-            <pre className="text-xs ansein-mono text-[var(--ansein-text-muted)] whitespace-pre-wrap break-words leading-relaxed">
+            <pre className="text-xs ansein-mono text-muted-foreground whitespace-pre-wrap break-words leading-relaxed">
               {source.content}
             </pre>
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <FileText className="h-8 w-8 text-[var(--ansein-text-dim)] mb-3" />
-              <p className="text-sm text-[var(--ansein-text-muted)]">No previewable content</p>
-              <p className="text-xs text-[var(--ansein-text-dim)] mt-1">
+              <FileText className="h-8 w-8 text-muted-foreground/50 mb-3" />
+              <p className="text-sm text-muted-foreground">No previewable content</p>
+              <p className="text-xs text-muted-foreground/50 mt-1">
                 This source may be a binary file or empty.
               </p>
             </div>
@@ -1417,12 +1417,12 @@ function SourcePreviewModal({ source, onClose }: { source: Source; onClose: () =
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-3 border-t border-[var(--ansein-border)] flex items-center justify-between">
-          <p className="text-[10px] text-[var(--ansein-text-dim)] ansein-mono">
+        <div className="px-5 py-3 border-t border-border flex items-center justify-between">
+          <p className="text-[10px] text-muted-foreground/50 ansein-mono">
             Content hash: {source.content_hash?.slice(0, 16) || '—'}…
           </p>
-          <p className="text-[10px] text-[var(--ansein-text-dim)]">
-            Press <kbd className="ansein-mono text-[9px] px-1 py-0.5 rounded border border-[var(--ansein-border)] bg-[var(--ansein-surface)]">Esc</kbd> to close
+          <p className="text-[10px] text-muted-foreground/50">
+            Press <kbd className="ansein-mono text-[9px] px-1 py-0.5 rounded border border-border bg-card">Esc</kbd> to close
           </p>
         </div>
       </div>
@@ -1455,9 +1455,9 @@ function GraphTab({ invId }: { invId: number }) {
 
   if (!data || data.nodes.length === 0) {
     return (
-      <div className="ansein-card rounded-xl">
+      <div className="bg-card border border-border rounded-xl">
         <EmptyState
-          icon={<Network className="h-6 w-6 text-[var(--ansein-text-dim)]" />}
+          icon={<Network className="h-6 w-6 text-muted-foreground/50" />}
           title="No graph data"
           description="Run the extraction pipeline to populate the knowledge graph. The graph visualises entities and their relationships."
           className="py-16"
@@ -1517,9 +1517,9 @@ function EntitiesTab({ invId }: { invId: number }) {
 
   if (entities.length === 0) {
     return (
-      <div className="ansein-card rounded-xl">
+      <div className="bg-card border border-border rounded-xl">
         <EmptyState
-          icon={<Network className="h-6 w-6 text-[var(--ansein-text-dim)]" />}
+          icon={<Network className="h-6 w-6 text-muted-foreground/50" />}
           title="No entities yet"
           description="Run the extraction pipeline to extract entities (IOCs, actors, malware, etc.) from your sources."
           className="py-16"
@@ -1585,8 +1585,8 @@ function EntitiesTab({ invId }: { invId: number }) {
                 key={type}
                 onClick={() => setActiveType(activeType === type ? null : type)}
                 className={cn(
-                  'ansein-card rounded-lg p-3 text-left transition-all relative overflow-hidden',
-                  activeType === type ? 'ring-1 ring-[var(--ansein-primary)]' : 'ansein-card-hover'
+                  'bg-card border border-border rounded-lg p-3 text-left transition-all relative overflow-hidden',
+                  activeType === type ? 'ring-1 ring-[primary]' : 'hover:border-primary/50 transition-colors'
                 )}
               >
                 <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: color }} />
@@ -1597,15 +1597,15 @@ function EntitiesTab({ invId }: { invId: number }) {
                   >
                     <Icon className="h-3 w-3" />
                   </div>
-                  <span className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] ansein-mono truncate">
+                  <span className="text-[10px] uppercase tracking-widest text-muted-foreground/50 ansein-mono truncate">
                     {ENTITY_TYPE_LABELS[type] || type}
                   </span>
                 </div>
                 <div className="flex items-end justify-between">
-                  <span className="text-xl font-bold ansein-mono text-[var(--ansein-text)]">
+                  <span className="text-xl font-bold ansein-mono text-foreground">
                     {items.length}
                   </span>
-                  <span className="text-[10px] text-[var(--ansein-text-dim)]">{pct}%</span>
+                  <span className="text-[10px] text-muted-foreground/50">{pct}%</span>
                 </div>
               </button>
             )
@@ -1615,16 +1615,16 @@ function EntitiesTab({ invId }: { invId: number }) {
       {/* Search + filter row */}
       <div className="flex flex-col md:flex-row gap-3 md:items-center">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--ansein-text-dim)]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Filter entities by value or type…"
-            className="w-full pl-9 pr-3 py-2 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-sm focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)]"
+            className="w-full pl-9 pr-3 py-2 rounded-md bg-card border border-border text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           />
         </div>
-        <div className="flex items-center gap-2 text-xs text-[var(--ansein-text-muted)]">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Badge color="primary">{filtered.length}/{entities.length}</Badge>
           <Badge color="slate">{rels.length} rels</Badge>
           {maliciousCount > 0 && (
@@ -1638,7 +1638,7 @@ function EntitiesTab({ invId }: { invId: number }) {
               ].join('\n')
               navigator.clipboard.writeText(csv).then(() => toast.success('Copied CSV to clipboard'))
             }}
-            className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] hover:border-[var(--ansein-border-strong)] transition-colors"
+            className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
             title="Copy filtered entities as CSV"
           >
             <ClipboardList className="h-3 w-3" />
@@ -1655,7 +1655,7 @@ function EntitiesTab({ invId }: { invId: number }) {
               })), null, 2)
               navigator.clipboard.writeText(json).then(() => toast.success('Copied JSON to clipboard'))
             }}
-            className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] hover:border-[var(--ansein-border-strong)] transition-colors"
+            className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
             title="Copy filtered entities as JSON"
           >
             <ArrowDownToLine className="h-3 w-3" />
@@ -1665,7 +1665,7 @@ function EntitiesTab({ invId }: { invId: number }) {
       </div>
 
       {/* Advanced filters: malicious toggle + confidence slider */}
-      <div className="flex flex-col sm:flex-row gap-4 sm:items-center ansein-card rounded-lg p-3">
+      <div className="flex flex-col sm:flex-row gap-4 sm:items-center bg-card border border-border rounded-lg p-3">
         <button
           onClick={() => setMaliciousOnly((v) => !v)}
           disabled={maliciousCount === 0}
@@ -1673,7 +1673,7 @@ function EntitiesTab({ invId }: { invId: number }) {
             'inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors',
             maliciousOnly
               ? 'bg-rose-500/15 text-rose-400 border-rose-500/40'
-              : 'bg-[var(--ansein-surface)] text-[var(--ansein-text-muted)] border-[var(--ansein-border)] hover:text-rose-400 hover:border-rose-500/30',
+              : 'bg-card text-muted-foreground border-border hover:text-rose-400 hover:border-rose-500/30',
             maliciousCount === 0 && 'opacity-40 cursor-not-allowed'
           )}
           title={maliciousCount === 0 ? 'No malicious entities detected' : 'Toggle malicious-only filter'}
@@ -1684,9 +1684,9 @@ function EntitiesTab({ invId }: { invId: number }) {
             <span className="ansein-mono text-[10px] px-1 rounded bg-rose-500/20">{maliciousCount}</span>
           )}
         </button>
-        <div className="h-5 w-px bg-[var(--ansein-border)] hidden sm:block" />
+        <div className="h-5 w-px bg-[border] hidden sm:block" />
         <div className="flex items-center gap-2.5 flex-1 min-w-0">
-          <span className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] ansein-mono whitespace-nowrap">
+          <span className="text-[10px] uppercase tracking-widest text-muted-foreground/50 ansein-mono whitespace-nowrap">
             Min confidence
           </span>
           <input
@@ -1696,19 +1696,19 @@ function EntitiesTab({ invId }: { invId: number }) {
             step={10}
             value={minConfidence}
             onChange={(e) => setMinConfidence(Number(e.target.value))}
-            className="flex-1 h-1 accent-[var(--ansein-primary)] cursor-pointer"
+            className="flex-1 h-1 accent-[primary] cursor-pointer"
             style={{
-              background: `linear-gradient(to right, var(--ansein-primary) ${minConfidence}%, var(--ansein-border) ${minConfidence}%)`,
+              background: `linear-gradient(to right, primary ${minConfidence}%, border ${minConfidence}%)`,
               borderRadius: '9999px',
             }}
           />
-          <span className="ansein-mono text-xs text-[var(--ansein-text)] w-10 text-right tabular-nums">
+          <span className="ansein-mono text-xs text-foreground w-10 text-right tabular-nums">
             {minConfidence}%
           </span>
           {minConfidence > 0 && (
             <button
               onClick={() => setMinConfidence(0)}
-              className="text-[10px] text-[var(--ansein-text-dim)] hover:text-[var(--ansein-text)] transition-colors"
+              className="text-[10px] text-muted-foreground/50 hover:text-foreground transition-colors"
               title="Reset confidence filter"
             >
               Reset
@@ -1725,8 +1725,8 @@ function EntitiesTab({ invId }: { invId: number }) {
             className={cn(
               'px-2 py-0.5 rounded text-[10px] ansein-mono border transition-colors',
               activeType === null
-                ? 'bg-[var(--ansein-primary)] text-[var(--ansein-bg)] border-[var(--ansein-primary)]'
-                : 'bg-[var(--ansein-surface)] text-[var(--ansein-text-muted)] border-[var(--ansein-border)] hover:text-[var(--ansein-text)]'
+                ? 'bg-primary text-primary-foreground border-primary'
+                : 'bg-card text-muted-foreground border-border hover:text-foreground'
             )}
           >
             All · {entities.length}
@@ -1754,14 +1754,14 @@ function EntitiesTab({ invId }: { invId: number }) {
         </div>
 
         {/* View toggle */}
-        <div className="flex items-center gap-0.5 p-0.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] flex-shrink-0">
+        <div className="flex items-center gap-0.5 p-0.5 rounded-md bg-card border border-border flex-shrink-0">
           <button
             onClick={() => setViewMode('grid')}
             className={cn(
               'px-2 py-1 rounded text-[10px] font-medium transition-colors flex items-center gap-1',
               viewMode === 'grid'
-                ? 'bg-[var(--ansein-primary)]/15 text-[var(--ansein-primary)]'
-                : 'text-[var(--ansein-text-dim)] hover:text-[var(--ansein-text)]'
+                ? 'bg-primary/15 text-primary'
+                : 'text-muted-foreground/50 hover:text-foreground'
             )}
             title="Grid view"
           >
@@ -1773,8 +1773,8 @@ function EntitiesTab({ invId }: { invId: number }) {
             className={cn(
               'px-2 py-1 rounded text-[10px] font-medium transition-colors flex items-center gap-1',
               viewMode === 'table'
-                ? 'bg-[var(--ansein-primary)]/15 text-[var(--ansein-primary)]'
-                : 'text-[var(--ansein-text-dim)] hover:text-[var(--ansein-text)]'
+                ? 'bg-primary/15 text-primary'
+                : 'text-muted-foreground/50 hover:text-foreground'
             )}
             title="Table view"
           >
@@ -1786,7 +1786,7 @@ function EntitiesTab({ invId }: { invId: number }) {
 
       {/* Entity grid or table */}
       {filtered.length === 0 ? (
-        <div className="ansein-card rounded-xl py-10 text-center text-sm text-[var(--ansein-text-muted)]">
+        <div className="bg-card border border-border rounded-xl py-10 text-center text-sm text-muted-foreground">
           No entities match your filter.
         </div>
       ) : viewMode === 'table' ? (
@@ -1813,7 +1813,7 @@ function EntitiesTab({ invId }: { invId: number }) {
               <div
                 key={e.id}
                 onClick={() => setSelectedEntityId(e.id)}
-                className="ansein-card ansein-card-hover rounded-lg p-4 cursor-pointer relative overflow-hidden"
+                className="bg-card border border-border hover:border-primary/50 transition-colors rounded-lg p-4 cursor-pointer relative overflow-hidden"
               >
                 {/* Type accent line at top */}
                 <div
@@ -1831,10 +1831,10 @@ function EntitiesTab({ invId }: { invId: number }) {
                     <Icon className="h-4 w-4" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] ansein-mono">
+                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50 ansein-mono">
                       {ENTITY_TYPE_LABELS[e.entity_type] || e.entity_type}
                     </p>
-                    <p className="text-sm font-medium text-[var(--ansein-text)] truncate ansein-mono" title={e.value}>
+                    <p className="text-sm font-medium text-foreground truncate ansein-mono" title={e.value}>
                       {e.value}
                     </p>
                   </div>
@@ -1843,7 +1843,7 @@ function EntitiesTab({ invId }: { invId: number }) {
                       ev.stopPropagation()
                       copyEntityValue(e)
                     }}
-                    className="p-1 text-[var(--ansein-text-dim)] hover:text-[var(--ansein-text)] transition-colors"
+                    className="p-1 text-muted-foreground/50 hover:text-foreground transition-colors"
                     title="Copy value"
                   >
                     {copiedId === e.id ? (
@@ -1853,12 +1853,12 @@ function EntitiesTab({ invId }: { invId: number }) {
                     )}
                   </button>
                 </div>
-                <div className="mt-3 flex items-center justify-between text-[10px] text-[var(--ansein-text-dim)]">
+                <div className="mt-3 flex items-center justify-between text-[10px] text-muted-foreground/50">
                   <span className="flex items-center gap-1">
-                    via <span className="ansein-mono text-[var(--ansein-text-muted)]">{e.source_method}</span>
+                    via <span className="ansein-mono text-muted-foreground">{e.source_method}</span>
                   </span>
                   <div className="flex items-center gap-1.5">
-                    <div className="h-1 w-12 rounded-full bg-[var(--ansein-border)] overflow-hidden">
+                    <div className="h-1 w-12 rounded-full bg-[border] overflow-hidden">
                       <div
                         className="h-full rounded-full"
                         style={{
@@ -1900,20 +1900,20 @@ function EntitiesTab({ invId }: { invId: number }) {
 
       {/* Relationships table */}
       {rels.length > 0 && (
-        <div className="ansein-card rounded-xl p-5">
-          <h3 className="text-sm font-semibold text-[var(--ansein-text)] mb-3 flex items-center gap-2">
-            <Activity className="h-4 w-4 text-[var(--ansein-primary)]" />
+        <div className="bg-card border border-border rounded-xl p-5">
+          <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+            <Activity className="h-4 w-4 text-primary" />
             Relationships
             <Badge color="slate">{rels.length}</Badge>
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[var(--ansein-border)]">
-                  <th className="text-left text-[10px] uppercase tracking-wider text-[var(--ansein-text-dim)] py-2 pr-4">Source</th>
-                  <th className="text-left text-[10px] uppercase tracking-wider text-[var(--ansein-text-dim)] py-2 pr-4">Relation</th>
-                  <th className="text-left text-[10px] uppercase tracking-wider text-[var(--ansein-text-dim)] py-2 pr-4">Target</th>
-                  <th className="text-right text-[10px] uppercase tracking-wider text-[var(--ansein-text-dim)] py-2">Weight</th>
+                <tr className="border-b border-border">
+                  <th className="text-left text-[10px] uppercase tracking-wider text-muted-foreground/50 py-2 pr-4">Source</th>
+                  <th className="text-left text-[10px] uppercase tracking-wider text-muted-foreground/50 py-2 pr-4">Relation</th>
+                  <th className="text-left text-[10px] uppercase tracking-wider text-muted-foreground/50 py-2 pr-4">Target</th>
+                  <th className="text-right text-[10px] uppercase tracking-wider text-muted-foreground/50 py-2">Weight</th>
                 </tr>
               </thead>
               <tbody>
@@ -1923,9 +1923,9 @@ function EntitiesTab({ invId }: { invId: number }) {
                   return (
                     <tr
                       key={r.id}
-                      className="border-b border-[var(--ansein-border)] last:border-0 hover:bg-[var(--ansein-surface)]/40 transition-colors"
+                      className="border-b border-border last:border-0 hover:bg-card/40 transition-colors"
                     >
-                      <td className="py-2 pr-4 ansein-mono text-xs text-[var(--ansein-text)]">
+                      <td className="py-2 pr-4 ansein-mono text-xs text-foreground">
                         <button
                           onClick={() => src && setSelectedEntityId(src.id)}
                           className="hover:underline truncate text-left"
@@ -1935,11 +1935,11 @@ function EntitiesTab({ invId }: { invId: number }) {
                         </button>
                       </td>
                       <td className="py-2 pr-4">
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text-muted)] ansein-mono">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-card border border-border text-muted-foreground ansein-mono">
                           {r.relation_type}
                         </span>
                       </td>
-                      <td className="py-2 pr-4 ansein-mono text-xs text-[var(--ansein-text)]">
+                      <td className="py-2 pr-4 ansein-mono text-xs text-foreground">
                         <button
                           onClick={() => tgt && setSelectedEntityId(tgt.id)}
                           className="hover:underline truncate text-left"
@@ -1948,7 +1948,7 @@ function EntitiesTab({ invId }: { invId: number }) {
                           {tgt?.value || `#${r.target_id}`}
                         </button>
                       </td>
-                      <td className="py-2 text-right ansein-mono text-xs text-[var(--ansein-text-muted)]">
+                      <td className="py-2 text-right ansein-mono text-xs text-muted-foreground">
                         {r.weight.toFixed(2)}
                       </td>
                     </tr>
@@ -1957,7 +1957,7 @@ function EntitiesTab({ invId }: { invId: number }) {
               </tbody>
             </table>
             {rels.length > 50 && (
-              <p className="text-xs text-[var(--ansein-text-dim)] mt-2 text-center">
+              <p className="text-xs text-muted-foreground/50 mt-2 text-center">
                 Showing first 50 of {rels.length} relationships
               </p>
             )}
@@ -1993,9 +1993,9 @@ function AnalysisTab({ invId }: { invId: number }) {
 
   if (error || !data) {
     return (
-      <div className="ansein-card rounded-xl">
+      <div className="bg-card border border-border rounded-xl">
         <EmptyState
-          icon={<Lightbulb className="h-6 w-6 text-[var(--ansein-text-dim)]" />}
+          icon={<Lightbulb className="h-6 w-6 text-muted-foreground/50" />}
           title="No analysis yet"
           description="Run the extraction pipeline to generate a cognitive threat analysis. The analysis includes a narrative, severity score, Admiralty code, and recommendations."
           className="py-16"
@@ -2023,9 +2023,9 @@ function AnalysisTab({ invId }: { invId: number }) {
     <div className="space-y-6">
       {/* Severity + Admiralty + Model row */}
       <div className="grid md:grid-cols-3 gap-4">
-        <div className="ansein-card rounded-xl p-5 relative overflow-hidden">
+        <div className="bg-card border border-border rounded-xl p-5 relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1" style={{ background: severityColor }} />
-          <p className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] mb-3">Severity score</p>
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50 mb-3">Severity score</p>
           <div className="flex items-end gap-3">
             <span className="text-4xl font-bold ansein-mono" style={{ color: severityColor }}>
               {data.severity_score.toFixed(0)}
@@ -2037,39 +2037,39 @@ function AnalysisTab({ invId }: { invId: number }) {
               {severityTier}
             </span>
           </div>
-          <div className="mt-3 h-2 rounded-full bg-[var(--ansein-border)] overflow-hidden">
+          <div className="mt-3 h-2 rounded-full bg-[border] overflow-hidden">
             <div
               className="h-full rounded-full transition-all duration-700"
               style={{ width: `${data.severity_score}%`, background: `linear-gradient(90deg, ${severityColor}cc, ${severityColor})` }}
             />
           </div>
         </div>
-        <div className="ansein-card rounded-xl p-5 relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-[var(--ansein-primary)]" />
-          <p className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] mb-3">Admiralty code</p>
+        <div className="bg-card border border-border rounded-xl p-5 relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-primary" />
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50 mb-3">Admiralty code</p>
           <p className={cn('text-3xl font-bold ansein-mono', adm.color)}>{data.admiralty_code}</p>
           <p className={cn('text-xs mt-2 leading-relaxed', adm.color)}>{adm.label}</p>
         </div>
-        <div className="ansein-card rounded-xl p-5 relative overflow-hidden">
+        <div className="bg-card border border-border rounded-xl p-5 relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1 bg-amber-500" />
-          <p className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] mb-3">Analysis model</p>
-          <p className="text-sm font-medium text-[var(--ansein-text)] ansein-mono flex items-center gap-2">
-            <Cpu className="h-4 w-4 text-[var(--ansein-primary)]" />
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50 mb-3">Analysis model</p>
+          <p className="text-sm font-medium text-foreground ansein-mono flex items-center gap-2">
+            <Cpu className="h-4 w-4 text-primary" />
             {data.model_used || 'heuristic'}
           </p>
           <div className="mt-3 flex items-center gap-2">
             <div className="flex-1">
-              <p className="text-[10px] text-[var(--ansein-text-dim)] mb-1">Confidence</p>
-              <div className="h-1.5 rounded-full bg-[var(--ansein-border)] overflow-hidden">
+              <p className="text-[10px] text-muted-foreground/50 mb-1">Confidence</p>
+              <div className="h-1.5 rounded-full bg-[border] overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-[var(--ansein-primary)]"
+                  className="h-full rounded-full bg-primary"
                   style={{ width: `${(data.confidence * 100).toFixed(0)}%` }}
                 />
               </div>
             </div>
-            <span className="text-xs ansein-mono text-[var(--ansein-text-muted)]">{(data.confidence * 100).toFixed(0)}%</span>
+            <span className="text-xs ansein-mono text-muted-foreground">{(data.confidence * 100).toFixed(0)}%</span>
           </div>
-          <p className="text-[10px] text-[var(--ansein-text-dim)] mt-2">
+          <p className="text-[10px] text-muted-foreground/50 mt-2">
             {data.tokens_used.toLocaleString()} tokens consumed
           </p>
         </div>
@@ -2077,10 +2077,10 @@ function AnalysisTab({ invId }: { invId: number }) {
 
       {/* Narrative */}
       {data.narrative && (
-        <div className="ansein-card rounded-xl p-6">
-          <h3 className="text-sm font-semibold text-[var(--ansein-text)] mb-4 flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-[var(--ansein-primary)]/15 border border-[var(--ansein-primary)]/30">
-              <Sparkles className="h-3.5 w-3.5 text-[var(--ansein-primary)]" />
+        <div className="bg-card border border-border rounded-xl p-6">
+          <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/15 border border-primary/30">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
             </div>
             Threat narrative
           </h3>
@@ -2090,8 +2090,8 @@ function AnalysisTab({ invId }: { invId: number }) {
 
       {/* Actor hypothesis */}
       {actor && Object.keys(actor).length > 0 && (
-        <div className="ansein-card rounded-xl p-6">
-          <h3 className="text-sm font-semibold text-[var(--ansein-text)] mb-4 flex items-center gap-2">
+        <div className="bg-card border border-border rounded-xl p-6">
+          <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-rose-500/15 border border-rose-500/30">
               <Users className="h-3.5 w-3.5 text-rose-400" />
             </div>
@@ -2099,10 +2099,10 @@ function AnalysisTab({ invId }: { invId: number }) {
           </h3>
           <div className="grid md:grid-cols-2 gap-4 text-sm">
             <div>
-              <p className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] mb-1">Identified actor</p>
-              <p className="text-[var(--ansein-text)] font-semibold">{actor.actor || 'Unknown'}</p>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50 mb-1">Identified actor</p>
+              <p className="text-foreground font-semibold">{actor.actor || 'Unknown'}</p>
               <div className="mt-2 flex items-center gap-2">
-                <div className="flex-1 h-1.5 rounded-full bg-[var(--ansein-border)] overflow-hidden">
+                <div className="flex-1 h-1.5 rounded-full bg-[border] overflow-hidden">
                   <div
                     className="h-full rounded-full"
                     style={{
@@ -2111,19 +2111,19 @@ function AnalysisTab({ invId }: { invId: number }) {
                     }}
                   />
                 </div>
-                <span className="text-xs ansein-mono text-[var(--ansein-text-muted)]">{actorConfDisplay.toFixed(0)}%</span>
+                <span className="text-xs ansein-mono text-muted-foreground">{actorConfDisplay.toFixed(0)}%</span>
               </div>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] mb-1">Origin</p>
-              <p className="text-[var(--ansein-text)]">{actor.origin || 'Unknown'}</p>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50 mb-1">Origin</p>
+              <p className="text-foreground">{actor.origin || 'Unknown'}</p>
             </div>
             <div className="md:col-span-2">
-              <p className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] mb-1">Motivation</p>
-              <p className="text-[var(--ansein-text-muted)]">{actor.motivation || 'Unknown'}</p>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50 mb-1">Motivation</p>
+              <p className="text-muted-foreground">{actor.motivation || 'Unknown'}</p>
             </div>
             <div className="md:col-span-2">
-              <p className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] mb-1">Reasoning</p>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50 mb-1">Reasoning</p>
               <Markdown content={actor.reasoning || 'No reasoning provided.'} />
             </div>
           </div>
@@ -2132,8 +2132,8 @@ function AnalysisTab({ invId }: { invId: number }) {
 
       {/* Attack Hypotheses */}
       {data.hypotheses && data.hypotheses.length > 0 && (
-        <div className="ansein-card rounded-xl p-6">
-          <h3 className="text-sm font-semibold text-[var(--ansein-text)] mb-4 flex items-center gap-2">
+        <div className="bg-card border border-border rounded-xl p-6">
+          <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-rose-500/15 border border-rose-500/30">
               <AlertTriangle className="h-3.5 w-3.5 text-rose-400" />
             </div>
@@ -2145,11 +2145,11 @@ function AnalysisTab({ invId }: { invId: number }) {
               return (
                 <div
                   key={i}
-                  className="rounded-lg p-4 bg-[var(--ansein-surface)] border border-[var(--ansein-border)] relative overflow-hidden"
+                  className="rounded-lg p-4 bg-card border border-border relative overflow-hidden"
                   style={{ borderLeft: `3px solid ${confColor}` }}
                 >
                   <div className="flex items-start justify-between gap-3 mb-2">
-                    <p className="text-sm font-semibold text-[var(--ansein-text)]">{h.scenario}</p>
+                    <p className="text-sm font-semibold text-foreground">{h.scenario}</p>
                     <span
                       className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold ansein-mono flex-shrink-0"
                       style={{ background: `${confColor}20`, color: confColor, border: `1px solid ${confColor}40` }}
@@ -2158,19 +2158,19 @@ function AnalysisTab({ invId }: { invId: number }) {
                     </span>
                   </div>
                   {h.reasoning && (
-                    <div className="text-xs text-[var(--ansein-text-muted)] leading-relaxed mb-2">
+                    <div className="text-xs text-muted-foreground leading-relaxed mb-2">
                       <Markdown content={h.reasoning} />
                     </div>
                   )}
                   {h.next_steps && h.next_steps.length > 0 && (
-                    <div className="mt-2 pt-2 border-t border-[var(--ansein-border)]">
-                      <p className="text-[10px] uppercase tracking-[0.15em] text-[var(--ansein-text-dim)] ansein-mono mb-1.5">
+                    <div className="mt-2 pt-2 border-t border-border">
+                      <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/50 ansein-mono mb-1.5">
                         Recommended next steps
                       </p>
                       <ol className="space-y-1">
                         {h.next_steps.map((step, j) => (
-                          <li key={j} className="flex items-start gap-2 text-xs text-[var(--ansein-text-muted)]">
-                            <span className="flex h-4 w-4 items-center justify-center rounded bg-[var(--ansein-bg)] border border-[var(--ansein-border)] ansein-mono text-[9px] text-[var(--ansein-primary)] flex-shrink-0 mt-0.5">
+                          <li key={j} className="flex items-start gap-2 text-xs text-muted-foreground">
+                            <span className="flex h-4 w-4 items-center justify-center rounded bg-background border border-border ansein-mono text-[9px] text-primary flex-shrink-0 mt-0.5">
                               {j + 1}
                             </span>
                             <span>{step}</span>
@@ -2188,8 +2188,8 @@ function AnalysisTab({ invId }: { invId: number }) {
 
       {/* Recommendations */}
       {data.recommendations && data.recommendations.length > 0 && (
-        <div className="ansein-card rounded-xl p-6">
-          <h3 className="text-sm font-semibold text-[var(--ansein-text)] mb-4 flex items-center gap-2">
+        <div className="bg-card border border-border rounded-xl p-6">
+          <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-500/15 border border-amber-500/30">
               <Lightbulb className="h-3.5 w-3.5 text-amber-400" />
             </div>
@@ -2198,7 +2198,7 @@ function AnalysisTab({ invId }: { invId: number }) {
           <ul className="space-y-3">
             {data.recommendations.map((r, i) => (
               <li key={i} className="flex items-start gap-3">
-                <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] ansein-mono text-[10px] text-[var(--ansein-primary)] flex-shrink-0 mt-0.5">
+                <span className="flex h-5 w-5 items-center justify-center rounded-md bg-card border border-border ansein-mono text-[10px] text-primary flex-shrink-0 mt-0.5">
                   {i + 1}
                 </span>
                 <Markdown content={r} />
@@ -2209,7 +2209,7 @@ function AnalysisTab({ invId }: { invId: number }) {
       )}
 
       {/* Generated at */}
-      <div className="flex items-center justify-center gap-2 text-xs text-[var(--ansein-text-dim)]">
+      <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground/50">
         <Cpu className="h-3 w-3" />
         Analysis generated {formatDate(data.created_at)} by AnseIn cognitive engine
       </div>
@@ -2317,13 +2317,13 @@ function CopilotInline({
 
   return (
     <div className="flex flex-col h-[calc(100vh-360px)] min-h-[500px]">
-      <div className="ansein-card rounded-xl flex-1 flex flex-col overflow-hidden">
+      <div className="bg-card border border-border rounded-xl flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="px-5 py-3 border-b border-[var(--ansein-border)] flex items-center gap-2">
-          <Bot className="h-4 w-4 text-[var(--ansein-primary)]" />
+        <div className="px-5 py-3 border-b border-border flex items-center gap-2">
+          <Bot className="h-4 w-4 text-primary" />
           <div>
-            <p className="text-sm font-medium text-[var(--ansein-text)]">Investigation Copilot</p>
-            <p className="text-[10px] text-[var(--ansein-text-dim)]">
+            <p className="text-sm font-medium text-foreground">Investigation Copilot</p>
+            <p className="text-[10px] text-muted-foreground/50">
               Grounded in "{invTitle}" · {currentSessionId ? 'session active' : 'new session'}
             </p>
           </div>
@@ -2333,11 +2333,11 @@ function CopilotInline({
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-5 space-y-4">
           {messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--ansein-surface)] border border-[var(--ansein-border)] mb-3">
-                <Bot className="h-5 w-5 text-[var(--ansein-primary)]" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-card border border-border mb-3">
+                <Bot className="h-5 w-5 text-primary" />
               </div>
-              <p className="text-sm font-medium text-[var(--ansein-text)]">Ask the Copilot</p>
-              <p className="text-xs text-[var(--ansein-text-muted)] mt-1 max-w-sm">
+              <p className="text-sm font-medium text-foreground">Ask the Copilot</p>
+              <p className="text-xs text-muted-foreground mt-1 max-w-sm">
                 I can answer questions about this investigation's entities, enrichment, and analysis. Try:
               </p>
               <div className="mt-4 space-y-1.5">
@@ -2349,7 +2349,7 @@ function CopilotInline({
                   <button
                     key={q}
                     onClick={() => setInput(q)}
-                    className="block text-xs text-left px-3 py-1.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] hover:border-[var(--ansein-border-strong)] transition-colors w-80 max-w-full"
+                    className="block text-xs text-left px-3 py-1.5 rounded-md bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors w-80 max-w-full"
                   >
                     {q}
                   </button>
@@ -2369,8 +2369,8 @@ function CopilotInline({
                   className={cn(
                     'flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full',
                     m.role === 'user'
-                      ? 'bg-[var(--ansein-primary)] text-[var(--ansein-bg)]'
-                      : 'bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-primary)]'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-card border border-border text-primary'
                   )}
                 >
                   {m.role === 'user' ? <User className="h-3.5 w-3.5" /> : <Bot className="h-3.5 w-3.5" />}
@@ -2379,8 +2379,8 @@ function CopilotInline({
                   className={cn(
                     'flex-1 max-w-[80%] px-3.5 py-2.5 rounded-lg text-sm leading-relaxed',
                     m.role === 'user'
-                      ? 'bg-[var(--ansein-primary)]/10 border border-[var(--ansein-primary)]/20 text-[var(--ansein-text)]'
-                      : 'bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text)]'
+                      ? 'bg-primary/10 border border-primary/20 text-foreground'
+                      : 'bg-card border border-border text-foreground'
                   )}
                 >
                   {m.role === 'assistant' ? (
@@ -2389,10 +2389,10 @@ function CopilotInline({
                     <p className="whitespace-pre-wrap">{m.content}</p>
                   )}
                   {m.citations && m.citations.length > 0 && (
-                    <div className="mt-2 pt-2 border-t border-[var(--ansein-border)] flex flex-wrap gap-1">
-                      <span className="text-[10px] text-[var(--ansein-text-dim)]">Cites:</span>
+                    <div className="mt-2 pt-2 border-t border-border flex flex-wrap gap-1">
+                      <span className="text-[10px] text-muted-foreground/50">Cites:</span>
                       {m.citations.slice(0, 5).map((c, i) => (
-                        <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--ansein-bg)] border border-[var(--ansein-border)] text-[var(--ansein-text-muted)] ansein-mono">
+                        <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-background border border-border text-muted-foreground ansein-mono">
                           {c.length > 24 ? c.slice(0, 22) + '…' : c}
                         </span>
                       ))}
@@ -2404,10 +2404,10 @@ function CopilotInline({
           )}
           {sending && (
             <div className="flex gap-3">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-primary)]">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-card border border-border text-primary">
                 <Bot className="h-3.5 w-3.5" />
               </div>
-              <div className="bg-[var(--ansein-surface)] border border-[var(--ansein-border)] rounded-lg px-3.5 py-2.5 text-sm text-[var(--ansein-text-muted)]">
+              <div className="bg-card border border-border rounded-lg px-3.5 py-2.5 text-sm text-muted-foreground">
                 <Loader2 className="h-3.5 w-3.5 animate-spin inline mr-2" />
                 Thinking…
               </div>
@@ -2416,7 +2416,7 @@ function CopilotInline({
         </div>
 
         {/* Input */}
-        <div className="p-3 border-t border-[var(--ansein-border)]">
+        <div className="p-3 border-t border-border">
           <div className="flex items-end gap-2">
             <textarea
               rows={1}
@@ -2424,7 +2424,7 @@ function CopilotInline({
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKey}
               placeholder="Ask about this investigation (type or speak)…"
-              className="flex-1 px-3 py-2 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-sm text-[var(--ansein-text)] placeholder:text-[var(--ansein-text-dim)] focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)] resize-none max-h-32"
+              className="flex-1 px-3 py-2 rounded-md bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-none max-h-32"
               style={{ minHeight: '38px' }}
             />
             <VoiceInputButton
@@ -2446,12 +2446,12 @@ function CopilotInline({
             <button
               onClick={handleSend}
               disabled={!input.trim() || sending}
-              className="inline-flex items-center justify-center h-9 w-9 rounded-md bg-[var(--ansein-primary)] text-[var(--ansein-bg)] hover:bg-[var(--ansein-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="inline-flex items-center justify-center h-9 w-9 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <Send className="h-4 w-4" />
             </button>
           </div>
-          <p className="text-[10px] text-[var(--ansein-text-dim)] mt-1.5 text-center">
+          <p className="text-[10px] text-muted-foreground/50 mt-1.5 text-center">
             Press Enter to send · Shift+Enter for new line · Click the mic to speak · Answers are grounded in this investigation's data only.
           </p>
         </div>
@@ -2540,28 +2540,28 @@ function NotesTab({ invId }: { invId: number }) {
     <div className="grid lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2 space-y-6">
         {/* Composer */}
-        <div className="ansein-card rounded-xl p-5">
+        <div className="bg-card border border-border rounded-xl p-5">
           <div className="flex items-center gap-2 mb-3">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[var(--ansein-primary)]/15 border border-[var(--ansein-primary)]/30">
-              <StickyNote className="h-3.5 w-3.5 text-[var(--ansein-primary)]" />
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/15 border border-primary/30">
+              <StickyNote className="h-3.5 w-3.5 text-primary" />
             </div>
-            <h3 className="text-sm font-semibold text-[var(--ansein-text)]">Add a note</h3>
+            <h3 className="text-sm font-semibold text-foreground">Add a note</h3>
           </div>
           <textarea
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder="Capture an observation, hypothesis, link, or follow-up. Notes are visible to anyone with access to this investigation."
             rows={4}
-            className="w-full px-3 py-2.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-sm text-[var(--ansein-text)] placeholder:text-[var(--ansein-text-dim)] focus:outline-none focus:border-[var(--ansein-primary)] resize-y min-h-[100px]"
+            className="w-full px-3 py-2.5 rounded-md bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary resize-y min-h-[100px]"
           />
           <div className="flex items-center justify-between mt-3">
-            <p className="text-[10px] text-[var(--ansein-text-dim)]">
+            <p className="text-[10px] text-muted-foreground/50">
               {draft.length} / 10000 chars · Markdown supported
             </p>
             <button
               onClick={handleCreate}
               disabled={!draft.trim() || createMutation.isPending}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[var(--ansein-primary)] text-[var(--ansein-bg)] text-xs font-medium hover:bg-[var(--ansein-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {createMutation.isPending ? (
                 <Loader2 className="h-3 w-3 animate-spin" />
@@ -2579,9 +2579,9 @@ function NotesTab({ invId }: { invId: number }) {
             <Spinner />
           </div>
         ) : notes.length === 0 ? (
-          <div className="ansein-card rounded-xl">
+          <div className="bg-card border border-border rounded-xl">
             <EmptyState
-              icon={<StickyNote className="h-5 w-5 text-[var(--ansein-primary)]" />}
+              icon={<StickyNote className="h-5 w-5 text-primary" />}
               title="No notes yet"
               description="Use notes to capture observations, hypotheses, and analyst-to-analyst context that doesn't fit elsewhere."
               variant="branded"
@@ -2618,7 +2618,7 @@ function NotesTab({ invId }: { invId: number }) {
             {otherNotes.length > 0 && (
               <div className="space-y-3">
                 {pinnedNotes.length > 0 && (
-                  <p className="px-1 text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] ansein-mono">
+                  <p className="px-1 text-[10px] uppercase tracking-widest text-muted-foreground/50 ansein-mono">
                     All notes
                   </p>
                 )}
@@ -2648,15 +2648,15 @@ function NotesTab({ invId }: { invId: number }) {
 
       {/* Side panel */}
       <div className="space-y-6">
-        <div className="ansein-card rounded-xl p-5">
-          <h3 className="text-sm font-semibold text-[var(--ansein-text)] mb-3 flex items-center gap-2">
+        <div className="bg-card border border-border rounded-xl p-5">
+          <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
             <Lightbulb className="h-4 w-4 text-amber-400" />
             Analyst notes
           </h3>
-          <p className="text-xs text-[var(--ansein-text-muted)] leading-relaxed">
+          <p className="text-xs text-muted-foreground leading-relaxed">
             Notes are an enduring record of analyst reasoning. Use them to capture:
           </p>
-          <ul className="mt-3 space-y-2 text-xs text-[var(--ansein-text-muted)]">
+          <ul className="mt-3 space-y-2 text-xs text-muted-foreground">
             <li className="flex gap-2">
               <span className="text-amber-400 flex-shrink-0">·</span>
               Hypotheses and confidence levels
@@ -2674,12 +2674,12 @@ function NotesTab({ invId }: { invId: number }) {
               Caveats and false-positive notes
             </li>
           </ul>
-          <div className="mt-4 pt-4 border-t border-[var(--ansein-border)] grid grid-cols-2 gap-2 text-center">
+          <div className="mt-4 pt-4 border-t border-border grid grid-cols-2 gap-2 text-center">
             <div>
-              <p className="text-xl font-semibold ansein-mono text-[var(--ansein-text)]">
+              <p className="text-xl font-semibold ansein-mono text-foreground">
                 {notes.length}
               </p>
-              <p className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)]">
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50">
                 Total
               </p>
             </div>
@@ -2687,7 +2687,7 @@ function NotesTab({ invId }: { invId: number }) {
               <p className="text-xl font-semibold ansein-mono text-amber-400">
                 {pinnedNotes.length}
               </p>
-              <p className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)]">
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50">
                 Pinned
               </p>
             </div>
@@ -2728,7 +2728,7 @@ function NoteCard({
   return (
     <div
       className={cn(
-        'ansein-card rounded-xl p-5 relative overflow-hidden transition-colors',
+        'bg-card border border-border rounded-xl p-5 relative overflow-hidden transition-colors',
         note.pinned && 'border-amber-500/30'
       )}
     >
@@ -2737,14 +2737,14 @@ function NoteCard({
       )}
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="flex items-center gap-2 min-w-0">
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-[var(--ansein-primary)] to-[var(--ansein-primary-hover)] text-[var(--ansein-bg)] text-xs font-semibold flex-shrink-0">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-[primary] to-[primary/90] text-primary-foreground text-xs font-semibold flex-shrink-0">
             {note.author_name?.[0]?.toUpperCase() || 'A'}
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-medium text-[var(--ansein-text)] truncate">
+            <p className="text-xs font-medium text-foreground truncate">
               {note.author_name}
             </p>
-            <p className="text-[10px] text-[var(--ansein-text-dim)] flex items-center gap-1.5">
+            <p className="text-[10px] text-muted-foreground/50 flex items-center gap-1.5">
               {formatRelative(note.created_at)}
               {isEdited && <span className="italic">· edited</span>}
             </p>
@@ -2758,7 +2758,7 @@ function NoteCard({
               'p-1.5 rounded-md transition-colors',
               note.pinned
                 ? 'text-amber-400 hover:bg-amber-500/10'
-                : 'text-[var(--ansein-text-dim)] hover:text-amber-400 hover:bg-[var(--ansein-surface)]'
+                : 'text-muted-foreground/50 hover:text-amber-400 hover:bg-card'
             )}
             title={note.pinned ? 'Unpin note' : 'Pin note to top'}
           >
@@ -2767,7 +2767,7 @@ function NoteCard({
           {!editing && (
             <button
               onClick={onStartEdit}
-              className="p-1.5 rounded-md text-[var(--ansein-text-dim)] hover:text-[var(--ansein-text)] hover:bg-[var(--ansein-surface)] transition-colors"
+              className="p-1.5 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-card transition-colors"
               title="Edit note"
             >
               <Pencil className="h-3.5 w-3.5" />
@@ -2777,7 +2777,7 @@ function NoteCard({
             onClick={() => {
               if (confirm('Delete this note?')) onDelete()
             }}
-            className="p-1.5 rounded-md text-[var(--ansein-text-dim)] hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+            className="p-1.5 rounded-md text-muted-foreground/50 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
             title="Delete note"
           >
             <Trash2 className="h-3.5 w-3.5" />
@@ -2791,26 +2791,26 @@ function NoteCard({
             value={editBody}
             onChange={(e) => onEditBodyChange(e.target.value)}
             rows={4}
-            className="w-full px-3 py-2 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-sm text-[var(--ansein-text)] focus:outline-none focus:border-[var(--ansein-primary)] resize-y min-h-[100px]"
+            className="w-full px-3 py-2 rounded-md bg-card border border-border text-sm text-foreground focus:outline-none focus:border-primary resize-y min-h-[100px]"
           />
           <div className="flex items-center justify-end gap-2 mt-2">
             <button
               onClick={onCancelEdit}
-              className="px-2.5 py-1 rounded-md text-xs text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] transition-colors"
+              className="px-2.5 py-1 rounded-md text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={onSaveEdit}
               disabled={saving || !editBody.trim()}
-              className="px-2.5 py-1 rounded-md bg-[var(--ansein-primary)] text-[var(--ansein-bg)] text-xs font-medium hover:bg-[var(--ansein-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-2.5 py-1 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Save'}
             </button>
           </div>
         </div>
       ) : (
-        <div className="text-sm text-[var(--ansein-text-muted)] leading-relaxed whitespace-pre-wrap break-words">
+        <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap break-words">
           {note.body}
         </div>
       )}
@@ -2900,19 +2900,19 @@ function ActivityTab({ invId }: { invId: number }) {
     <div className="grid lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2 space-y-6">
         {/* Header card */}
-        <div className="ansein-card rounded-xl p-6">
+        <div className="bg-card border border-border rounded-xl p-6">
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[var(--ansein-primary)]/15 border border-[var(--ansein-primary)]/30">
-                <History className="h-3.5 w-3.5 text-[var(--ansein-primary)]" />
+              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/15 border border-primary/30">
+                <History className="h-3.5 w-3.5 text-primary" />
               </div>
-              <h3 className="text-sm font-semibold text-[var(--ansein-text)]">Activity timeline</h3>
+              <h3 className="text-sm font-semibold text-foreground">Activity timeline</h3>
             </div>
-            <span className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] ansein-mono">
+            <span className="text-[10px] uppercase tracking-widest text-muted-foreground/50 ansein-mono">
               {items.length} events
             </span>
           </div>
-          <p className="text-xs text-[var(--ansein-text-muted)] mb-4">
+          <p className="text-xs text-muted-foreground mb-4">
             Tamper-evident record of all actions taken on this investigation.
           </p>
 
@@ -2922,7 +2922,7 @@ function ActivityTab({ invId }: { invId: number }) {
             </div>
           ) : items.length === 0 ? (
             <EmptyState
-              icon={<History className="h-5 w-5 text-[var(--ansein-primary)]" />}
+              icon={<History className="h-5 w-5 text-primary" />}
               title="No activity yet"
               description="Actions taken on this investigation — adding sources, running the pipeline, posting notes — will appear here in chronological order."
               variant="branded"
@@ -2943,15 +2943,15 @@ function ActivityTab({ invId }: { invId: number }) {
                     : dayDate.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })
                 return (
                   <div key={dayKey}>
-                    <p className="px-1 text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] ansein-mono mb-3 flex items-center gap-2">
-                      <span className="h-px flex-1 bg-[var(--ansein-border)]" />
+                    <p className="px-1 text-[10px] uppercase tracking-widest text-muted-foreground/50 ansein-mono mb-3 flex items-center gap-2">
+                      <span className="h-px flex-1 bg-[border]" />
                       {label}
-                      <span className="text-[var(--ansein-text-dim)]/60">· {dayItems.length}</span>
-                      <span className="h-px flex-1 bg-[var(--ansein-border)]" />
+                      <span className="text-muted-foreground/50/60">· {dayItems.length}</span>
+                      <span className="h-px flex-1 bg-[border]" />
                     </p>
                     <div className="relative pl-6">
                       {/* Vertical timeline line */}
-                      <div className="absolute left-[11px] top-1 bottom-1 w-px bg-[var(--ansein-border)]" />
+                      <div className="absolute left-[11px] top-1 bottom-1 w-px bg-[border]" />
                       <div className="space-y-3">
                         {dayItems.map((entry) => {
                           const Icon = ACTIVITY_ICONS[entry.action] || Activity
@@ -2961,34 +2961,34 @@ function ActivityTab({ invId }: { invId: number }) {
                             <div key={entry.id} className="relative">
                               {/* Node on timeline */}
                               <div
-                                className="absolute -left-6 top-1 flex h-6 w-6 items-center justify-center rounded-full border-2 bg-[var(--ansein-bg)]"
+                                className="absolute -left-6 top-1 flex h-6 w-6 items-center justify-center rounded-full border-2 bg-background"
                                 style={{ borderColor: color }}
                               >
                                 <Icon className="h-3 w-3" style={{ color }} />
                               </div>
-                              <div className="ansein-card rounded-lg p-3 ml-2">
+                              <div className="bg-card border border-border rounded-lg p-3 ml-2">
                                 <div className="flex items-start justify-between gap-2 mb-1">
                                   <div className="min-w-0">
-                                    <p className="text-xs font-medium text-[var(--ansein-text)] truncate">
+                                    <p className="text-xs font-medium text-foreground truncate">
                                       {activityLabel(entry.action)}
                                     </p>
-                                    <p className="text-[10px] text-[var(--ansein-text-dim)] ansein-mono mt-0.5">
+                                    <p className="text-[10px] text-muted-foreground/50 ansein-mono mt-0.5">
                                       {entry.action}
                                     </p>
                                   </div>
-                                  <span className="text-[10px] text-[var(--ansein-text-dim)] whitespace-nowrap flex-shrink-0">
+                                  <span className="text-[10px] text-muted-foreground/50 whitespace-nowrap flex-shrink-0">
                                     {formatRelative(entry.created_at)}
                                   </span>
                                 </div>
                                 <div className="flex flex-wrap items-center gap-1.5 mt-2">
                                   {entry.ip_address && (
-                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text-dim)] ansein-mono">
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] bg-card border border-border text-muted-foreground/50 ansein-mono">
                                       <Globe className="h-2 w-2" />
                                       {entry.ip_address}
                                     </span>
                                   )}
                                   {typeof meta.source_type === 'string' && (
-                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text-dim)] ansein-mono">
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] bg-card border border-border text-muted-foreground/50 ansein-mono">
                                       {meta.source_type}
                                     </span>
                                   )}
@@ -3004,7 +3004,7 @@ function ActivityTab({ invId }: { invId: number }) {
                                     </span>
                                   )}
                                   {typeof meta.size_bytes === 'number' && (
-                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text-dim)] ansein-mono">
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] bg-card border border-border text-muted-foreground/50 ansein-mono">
                                       {formatBytes(meta.size_bytes as number)}
                                     </span>
                                   )}
@@ -3025,13 +3025,13 @@ function ActivityTab({ invId }: { invId: number }) {
 
       {/* Side panel: action breakdown */}
       <div className="space-y-6">
-        <div className="ansein-card rounded-xl p-5">
-          <h3 className="text-sm font-semibold text-[var(--ansein-text)] mb-4 flex items-center gap-2">
+        <div className="bg-card border border-border rounded-xl p-5">
+          <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
             <Lightbulb className="h-4 w-4 text-amber-400" />
             Action breakdown
           </h3>
           {items.length === 0 ? (
-            <p className="text-xs text-[var(--ansein-text-dim)] text-center py-4">
+            <p className="text-xs text-muted-foreground/50 text-center py-4">
               No activity to summarise
             </p>
           ) : (
@@ -3044,13 +3044,13 @@ function ActivityTab({ invId }: { invId: number }) {
                   return (
                     <div key={action} className="flex items-center gap-2.5">
                       <span className="h-2 w-2 rounded-full flex-shrink-0" style={{ background: color }} />
-                      <span className="text-xs text-[var(--ansein-text-muted)] flex-1 min-w-0 truncate">
+                      <span className="text-xs text-muted-foreground flex-1 min-w-0 truncate">
                         {activityLabel(action)}
                       </span>
-                      <span className="ansein-mono text-xs text-[var(--ansein-text)] flex-shrink-0">
+                      <span className="ansein-mono text-xs text-foreground flex-shrink-0">
                         {count}
                       </span>
-                      <span className="ansein-mono text-[10px] text-[var(--ansein-text-dim)] w-8 text-right flex-shrink-0">
+                      <span className="ansein-mono text-[10px] text-muted-foreground/50 w-8 text-right flex-shrink-0">
                         {pct}%
                       </span>
                     </div>
@@ -3060,28 +3060,28 @@ function ActivityTab({ invId }: { invId: number }) {
           )}
         </div>
 
-        <div className="ansein-card rounded-xl p-5">
-          <h3 className="text-sm font-semibold text-[var(--ansein-text)] mb-3 flex items-center gap-2">
-            <Lock className="h-4 w-4 text-[var(--ansein-primary)]" />
+        <div className="bg-card border border-border rounded-xl p-5">
+          <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+            <Lock className="h-4 w-4 text-primary" />
             Tamper-evident
           </h3>
-          <p className="text-xs text-[var(--ansein-text-muted)] leading-relaxed">
+          <p className="text-xs text-muted-foreground leading-relaxed">
             Activity is recorded to a write-once audit log. Events cannot be edited or deleted by users — only appended.
           </p>
-          <div className="mt-3 pt-3 border-t border-[var(--ansein-border)] grid grid-cols-2 gap-2 text-center">
+          <div className="mt-3 pt-3 border-t border-border grid grid-cols-2 gap-2 text-center">
             <div>
-              <p className="text-xl font-semibold ansein-mono text-[var(--ansein-text)]">
+              <p className="text-xl font-semibold ansein-mono text-foreground">
                 {items.length}
               </p>
-              <p className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)]">
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50">
                 Total events
               </p>
             </div>
             <div>
-              <p className="text-xl font-semibold ansein-mono text-[var(--ansein-primary)]">
+              <p className="text-xl font-semibold ansein-mono text-primary">
                 {Object.keys(actionBreakdown).length}
               </p>
-              <p className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)]">
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50">
                 Action types
               </p>
             </div>
@@ -3102,16 +3102,16 @@ function formatBytes(bytes: number): string {
 /* ============================================ Entity Table View */
 function EntityTableView({ entities, onSelect }: { entities: Entity[]; onSelect: (id: number) => void }) {
   return (
-    <div className="ansein-card rounded-xl overflow-hidden">
+    <div className="bg-card border border-border rounded-xl overflow-hidden">
       <div className="overflow-x-auto ansein-scrollbar">
         <table className="w-full text-xs">
           <thead>
-            <tr className="border-b border-[var(--ansein-border)] bg-[var(--ansein-surface)]/50">
-              <th className="text-left py-2.5 px-3 font-medium text-[var(--ansein-text-dim)] uppercase tracking-[0.15em] text-[10px]">Type</th>
-              <th className="text-left py-2.5 px-3 font-medium text-[var(--ansein-text-dim)] uppercase tracking-[0.15em] text-[10px]">Value</th>
-              <th className="text-left py-2.5 px-3 font-medium text-[var(--ansein-text-dim)] uppercase tracking-[0.15em] text-[10px]">Method</th>
-              <th className="text-right py-2.5 px-3 font-medium text-[var(--ansein-text-dim)] uppercase tracking-[0.15em] text-[10px]">Confidence</th>
-              <th className="text-left py-2.5 px-3 font-medium text-[var(--ansein-text-dim)] uppercase tracking-[0.15em] text-[10px]">Enrichment</th>
+            <tr className="border-b border-border bg-card/50">
+              <th className="text-left py-2.5 px-3 font-medium text-muted-foreground/50 uppercase tracking-[0.15em] text-[10px]">Type</th>
+              <th className="text-left py-2.5 px-3 font-medium text-muted-foreground/50 uppercase tracking-[0.15em] text-[10px]">Value</th>
+              <th className="text-left py-2.5 px-3 font-medium text-muted-foreground/50 uppercase tracking-[0.15em] text-[10px]">Method</th>
+              <th className="text-right py-2.5 px-3 font-medium text-muted-foreground/50 uppercase tracking-[0.15em] text-[10px]">Confidence</th>
+              <th className="text-left py-2.5 px-3 font-medium text-muted-foreground/50 uppercase tracking-[0.15em] text-[10px]">Enrichment</th>
             </tr>
           </thead>
           <tbody>
@@ -3129,7 +3129,7 @@ function EntityTableView({ entities, onSelect }: { entities: Entity[]; onSelect:
                 <tr
                   key={e.id}
                   onClick={() => onSelect(e.id)}
-                  className="border-b border-[var(--ansein-border)] last:border-0 hover:bg-[var(--ansein-surface)] cursor-pointer transition-colors group"
+                  className="border-b border-border last:border-0 hover:bg-card cursor-pointer transition-colors group"
                 >
                   <td className="py-2.5 px-3">
                     <span
@@ -3140,13 +3140,13 @@ function EntityTableView({ entities, onSelect }: { entities: Entity[]; onSelect:
                     </span>
                   </td>
                   <td className="py-2.5 px-3">
-                    <span className="ansein-mono text-[var(--ansein-text)] group-hover:text-[var(--ansein-primary)] transition-colors break-all">
+                    <span className="ansein-mono text-foreground group-hover:text-primary transition-colors break-all">
                       {e.value}
                     </span>
                   </td>
-                  <td className="py-2.5 px-3 text-[var(--ansein-text-muted)] ansein-mono">{e.source_method}</td>
+                  <td className="py-2.5 px-3 text-muted-foreground ansein-mono">{e.source_method}</td>
                   <td className="py-2.5 px-3 text-right">
-                    <span className="ansein-mono text-[var(--ansein-text)] tabular-nums">
+                    <span className="ansein-mono text-foreground tabular-nums">
                       {(e.confidence * 100).toFixed(0)}%
                     </span>
                   </td>
@@ -3159,12 +3159,12 @@ function EntityTableView({ entities, onSelect }: { entities: Entity[]; onSelect:
                             Malicious
                           </span>
                         )}
-                        <span className="text-[10px] text-[var(--ansein-text-dim)] ansein-mono">
+                        <span className="text-[10px] text-muted-foreground/50 ansein-mono">
                           {enrKeys.join(', ')}
                         </span>
                       </div>
                     ) : (
-                      <span className="text-[10px] text-[var(--ansein-text-dim)]">—</span>
+                      <span className="text-[10px] text-muted-foreground/50">—</span>
                     )}
                   </td>
                 </tr>

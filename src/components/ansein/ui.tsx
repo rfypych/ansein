@@ -70,13 +70,13 @@ export function SeverityMeter({ score, size = 'md' }: { score: number; size?: 's
         {safe.toFixed(0)}
       </div>
       <div className="flex flex-col gap-1">
-        <div className={cn('w-20 rounded-full bg-[var(--ansein-border)]', dims.bar)}>
+        <div className={cn('w-20 rounded-full bg-[border]', dims.bar)}>
           <div
             className={cn('h-full rounded-full transition-all', dims.bar)}
             style={{ width: `${safe}%`, background: color }}
           />
         </div>
-        <span className={cn('uppercase tracking-widest text-[var(--ansein-text-dim)] ansein-mono', dims.label)}>
+        <span className={cn('uppercase tracking-widest text-muted-foreground/50 ansein-mono', dims.label)}>
           {tier}
         </span>
       </div>
@@ -112,16 +112,16 @@ export function EmptyState({
           className={cn(
             'mb-4 flex h-14 w-14 items-center justify-center rounded-full border',
             variant === 'branded'
-              ? 'bg-gradient-to-br from-[var(--ansein-primary)]/15 to-transparent border-[var(--ansein-primary)]/30 ansein-glow'
-              : 'bg-[var(--ansein-surface)] border-[var(--ansein-border)]'
+              ? 'bg-gradient-to-br from-[primary]/15 to-transparent border-primary/30 '
+              : 'bg-card border-border'
           )}
         >
           {icon}
         </div>
       )}
-      <h3 className="text-base font-semibold text-[var(--ansein-text)]">{title}</h3>
+      <h3 className="text-base font-semibold text-foreground">{title}</h3>
       {description && (
-        <p className="mt-1.5 text-sm text-[var(--ansein-text-muted)] max-w-sm">{description}</p>
+        <p className="mt-1.5 text-sm text-muted-foreground max-w-sm">{description}</p>
       )}
       {action && <div className="mt-5">{action}</div>}
     </div>
@@ -141,19 +141,19 @@ export function SectionHeader({
   icon?: ReactNode
 }) {
   return (
-    <div className="flex items-start justify-between gap-4 pb-4 border-b border-[var(--ansein-border)]">
+    <div className="flex items-start justify-between gap-4 pb-4 border-b border-border">
       <div className="flex items-start gap-3">
         {icon && (
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-primary)]">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-card border border-border text-primary">
             {icon}
           </div>
         )}
         <div>
-          <h2 className="text-xl font-bold text-[var(--ansein-text)] tracking-tight">
+          <h2 className="text-xl font-bold text-foreground tracking-tight">
             {title}
           </h2>
           {subtitle && (
-            <p className="text-sm text-[var(--ansein-text-muted)] mt-1">{subtitle}</p>
+            <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
           )}
         </div>
       </div>
@@ -167,7 +167,7 @@ export function Spinner({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'h-5 w-5 rounded-full border-2 border-[var(--ansein-border-strong)] border-t-[var(--ansein-primary)] ansein-spin',
+        'h-5 w-5 rounded-full border-2 border-primary/50 border-t-primary ansein-spin',
         className
       )}
     />
@@ -181,7 +181,7 @@ export function KbdHint({ keys }: { keys: string[] }) {
       {keys.map((k, i) => (
         <kbd
           key={i}
-          className="ansein-mono text-[10px] px-1.5 py-0.5 rounded border border-[var(--ansein-border)] bg-[var(--ansein-surface)] text-[var(--ansein-text-muted)]"
+          className="ansein-mono text-[10px] px-1.5 py-0.5 rounded border border-border bg-card text-muted-foreground"
         >
           {k}
         </kbd>
@@ -266,7 +266,7 @@ export function ProgressRing({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="var(--ansein-border)"
+          stroke="border"
           strokeWidth={strokeWidth}
         />
         <circle
@@ -284,12 +284,12 @@ export function ProgressRing({
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         {label && (
-          <span className="text-base font-semibold ansein-mono text-[var(--ansein-text)]">
+          <span className="text-base font-semibold ansein-mono text-foreground">
             {label}
           </span>
         )}
         {sublabel && (
-          <span className="text-[9px] uppercase tracking-widest text-[var(--ansein-text-dim)]">
+          <span className="text-[9px] uppercase tracking-widest text-muted-foreground/50">
             {sublabel}
           </span>
         )}
@@ -382,7 +382,7 @@ export function DonutChart({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="var(--ansein-border)"
+          stroke="border"
           strokeWidth={strokeWidth}
           opacity={0.4}
         />
@@ -411,12 +411,12 @@ export function DonutChart({
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         {centerLabel && (
-          <span className="text-xl font-semibold ansein-mono text-[var(--ansein-text)]">
+          <span className="text-xl font-semibold ansein-mono text-foreground">
             {centerLabel}
           </span>
         )}
         {centerSublabel && (
-          <span className="text-[9px] uppercase tracking-widest text-[var(--ansein-text-dim)] mt-0.5">
+          <span className="text-[9px] uppercase tracking-widest text-muted-foreground/50 mt-0.5">
             {centerSublabel}
           </span>
         )}

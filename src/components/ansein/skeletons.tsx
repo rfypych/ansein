@@ -8,7 +8,7 @@ export function CardSkeleton({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'ansein-card rounded-xl p-5 space-y-3',
+        'bg-card border border-border rounded-xl p-5 space-y-3',
         className
       )}
     >
@@ -25,14 +25,14 @@ export function CardSkeleton({ className }: { className?: string }) {
 
 export function InvestigationCardSkeleton() {
   return (
-    <div className="ansein-card rounded-xl p-5 flex flex-col gap-3">
+    <div className="bg-card border border-border rounded-xl p-5 flex flex-col gap-3">
       <div className="flex items-start justify-between gap-2">
         <div className="h-4 w-32 ansein-shimmer rounded" />
         <div className="h-5 w-16 ansein-shimmer rounded" />
       </div>
       <div className="h-3 w-full ansein-shimmer rounded" />
       <div className="h-3 w-4/5 ansein-shimmer rounded" />
-      <div className="grid grid-cols-3 gap-2 mt-2 pt-3 border-t border-[var(--ansein-border)]">
+      <div className="grid grid-cols-3 gap-2 mt-2 pt-3 border-t border-border">
         <div className="h-8 ansein-shimmer rounded" />
         <div className="h-8 ansein-shimmer rounded" />
         <div className="h-8 ansein-shimmer rounded" />
@@ -59,7 +59,7 @@ export function DashboardSkeleton() {
         ))}
       </div>
       <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 ansein-card rounded-xl p-6">
+        <div className="lg:col-span-2 bg-card border border-border rounded-xl p-6">
           <div className="h-4 w-40 ansein-shimmer rounded mb-4" />
           <div className="space-y-3">
             {[0, 1, 2].map((i) => (
@@ -84,7 +84,7 @@ export function DashboardSkeleton() {
 
 export function EntityCardSkeleton() {
   return (
-    <div className="ansein-card rounded-lg p-4">
+    <div className="bg-card border border-border rounded-lg p-4">
       <div className="flex items-start gap-3">
         <div className="h-8 w-8 ansein-shimmer rounded-md" />
         <div className="flex-1 space-y-2">

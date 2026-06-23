@@ -90,13 +90,13 @@ export function VirtualizedEntityTable({ entities, onSelect, height = 560 }: Pro
       : 0
 
   return (
-    <div className="ansein-card rounded-xl overflow-hidden border border-[var(--ansein-border)]">
+    <div className="bg-card border border-border rounded-xl overflow-hidden border border-border">
       {/* Row count strip */}
-      <div className="flex items-center justify-between px-3 py-1.5 border-b border-[var(--ansein-border)] bg-[var(--ansein-surface)]/40">
-        <span className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)] ansein-mono">
+      <div className="flex items-center justify-between px-3 py-1.5 border-b border-border bg-card/40">
+        <span className="text-[10px] uppercase tracking-widest text-muted-foreground/50 ansein-mono">
           {entities.length.toLocaleString()} rows · virtualized
         </span>
-        <span className="text-[10px] text-[var(--ansein-text-dim)] ansein-mono">
+        <span className="text-[10px] text-muted-foreground/50 ansein-mono">
           window {virtualItems.length} / {entities.length.toLocaleString()}
         </span>
       </div>
@@ -114,13 +114,13 @@ export function VirtualizedEntityTable({ entities, onSelect, height = 560 }: Pro
             <col style={{ width: '12%' }} />
             <col style={{ width: '26%' }} />
           </colgroup>
-          <thead className="sticky top-0 z-10 bg-[var(--ansein-surface)]">
-            <tr className="border-b border-[var(--ansein-border)]">
+          <thead className="sticky top-0 z-10 bg-card">
+            <tr className="border-b border-border">
               {['Type', 'Value', 'Method', 'Confidence', 'Enrichment'].map((h, i) => (
                 <th
                   key={h}
                   className={cn(
-                    'py-2.5 px-3 font-medium text-[var(--ansein-text-dim)] uppercase tracking-[0.15em] text-[10px]',
+                    'py-2.5 px-3 font-medium text-muted-foreground/50 uppercase tracking-[0.2em] text-[10px]',
                     i === 3 ? 'text-right' : 'text-left',
                   )}
                 >
@@ -149,7 +149,7 @@ export function VirtualizedEntityTable({ entities, onSelect, height = 560 }: Pro
                   data-index={virtualRow.index}
                   ref={virtualizer.measureElement}
                   onClick={() => onSelect(e.id)}
-                  className="border-b border-[var(--ansein-border)] last:border-0 hover:bg-[var(--ansein-surface)] cursor-pointer transition-colors group"
+                  className="border-b border-border last:border-0 hover:bg-card cursor-pointer transition-colors group"
                 >
                   {/* Type */}
                   <td className="py-2.5 px-3 text-left">
@@ -167,7 +167,7 @@ export function VirtualizedEntityTable({ entities, onSelect, height = 560 }: Pro
                   {/* Value (monospace) */}
                   <td className="py-2.5 px-3 text-left max-w-0">
                     <span
-                      className="ansein-mono text-[var(--ansein-text)] group-hover:text-[var(--ansein-primary)] transition-colors truncate block"
+                      className="ansein-mono text-foreground group-hover:text-primary transition-colors truncate block"
                       title={e.value}
                     >
                       {e.value}
@@ -175,13 +175,13 @@ export function VirtualizedEntityTable({ entities, onSelect, height = 560 }: Pro
                   </td>
                   {/* Method */}
                   <td className="py-2.5 px-3 text-left">
-                    <span className="text-[var(--ansein-text-muted)] ansein-mono text-[10px]">
+                    <span className="text-muted-foreground ansein-mono text-[10px]">
                       {e.source_method}
                     </span>
                   </td>
                   {/* Confidence */}
                   <td className="py-2.5 px-3 text-right">
-                    <span className="ansein-mono text-[var(--ansein-text)] tabular-nums">
+                    <span className="ansein-mono text-foreground tabular-nums">
                       {(e.confidence * 100).toFixed(0)}%
                     </span>
                   </td>
@@ -198,12 +198,12 @@ export function VirtualizedEntityTable({ entities, onSelect, height = 560 }: Pro
                             Mal
                           </span>
                         )}
-                        <span className="text-[10px] text-[var(--ansein-text-dim)] ansein-mono truncate">
+                        <span className="text-[10px] text-muted-foreground/50 ansein-mono truncate">
                           {meta.enrKeys.join(', ')}
                         </span>
                       </div>
                     ) : (
-                      <span className="text-[10px] text-[var(--ansein-text-dim)]">—</span>
+                      <span className="text-[10px] text-muted-foreground/50">—</span>
                     )}
                   </td>
                 </tr>
@@ -223,19 +223,19 @@ export function VirtualizedEntityTable({ entities, onSelect, height = 560 }: Pro
         {/* Empty state — keep outside the table so the spacer math above
             stays simple. */}
         {entities.length === 0 && (
-          <div className="py-12 text-center text-sm text-[var(--ansein-text-muted)]">
+          <div className="py-12 text-center text-sm text-muted-foreground">
             No entities to display.
           </div>
         )}
       </div>
 
       {/* Footer hint */}
-      <div className="flex items-center justify-between px-3 py-1.5 border-t border-[var(--ansein-border)] bg-[var(--ansein-surface)]/40">
-        <span className="flex items-center gap-1 text-[10px] text-[var(--ansein-text-dim)]">
+      <div className="flex items-center justify-between px-3 py-1.5 border-t border-border bg-card/40">
+        <span className="flex items-center gap-1 text-[10px] text-muted-foreground/50">
           <ShieldAlert className="h-2.5 w-2.5 text-rose-400" />
           Click a row to open entity detail
         </span>
-        <span className="text-[10px] text-[var(--ansein-text-dim)] ansein-mono">
+        <span className="text-[10px] text-muted-foreground/50 ansein-mono">
           row height {ROW_HEIGHT}px · overscan 12
         </span>
       </div>

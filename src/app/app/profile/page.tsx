@@ -136,7 +136,7 @@ export default function ProfilePage() {
   if (!p) {
     return (
       <div className="px-6 py-8 max-w-5xl mx-auto">
-        <div className="ansein-card rounded-xl p-8 text-center text-[var(--ansein-text-muted)]">
+        <div className="bg-card border border-border rounded-xl p-8 text-center text-muted-foreground">
           Could not load profile.
         </div>
       </div>
@@ -174,19 +174,19 @@ export default function ProfilePage() {
     <div className="px-6 py-8 max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <p className="ansein-mono text-xs uppercase tracking-widest text-[var(--ansein-text-dim)] mb-1">
+        <p className="ansein-mono text-xs uppercase tracking-widest text-muted-foreground/50 mb-1">
           Account
         </p>
-        <h1 className="text-2xl font-semibold tracking-tight text-[var(--ansein-text)]">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
           Profile
         </h1>
-        <p className="text-sm text-[var(--ansein-text-muted)] mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           Manage your account details and security settings.
         </p>
       </div>
 
       {/* Identity card */}
-      <div className="ansein-card rounded-xl p-6 mb-6 relative overflow-hidden">
+      <div className="bg-card border border-border rounded-xl p-6 mb-6 relative overflow-hidden">
         {/* Decorative gradient banner */}
         <div
           className="absolute top-0 left-0 right-0 h-1"
@@ -194,14 +194,14 @@ export default function ProfilePage() {
         />
         <div className="flex items-start gap-4">
           <div
-            className="flex h-16 w-16 items-center justify-center rounded-full text-white text-xl font-semibold flex-shrink-0 ring-2 ring-[var(--ansein-bg)] shadow-lg"
+            className="flex h-16 w-16 items-center justify-center rounded-full text-white text-xl font-semibold flex-shrink-0 ring-2 ring-[background] shadow-lg"
             style={{ background: avatarGradient }}
           >
             {initials}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-lg font-semibold text-[var(--ansein-text)]">
+              <h2 className="text-lg font-semibold text-foreground">
                 {p.full_name || 'Analyst'}
               </h2>
               {/* Role badge — RBAC */}
@@ -219,8 +219,8 @@ export default function ProfilePage() {
               </span>
               {!p.is_active && <Badge color="danger">Inactive</Badge>}
             </div>
-            <p className="text-sm text-[var(--ansein-text-muted)] mt-0.5 ansein-mono">{p.email}</p>
-            <div className="mt-3 flex flex-wrap gap-4 text-xs text-[var(--ansein-text-dim)]">
+            <p className="text-sm text-muted-foreground mt-0.5 ansein-mono">{p.email}</p>
+            <div className="mt-3 flex flex-wrap gap-4 text-xs text-muted-foreground/50">
               <span className="flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
                 Joined {formatDate(p.created_at)}
@@ -231,7 +231,7 @@ export default function ProfilePage() {
                   Last login {formatDate(p.last_login_at)}
                 </span>
               )}
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text-muted)]">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-card border border-border text-muted-foreground">
                 <Calendar className="h-2.5 w-2.5" />
                 Member for {accountAge}
               </span>
@@ -240,16 +240,16 @@ export default function ProfilePage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 gap-3 mt-6 pt-6 border-t border-[var(--ansein-border)]">
+        <div className="grid grid-cols-2 gap-3 mt-6 pt-6 border-t border-border">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-500/10 border border-teal-500/20 text-[var(--ansein-primary)]">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-500/10 border border-teal-500/20 text-primary">
               <FolderSearch className="h-4 w-4" />
             </div>
             <div>
-              <p className="text-xl font-semibold ansein-mono text-[var(--ansein-text)]">
+              <p className="text-xl font-semibold ansein-mono text-foreground">
                 <AnimatedNumber value={p.stats.investigations} />
               </p>
-              <p className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)]">
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50">
                 Investigations
               </p>
             </div>
@@ -259,10 +259,10 @@ export default function ProfilePage() {
               <Bot className="h-4 w-4" />
             </div>
             <div>
-              <p className="text-xl font-semibold ansein-mono text-[var(--ansein-text)]">
+              <p className="text-xl font-semibold ansein-mono text-foreground">
                 <AnimatedNumber value={p.stats.copilot_sessions} />
               </p>
-              <p className="text-[10px] uppercase tracking-widest text-[var(--ansein-text-dim)]">
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50">
                 Copilot chats
               </p>
             </div>
@@ -270,16 +270,16 @@ export default function ProfilePage() {
         </div>
 
         {/* Role description row */}
-        <div className="mt-4 pt-4 border-t border-[var(--ansein-border)] flex items-start gap-2.5">
-          <ShieldCheck className="h-3.5 w-3.5 text-[var(--ansein-primary)] flex-shrink-0 mt-0.5" />
-          <div className="text-xs text-[var(--ansein-text-muted)] leading-relaxed">
-            <span className="font-medium text-[var(--ansein-text)] capitalize">{displayRole}</span>
-            <span className="text-[var(--ansein-text-dim)]"> · </span>
+        <div className="mt-4 pt-4 border-t border-border flex items-start gap-2.5">
+          <ShieldCheck className="h-3.5 w-3.5 text-primary flex-shrink-0 mt-0.5" />
+          <div className="text-xs text-muted-foreground leading-relaxed">
+            <span className="font-medium text-foreground capitalize">{displayRole}</span>
+            <span className="text-muted-foreground/50"> · </span>
             <span>{ROLE_DESCRIPTIONS[displayRole as RbacRole]}</span>
             {displayRole === 'admin' && (
               <>
                 {' · '}
-                <Link href="/app/admin" className="text-[var(--ansein-primary)] hover:text-[var(--ansein-primary-hover)] underline underline-offset-2">
+                <Link href="/app/admin" className="text-primary hover:text-primary/90 underline underline-offset-2">
                   Admin console →
                 </Link>
               </>
@@ -289,22 +289,22 @@ export default function ProfilePage() {
       </div>
 
       {/* Update profile */}
-      <form onSubmit={handleUpdateProfile} className="ansein-card rounded-xl p-6 mb-6">
-        <h3 className="text-sm font-semibold text-[var(--ansein-text)] mb-1 flex items-center gap-2">
-          <UserIcon className="h-4 w-4 text-[var(--ansein-primary)]" />
+      <form onSubmit={handleUpdateProfile} className="bg-card border border-border rounded-xl p-6 mb-6">
+        <h3 className="text-sm font-semibold text-foreground mb-1 flex items-center gap-2">
+          <UserIcon className="h-4 w-4 text-primary" />
           Display name
         </h3>
-        <p className="text-xs text-[var(--ansein-text-muted)] mb-4">
+        <p className="text-xs text-muted-foreground mb-4">
           Your name appears in the sidebar and on shared reports.
         </p>
         <div className="flex flex-col sm:flex-row gap-2">
           <div className="relative flex-1">
-            <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--ansein-text-dim)]" />
+            <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
             <input
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-sm focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)]"
+              className="w-full pl-9 pr-3 py-2 rounded-md bg-card border border-border text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               placeholder="Your full name"
               maxLength={120}
             />
@@ -312,7 +312,7 @@ export default function ProfilePage() {
           <button
             type="submit"
             disabled={updateProfileMutation.isPending || !fullName.trim()}
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-md bg-[var(--ansein-primary)] text-[var(--ansein-bg)] text-sm font-medium hover:bg-[var(--ansein-primary-hover)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
           >
             {updateProfileMutation.isPending ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -325,64 +325,64 @@ export default function ProfilePage() {
 
         {/* Email (read-only) */}
         <div className="mt-4">
-          <label className="block text-xs font-medium text-[var(--ansein-text-muted)] uppercase tracking-wider mb-1.5">
-            Email <span className="text-[var(--ansein-text-dim)] normal-case">(read-only)</span>
+          <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5">
+            Email <span className="text-muted-foreground/50 normal-case">(read-only)</span>
           </label>
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--ansein-text-dim)]" />
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
             <input
               type="email"
               readOnly
               value={p.email}
-              className="w-full pl-9 pr-3 py-2 rounded-md bg-[var(--ansein-surface)]/50 border border-[var(--ansein-border)] text-sm text-[var(--ansein-text-muted)] ansein-mono cursor-not-allowed"
+              className="w-full pl-9 pr-3 py-2 rounded-md bg-card/50 border border-border text-sm text-muted-foreground ansein-mono cursor-not-allowed"
             />
           </div>
-          <p className="text-[10px] text-[var(--ansein-text-dim)] mt-1">
+          <p className="text-[10px] text-muted-foreground/50 mt-1">
             Email changes require administrator assistance.
           </p>
         </div>
       </form>
 
       {/* Change password */}
-      <form onSubmit={handleChangePassword} className="ansein-card rounded-xl p-6">
-        <h3 className="text-sm font-semibold text-[var(--ansein-text)] mb-1 flex items-center gap-2">
-          <KeyRound className="h-4 w-4 text-[var(--ansein-primary)]" />
+      <form onSubmit={handleChangePassword} className="bg-card border border-border rounded-xl p-6">
+        <h3 className="text-sm font-semibold text-foreground mb-1 flex items-center gap-2">
+          <KeyRound className="h-4 w-4 text-primary" />
           Change password
         </h3>
-        <p className="text-xs text-[var(--ansein-text-muted)] mb-4">
+        <p className="text-xs text-muted-foreground mb-4">
           Use at least 8 characters. Avoid common patterns.
         </p>
         <div className="space-y-3">
           <div>
-            <label className="block text-xs font-medium text-[var(--ansein-text-muted)] uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5">
               Current password
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--ansein-text-dim)]" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
               <input
                 type={showCurrent ? 'text' : 'password'}
                 value={currentPw}
                 onChange={(e) => setCurrentPw(e.target.value)}
                 required
                 autoComplete="current-password"
-                className="w-full pl-9 pr-10 py-2 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-sm focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)]"
+                className="w-full pl-9 pr-10 py-2 rounded-md bg-card border border-border text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 placeholder="••••••••"
               />
               <button
                 type="button"
                 onClick={() => setShowCurrent((s) => !s)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[var(--ansein-text-dim)] hover:text-[var(--ansein-text)]"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground/50 hover:text-foreground"
               >
                 {showCurrent ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
               </button>
             </div>
           </div>
           <div>
-            <label className="block text-xs font-medium text-[var(--ansein-text-muted)] uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5">
               New password
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--ansein-text-dim)]" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
               <input
                 type={showNew ? 'text' : 'password'}
                 value={newPw}
@@ -390,13 +390,13 @@ export default function ProfilePage() {
                 required
                 minLength={8}
                 autoComplete="new-password"
-                className="w-full pl-9 pr-10 py-2 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-sm focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)]"
+                className="w-full pl-9 pr-10 py-2 rounded-md bg-card border border-border text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 placeholder="At least 8 characters"
               />
               <button
                 type="button"
                 onClick={() => setShowNew((s) => !s)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[var(--ansein-text-dim)] hover:text-[var(--ansein-text)]"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground/50 hover:text-foreground"
               >
                 {showNew ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
               </button>
@@ -419,12 +419,12 @@ export default function ProfilePage() {
                             : strength === 3
                             ? '#facc15'
                             : '#10b981'
-                          : 'var(--ansein-border)',
+                          : 'border',
                       }}
                     />
                   )
                 })}
-                <span className="text-[10px] ansein-mono text-[var(--ansein-text-dim)] ml-2 w-16">
+                <span className="text-[10px] ansein-mono text-muted-foreground/50 ml-2 w-16">
                   {['weak', 'fair', 'good', 'strong'][passwordStrength(newPw) - 1] || 'weak'}
                 </span>
               </div>
@@ -434,7 +434,7 @@ export default function ProfilePage() {
         <button
           type="submit"
           disabled={changePwMutation.isPending || !currentPw || !newPw}
-          className="mt-4 w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-md bg-[var(--ansein-primary)] text-[var(--ansein-bg)] text-sm font-medium hover:bg-[var(--ansein-primary-hover)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+          className="mt-4 w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
         >
           {changePwMutation.isPending ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -446,9 +446,9 @@ export default function ProfilePage() {
       </form>
 
       {/* Security note */}
-      <div className="mt-6 p-4 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] flex items-start gap-2.5">
+      <div className="mt-6 p-4 rounded-md bg-card border border-border flex items-start gap-2.5">
         <AlertCircle className="h-4 w-4 text-amber-400 flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-[var(--ansein-text-muted)] leading-relaxed">
+        <p className="text-xs text-muted-foreground leading-relaxed">
           Passwords are hashed with bcrypt (12 rounds) and never stored in plaintext. After changing
           your password, your other sessions remain valid until their access tokens expire.
         </p>
