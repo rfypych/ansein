@@ -100,7 +100,7 @@ function AppShell({ children }: { children: ReactNode }) {
   const initials = user?.email?.[0]?.toUpperCase() || 'A'
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
+    <div className="flex h-screen bg-background">
       <CommandPalette open={palette.open} onOpenChange={palette.setOpen} />
       <QuickPasteModal open={quickPasteOpen} onClose={() => setQuickPasteOpen(false)} />
       <GlobalShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
@@ -144,7 +144,7 @@ function AppShell({ children }: { children: ReactNode }) {
       )}
 
       {/* ---------- Main content ---------- */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col">
         {/* Mobile top bar */}
         <div className="md:hidden flex items-center justify-between h-14 px-4 border-b border-border bg-card/60 backdrop-blur-xl z-20">
           <button

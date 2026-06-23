@@ -1,7 +1,7 @@
 // AnseIn v3 — Prisma schema
 // Designed to be MySQL-compatible for cPanel deployment.
 // For local dev we use SQLite (per environment constraint).
-// When deploying to cPanel/MySQL: change `provider = "sqlite"` to `"mysql"`
+// When deploying to cPanel/MySQL: change `provider = "postgresql"` to `"mysql"`
 // and set DATABASE_URL to: mysql://USER:PASS@HOST:3306/DB?charset=utf8mb4
 
 generator client {
