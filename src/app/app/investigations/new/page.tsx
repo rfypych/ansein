@@ -184,20 +184,20 @@ export default function NewInvestigationPage() {
     <div className="px-6 py-8 max-w-5xl mx-auto">
       <Link
         href="/app/investigations"
-        className="inline-flex items-center gap-1.5 text-sm text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] transition-colors mb-6"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to investigations
       </Link>
 
       <div className="mb-8">
-        <p className="ansein-mono text-xs uppercase tracking-widest text-[var(--ansein-text-dim)] mb-1">
+        <p className="ansein-mono text-xs uppercase tracking-widest text-muted-foreground/50 mb-1">
           New case
         </p>
-        <h1 className="text-2xl font-semibold tracking-tight text-[var(--ansein-text)]">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
           Create investigation
         </h1>
-        <p className="text-sm text-[var(--ansein-text-muted)] mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           Start from a template or build a blank case. You can add sources and run the pipeline next.
         </p>
       </div>
@@ -205,8 +205,8 @@ export default function NewInvestigationPage() {
       {/* Template picker */}
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-3">
-          <Sparkles className="h-4 w-4 text-[var(--ansein-primary)]" />
-          <h2 className="text-sm font-semibold text-[var(--ansein-text)]">Choose a template</h2>
+          <Sparkles className="h-4 w-4 text-primary" />
+          <h2 className="text-sm font-semibold text-foreground">Choose a template</h2>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {TEMPLATES.map((t) => {
@@ -218,10 +218,10 @@ export default function NewInvestigationPage() {
                 type="button"
                 onClick={() => applyTemplate(t)}
                 className={cn(
-                  'ansein-card rounded-lg p-4 text-left transition-all relative overflow-hidden group',
+                  'bg-card border border-border rounded-lg p-4 text-left transition-all relative overflow-hidden group',
                   isActive
-                    ? 'border-[var(--ansein-primary)] ring-1 ring-[var(--ansein-primary)]'
-                    : 'ansein-card-hover'
+                    ? 'border-primary ring-1 ring-[primary]'
+                    : 'hover:border-primary/50 transition-colors'
                 )}
               >
                 {isActive && (
@@ -235,13 +235,13 @@ export default function NewInvestigationPage() {
                     <Icon className="h-4 w-4" />
                   </div>
                   {isActive && (
-                    <div className="flex h-4 w-4 items-center justify-center rounded-full bg-[var(--ansein-primary)]">
-                      <Check className="h-2.5 w-2.5 text-[var(--ansein-bg)]" />
+                    <div className="flex h-4 w-4 items-center justify-center rounded-full bg-primary">
+                      <Check className="h-2.5 w-2.5 text-primary-foreground" />
                     </div>
                   )}
                 </div>
-                <p className="text-sm font-semibold text-[var(--ansein-text)] mb-1">{t.title}</p>
-                <p className="text-[11px] text-[var(--ansein-text-muted)] leading-relaxed">
+                <p className="text-sm font-semibold text-foreground mb-1">{t.title}</p>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
                   {t.description}
                 </p>
               </button>
@@ -250,7 +250,7 @@ export default function NewInvestigationPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="ansein-card rounded-xl p-6 space-y-6">
+      <form onSubmit={handleSubmit} className="bg-card border border-border rounded-xl p-6 space-y-6">
         {error && (
           <div className="flex items-start gap-2 p-3 rounded-md bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm">
             <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
@@ -259,7 +259,7 @@ export default function NewInvestigationPage() {
         )}
 
         <div>
-          <label className="block text-xs font-medium text-[var(--ansein-text-muted)] uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5">
             Title <span className="text-rose-400 normal-case">*</span>
           </label>
           <input
@@ -269,13 +269,13 @@ export default function NewInvestigationPage() {
             maxLength={255}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-3 py-2.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text)] placeholder:text-[var(--ansein-text-dim)] text-sm focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)] transition-colors"
+            className="w-full px-3 py-2.5 rounded-md bg-card border border-border text-foreground placeholder:text-muted-foreground/50 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
             placeholder="e.g. APT29 Spear-Phishing Campaign Q4 2026"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-[var(--ansein-text-muted)] uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5">
             Description
           </label>
           <textarea
@@ -283,20 +283,20 @@ export default function NewInvestigationPage() {
             maxLength={10000}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full px-3 py-2.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text)] placeholder:text-[var(--ansein-text-dim)] text-sm focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)] transition-colors resize-y"
+            className="w-full px-3 py-2.5 rounded-md bg-card border border-border text-foreground placeholder:text-muted-foreground/50 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors resize-y"
             placeholder="Briefly describe the scope, objectives, and any prior context for this investigation…"
           />
-          <p className="text-xs text-[var(--ansein-text-dim)] mt-1">
+          <p className="text-xs text-muted-foreground/50 mt-1">
             {description.length} / 10000 characters
           </p>
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-[var(--ansein-text-muted)] uppercase tracking-wider mb-1.5">
-            Tags <span className="text-[var(--ansein-text-dim)] normal-case">(press Enter to add)</span>
+          <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5">
+            Tags <span className="text-muted-foreground/50 normal-case">(press Enter to add)</span>
           </label>
-          <div className="flex flex-wrap items-center gap-2 px-2.5 py-2 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] focus-within:border-[var(--ansein-primary)] focus-within:ring-1 focus-within:ring-[var(--ansein-primary)] transition-colors">
-            <Tag className="h-3.5 w-3.5 text-[var(--ansein-text-dim)]" />
+          <div className="flex flex-wrap items-center gap-2 px-2.5 py-2 rounded-md bg-card border border-border focus-within:border-primary focus-within:ring-1 focus-within:ring-[primary] transition-colors">
+            <Tag className="h-3.5 w-3.5 text-muted-foreground/50" />
             {tags.map((t) => (
               <span
                 key={t}
@@ -319,17 +319,17 @@ export default function NewInvestigationPage() {
               onKeyDown={handleTagKey}
               onBlur={addTag}
               placeholder={tags.length === 0 ? 'apt29, phishing, q4-2026' : ''}
-              className="flex-1 min-w-[100px] bg-transparent text-sm text-[var(--ansein-text)] placeholder:text-[var(--ansein-text-dim)] focus:outline-none"
+              className="flex-1 min-w-[100px] bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none"
             />
           </div>
         </div>
 
         {/* Tips card */}
-        <div className="rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] p-4">
+        <div className="rounded-md bg-card border border-border p-4">
           <div className="flex items-start gap-2.5">
-            <FileText className="h-4 w-4 text-[var(--ansein-primary)] flex-shrink-0 mt-0.5" />
-            <div className="text-xs text-[var(--ansein-text-muted)] leading-relaxed">
-              <strong className="text-[var(--ansein-text)]">Next step:</strong> after creating the
+            <FileText className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+            <div className="text-xs text-muted-foreground leading-relaxed">
+              <strong className="text-foreground">Next step:</strong> after creating the
               investigation you&apos;ll be taken to its detail page where you can add sources (raw text,
               files, URLs) and trigger the extraction pipeline with a single click.
             </div>
@@ -339,14 +339,14 @@ export default function NewInvestigationPage() {
         <div className="flex items-center justify-end gap-3 pt-2">
           <Link
             href="/app/investigations"
-            className="px-4 py-2 rounded-md text-sm text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] transition-colors"
+            className="px-4 py-2 rounded-md text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             Cancel
           </Link>
           <button
             type="submit"
             disabled={loading}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-[var(--ansein-primary)] text-[var(--ansein-bg)] text-sm font-medium hover:bg-[var(--ansein-primary-hover)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
           >
             {loading ? (
               <>

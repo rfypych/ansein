@@ -207,16 +207,16 @@ export default function AuditPage() {
       {/* Header */}
       <div className="mb-8 flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <p className="ansein-mono text-xs uppercase tracking-widest text-[var(--ansein-text-dim)] mb-1">
+          <p className="ansein-mono text-xs uppercase tracking-widest text-muted-foreground/50 mb-1">
             {isFullScope ? 'Security forensics' : 'Personal activity'}
           </p>
-          <h1 className="text-2xl font-semibold tracking-tight text-[var(--ansein-text)] flex items-center gap-3 flex-wrap">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground flex items-center gap-3 flex-wrap">
             {isFullScope ? 'Audit log' : 'My activity'}
             <Badge color={isFullScope ? 'primary' : 'slate'} dot>
               {isFullScope ? 'Workspace scope' : 'Own scope'}
             </Badge>
           </h1>
-          <p className="text-sm text-[var(--ansein-text-muted)] mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             {isFullScope
               ? 'Tamper-evident, hash-chained record of all security-relevant actions across the workspace.'
               : 'A hash-chained record of your own actions. Workspace-wide events are visible to editors and administrators.'}
@@ -233,7 +233,7 @@ export default function AuditPage() {
                 ? 'bg-rose-500/15 text-rose-300 border-rose-500/40 hover:bg-rose-500/25'
                 : chainStatus?.valid === true
                   ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/25'
-                  : 'bg-[var(--ansein-surface)] text-[var(--ansein-text-muted)] border-[var(--ansein-border)] hover:text-[var(--ansein-text)] hover:border-[var(--ansein-border-strong)]',
+                  : 'bg-card text-muted-foreground border-border hover:text-foreground hover:border-primary/50',
             )}
             title="Recompute hashes for the most recent entries and verify the chain is intact"
           >
@@ -267,10 +267,10 @@ export default function AuditPage() {
 
       {/* Action type breakdown */}
       {Object.keys(actionBreakdown).length > 0 && (
-        <div className="ansein-card rounded-xl p-5 mb-6">
-          <h3 className="text-sm font-semibold text-[var(--ansein-text)] mb-3 flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-[var(--ansein-primary)]/15 border border-[var(--ansein-primary)]/30">
-              <Activity className="h-3.5 w-3.5 text-[var(--ansein-primary)]" />
+        <div className="bg-card border border-border rounded-xl p-5 mb-6">
+          <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/15 border border-primary/30">
+              <Activity className="h-3.5 w-3.5 text-primary" />
             </div>
             Action breakdown
           </h3>
@@ -283,14 +283,14 @@ export default function AuditPage() {
                 return (
                   <div
                     key={type}
-                    className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)]"
+                    className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-card border border-border"
                   >
                     <span className="h-1.5 w-1.5 rounded-full" style={{ background: color }} />
-                    <span className="text-[10px] uppercase tracking-wider text-[var(--ansein-text-muted)] ansein-mono">
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground ansein-mono">
                       {type}
                     </span>
-                    <span className="text-xs font-semibold ansein-mono text-[var(--ansein-text)]">{count}</span>
-                    <span className="text-[9px] text-[var(--ansein-text-dim)]">({pct}%)</span>
+                    <span className="text-xs font-semibold ansein-mono text-foreground">{count}</span>
+                    <span className="text-[9px] text-muted-foreground/50">({pct}%)</span>
                   </div>
                 )
               })}
@@ -307,8 +307,8 @@ export default function AuditPage() {
             className={cn(
               'px-2.5 py-1 rounded-md text-xs font-medium border transition-colors',
               activeGroup === g.key
-                ? 'bg-[var(--ansein-primary)] text-[var(--ansein-bg)] border-[var(--ansein-primary)]'
-                : 'bg-[var(--ansein-surface)] text-[var(--ansein-text-muted)] border-[var(--ansein-border)] hover:text-[var(--ansein-text)] hover:border-[var(--ansein-border-strong)]'
+                ? 'bg-primary text-primary-foreground border-primary'
+                : 'bg-card text-muted-foreground border-border hover:text-foreground hover:border-primary/50'
             )}
           >
             {g.label}
@@ -322,9 +322,9 @@ export default function AuditPage() {
           <Spinner />
         </div>
       ) : items.length === 0 ? (
-        <div className="ansein-card rounded-xl">
+        <div className="bg-card border border-border rounded-xl">
           <EmptyState
-            icon={<Activity className="h-6 w-6 text-[var(--ansein-text-dim)]" />}
+            icon={<Activity className="h-6 w-6 text-muted-foreground/50" />}
             title={activeGroup === 'all' ? 'No audit events yet' : 'No matching events'}
             description={
               activeGroup === 'all'
@@ -335,13 +335,13 @@ export default function AuditPage() {
           />
         </div>
       ) : (
-        <div className="ansein-card rounded-xl overflow-hidden">
+        <div className="bg-card border border-border rounded-xl overflow-hidden">
           {/* Timeline list */}
           <div className="relative">
             {/* Vertical line */}
-            <div className="absolute left-[27px] top-0 bottom-0 w-px bg-[var(--ansein-border)]" />
+            <div className="absolute left-[27px] top-0 bottom-0 w-px bg-[border]" />
 
-            <div className="divide-y divide-[var(--ansein-border)]">
+            <div className="divide-y divide-border">
               {items.map((e) => {
                 const Icon = ACTION_ICONS[e.action] || Activity
                 const color = getActionColor(e.action)
@@ -349,12 +349,12 @@ export default function AuditPage() {
                 return (
                   <div
                     key={e.id}
-                    className="relative flex items-start gap-3 px-4 py-3 hover:bg-[var(--ansein-surface)]/40 transition-colors group"
+                    className="relative flex items-start gap-3 px-4 py-3 hover:bg-card/40 transition-colors group"
                   >
                     {/* Timeline node */}
                     <div className="relative z-10 flex-shrink-0 mt-0.5">
                       <div
-                        className="flex h-7 w-7 items-center justify-center rounded-full border-2 bg-[var(--ansein-bg)]"
+                        className="flex h-7 w-7 items-center justify-center rounded-full border-2 bg-background"
                         style={{ borderColor: color, color }}
                       >
                         <Icon className="h-3 w-3" />
@@ -365,29 +365,29 @@ export default function AuditPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2 flex-wrap">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-semibold text-[var(--ansein-text)]">
+                          <span className="text-xs font-semibold text-foreground">
                             {getActionLabel(e.action)}
                           </span>
-                          <span className="ansein-mono text-[10px] text-[var(--ansein-text-dim)]">
+                          <span className="ansein-mono text-[10px] text-muted-foreground/50">
                             {e.action}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 text-[10px] text-[var(--ansein-text-dim)]">
+                        <div className="flex items-center gap-2 text-[10px] text-muted-foreground/50">
                           <span className="ansein-mono">{formatRelative(e.created_at)}</span>
                           <span>·</span>
                           <span className="ansein-mono">{formatDate(e.created_at)}</span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 mt-1 text-[10px] text-[var(--ansein-text-muted)]">
+                      <div className="flex items-center gap-3 mt-1 text-[10px] text-muted-foreground">
                         {e.target_type && (
                           <span className="inline-flex items-center gap-1">
                             <span className="ansein-mono">{e.target_type}</span>
-                            {e.target_id && <span className="text-[var(--ansein-text-dim)]">#{e.target_id}</span>}
+                            {e.target_id && <span className="text-muted-foreground/50">#{e.target_id}</span>}
                           </span>
                         )}
                         {e.ip_address && (
                           <span className="inline-flex items-center gap-1 ansein-mono">
-                            <span className="text-[var(--ansein-text-dim)]">IP:</span>
+                            <span className="text-muted-foreground/50">IP:</span>
                             {e.ip_address}
                           </span>
                         )}
@@ -403,13 +403,13 @@ export default function AuditPage() {
                           {extraKeys.slice(0, 4).map((k) => (
                             <span
                               key={k}
-                              className="text-[9px] px-1.5 py-0.5 rounded bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text-dim)] ansein-mono"
+                              className="text-[9px] px-1.5 py-0.5 rounded bg-card border border-border text-muted-foreground/50 ansein-mono"
                             >
                               {k}={String(e.extra_metadata[k]).slice(0, 24)}
                             </span>
                           ))}
                           {extraKeys.length > 4 && (
-                            <span className="text-[9px] text-[var(--ansein-text-dim)]">
+                            <span className="text-[9px] text-muted-foreground/50">
                               +{extraKeys.length - 4} more
                             </span>
                           )}
@@ -419,7 +419,7 @@ export default function AuditPage() {
                       {e.entry_hash && (
                         <div className="mt-1.5 flex items-center gap-1.5">
                           <span
-                            className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded bg-[var(--ansein-primary)]/8 border border-[var(--ansein-primary)]/25 text-[var(--ansein-primary)] ansein-mono"
+                            className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded bg-primary/8 border border-primary/25 text-primary ansein-mono"
                             title={`prev: ${e.prev_hash || '(genesis)'}\nhash: ${e.entry_hash}`}
                           >
                             <Link2 className="h-2 w-2" />
@@ -436,25 +436,25 @@ export default function AuditPage() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between px-4 py-3 border-t border-[var(--ansein-border)]">
-              <p className="text-xs text-[var(--ansein-text-dim)] ansein-mono">
+            <div className="flex items-center justify-between px-4 py-3 border-t border-border">
+              <p className="text-xs text-muted-foreground/50 ansein-mono">
                 {((page - 1) * pageSize) + 1}–{Math.min(page * pageSize, total)} of {total}
               </p>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="p-1.5 rounded-md border border-[var(--ansein-border)] bg-[var(--ansein-surface)] text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] hover:border-[var(--ansein-border-strong)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  className="p-1.5 rounded-md border border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   <ChevronLeft className="h-3.5 w-3.5" />
                 </button>
-                <span className="text-xs text-[var(--ansein-text-muted)] ansein-mono px-2">
+                <span className="text-xs text-muted-foreground ansein-mono px-2">
                   {page} / {totalPages}
                 </span>
                 <button
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className="p-1.5 rounded-md border border-[var(--ansein-border)] bg-[var(--ansein-surface)] text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] hover:border-[var(--ansein-border-strong)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  className="p-1.5 rounded-md border border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   <ChevronRight className="h-3.5 w-3.5" />
                 </button>
@@ -465,9 +465,9 @@ export default function AuditPage() {
       )}
 
       {/* Note */}
-      <p className="mt-6 text-xs text-[var(--ansein-text-dim)] text-center">
+      <p className="mt-6 text-xs text-muted-foreground/50 text-center">
         Audit entries are immutable, hash-chained, and retained indefinitely. Each row's
-        <span className="ansein-mono text-[var(--ansein-primary)]"> entry_hash</span> depends on the
+        <span className="ansein-mono text-primary"> entry_hash</span> depends on the
         previous row's hash, making historical tampering detectable.
       </p>
     </div>
@@ -476,13 +476,13 @@ export default function AuditPage() {
 
 function StatTile({ label, value, icon, color }: { label: string; value: number | string; icon: React.ReactNode; color: string }) {
   return (
-    <div className="ansein-card rounded-lg p-3 relative overflow-hidden">
+    <div className="bg-card border border-border rounded-lg p-3 relative overflow-hidden">
       <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: color }} />
-      <div className="flex items-center gap-1.5 text-[var(--ansein-text-dim)] mb-1">
+      <div className="flex items-center gap-1.5 text-muted-foreground/50 mb-1">
         {icon}
         <span className="text-[10px] uppercase tracking-widest">{label}</span>
       </div>
-      <p className="text-lg font-semibold ansein-mono text-[var(--ansein-text)]">{value}</p>
+      <p className="text-lg font-semibold ansein-mono text-foreground">{value}</p>
     </div>
   )
 }

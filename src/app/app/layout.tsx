@@ -100,13 +100,13 @@ function AppShell({ children }: { children: ReactNode }) {
   const initials = user?.email?.[0]?.toUpperCase() || 'A'
 
   return (
-    <div className="flex h-screen bg-[var(--ansein-bg)] overflow-hidden">
+    <div className="flex h-screen bg-background overflow-hidden">
       <CommandPalette open={palette.open} onOpenChange={palette.setOpen} />
       <QuickPasteModal open={quickPasteOpen} onClose={() => setQuickPasteOpen(false)} />
       <GlobalShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
 
       {/* ---------- Sidebar (desktop) ---------- */}
-      <aside className="hidden md:flex w-64 flex-shrink-0 flex-col bg-[var(--ansein-sidebar)]/60 backdrop-blur-2xl border-r border-white/5 shadow-2xl z-20">
+      <aside className="hidden md:flex w-64 flex-shrink-0 flex-col bg-card/60 backdrop-blur-2xl border-r border-border shadow-sm z-20">
         <SidebarContent
           pathname={pathname}
           user={user}
@@ -124,9 +124,9 @@ function AppShell({ children }: { children: ReactNode }) {
             className="absolute inset-0 bg-black/60 backdrop-blur-md"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="absolute left-0 top-0 bottom-0 w-64 bg-[var(--ansein-sidebar)]/80 backdrop-blur-2xl border-r border-white/5 flex flex-col ansein-fade-in shadow-2xl">
+          <aside className="absolute left-0 top-0 bottom-0 w-64 bg-card/80 backdrop-blur-2xl border-r border-border flex flex-col ansein-fade-in shadow-sm">
             <button
-              className="absolute top-4 right-4 text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)]"
+              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
               onClick={() => setMobileOpen(false)}
             >
               <X className="h-5 w-5" />
@@ -146,10 +146,10 @@ function AppShell({ children }: { children: ReactNode }) {
       {/* ---------- Main content ---------- */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Mobile top bar */}
-        <div className="md:hidden flex items-center justify-between h-14 px-4 border-b border-white/5 bg-[var(--ansein-surface)]/60 backdrop-blur-xl z-20">
+        <div className="md:hidden flex items-center justify-between h-14 px-4 border-b border-border bg-card/60 backdrop-blur-xl z-20">
           <button
             onClick={() => setMobileOpen(true)}
-            className="p-1.5 rounded-md hover:bg-[var(--ansein-surface-hover)] text-[var(--ansein-text-muted)]"
+            className="p-1.5 rounded-md hover:hover:bg-card/80 text-muted-foreground"
             aria-label="Open menu"
           >
             <Menu className="h-5 w-5" />
@@ -157,7 +157,7 @@ function AppShell({ children }: { children: ReactNode }) {
           <BrandMark size={24} />
           <button
             onClick={() => palette.setOpen(true)}
-            className="p-1.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text-muted)]"
+            className="p-1.5 rounded-md bg-card border border-border text-muted-foreground"
             aria-label="Open command palette"
           >
             <CommandIcon className="h-4 w-4" />
@@ -170,7 +170,7 @@ function AppShell({ children }: { children: ReactNode }) {
       {/* Floating shortcuts help button */}
       <button
         onClick={() => setShortcutsOpen(true)}
-        className="fixed bottom-4 right-4 flex h-9 w-9 items-center justify-center rounded-full bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] hover:border-[var(--ansein-border-strong)] transition-colors z-30 shadow-lg"
+        className="fixed bottom-4 right-4 flex h-9 w-9 items-center justify-center rounded-full bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors z-30 shadow-lg"
         title="Keyboard shortcuts (?)"
         aria-label="Keyboard shortcuts"
       >
@@ -211,7 +211,7 @@ function SidebarContent({
   return (
     <>
       {/* Logo */}
-      <div className="px-5 py-5 border-b border-[var(--ansein-border)]">
+      <div className="px-5 py-5 border-b border-border">
         <Link href="/app">
           <Brand size={32} />
         </Link>
@@ -221,21 +221,21 @@ function SidebarContent({
       <div className="px-3 pt-4 space-y-2">
         <Link
           href="/app/investigations/new"
-          className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-md bg-[var(--ansein-primary)] text-[var(--ansein-bg)] text-sm font-medium hover:bg-[var(--ansein-primary-hover)] transition-colors"
+          className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
         >
           <Plus className="h-4 w-4" />
           New investigation
         </Link>
         <button
           onClick={onOpenQuickPaste}
-          className="w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-xs text-[var(--ansein-text-muted)] hover:border-[var(--ansein-border-strong)] hover:text-[var(--ansein-text)] transition-colors"
+          className="w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-md bg-card border border-border text-xs text-muted-foreground hover:border-primary/50 hover:text-foreground transition-colors"
           title="Quick paste (Shift+P)"
         >
           <span className="flex items-center gap-1.5">
-            <Zap className="h-3 w-3 text-[var(--ansein-accent)]" />
+            <Zap className="h-3 w-3 text-accent-foreground" />
             Quick paste
           </span>
-          <kbd className="ansein-mono text-[9px] px-1 py-0.5 rounded bg-[var(--ansein-bg)] border border-[var(--ansein-border)] text-[var(--ansein-text-dim)]">
+          <kbd className="ansein-mono text-[9px] px-1 py-0.5 rounded bg-background border border-border text-muted-foreground/50">
             ⇧P
           </kbd>
         </button>
@@ -245,13 +245,13 @@ function SidebarContent({
       <div className="px-3 pt-2">
         <button
           onClick={onOpenPalette}
-          className="w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-xs text-[var(--ansein-text-muted)] hover:border-[var(--ansein-border-strong)] hover:text-[var(--ansein-text)] transition-colors"
+          className="w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-md bg-card border border-border text-xs text-muted-foreground hover:border-primary/50 hover:text-foreground transition-colors"
         >
           <span className="flex items-center gap-1.5">
             <CommandIcon className="h-3 w-3" />
             Search…
           </span>
-          <kbd className="ansein-mono text-[9px] px-1 py-0.5 rounded bg-[var(--ansein-bg)] border border-[var(--ansein-border)] text-[var(--ansein-text-dim)]">
+          <kbd className="ansein-mono text-[9px] px-1 py-0.5 rounded bg-background border border-border text-muted-foreground/50">
             ⌘K
           </kbd>
         </button>
@@ -259,7 +259,7 @@ function SidebarContent({
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-        <p className="px-2 pb-2 text-[10px] font-medium uppercase tracking-[0.15em] text-[var(--ansein-text-dim)]">
+        <p className="px-2 pb-2 text-[10px] font-sans uppercase tracking-[0.2em] text-muted-foreground/50">
           Workspace
         </p>
         {NAV_ITEMS.map((item) => {
@@ -275,20 +275,20 @@ function SidebarContent({
               className={cn(
                 'flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-all group relative',
                 active
-                  ? 'bg-white/5 border border-white/5 text-[var(--ansein-text)] shadow-sm'
-                  : 'text-[var(--ansein-text-muted)] border border-transparent hover:bg-white/[0.02] hover:text-[var(--ansein-text)]'
+                  ? 'bg-card border border-border text-foreground shadow-sm'
+                  : 'text-muted-foreground border border-transparent hover:bg-card/50 hover:text-foreground'
               )}
             >
               {active && (
                 <span
-                  className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-0.5 rounded-r-full bg-[var(--ansein-primary)]"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-0.5 rounded-r-full bg-primary"
                   aria-hidden="true"
                 />
               )}
               <Icon
                 className={cn(
                   'h-4 w-4 transition-colors flex-shrink-0',
-                  active ? 'text-[var(--ansein-primary)]' : 'text-[var(--ansein-text-dim)] group-hover:text-[var(--ansein-text-muted)]'
+                  active ? 'text-primary' : 'text-muted-foreground/50 group-hover:text-muted-foreground'
                 )}
               />
               <span className="font-medium truncate">{item.label}</span>
@@ -299,7 +299,7 @@ function SidebarContent({
         {/* Admin section — visible to editor+ roles (per-item minimum) */}
         {visibleAdminItems.length > 0 && (
           <>
-            <p className="px-2 pt-5 pb-2 text-[10px] font-medium uppercase tracking-[0.15em] text-[var(--ansein-text-dim)]">
+            <p className="px-2 pt-5 pb-2 text-[10px] font-sans uppercase tracking-[0.2em] text-muted-foreground/50">
               Administration
             </p>
             {visibleAdminItems.map((item) => {
@@ -312,8 +312,8 @@ function SidebarContent({
                   className={cn(
                     'flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-all group relative',
                     active
-                      ? 'bg-white/5 border border-white/5 text-[var(--ansein-text)] shadow-sm'
-                      : 'text-[var(--ansein-text-muted)] border border-transparent hover:bg-white/[0.02] hover:text-[var(--ansein-text)]'
+                      ? 'bg-card border border-border text-foreground shadow-sm'
+                      : 'text-muted-foreground border border-transparent hover:bg-card/50 hover:text-foreground'
                   )}
                 >
                   {active && (
@@ -325,7 +325,7 @@ function SidebarContent({
                   <Icon
                     className={cn(
                       'h-4 w-4 transition-colors flex-shrink-0',
-                      active ? 'text-amber-400' : 'text-[var(--ansein-text-dim)] group-hover:text-[var(--ansein-text-muted)]'
+                      active ? 'text-amber-400' : 'text-muted-foreground/50 group-hover:text-muted-foreground'
                     )}
                   />
                   <span className="font-medium truncate">{item.label}</span>
@@ -337,10 +337,10 @@ function SidebarContent({
       </nav>
 
       {/* User footer — make it a Profile link */}
-      <div className="px-3 py-3 border-t border-[var(--ansein-border)]">
+      <div className="px-3 py-3 border-t border-border">
         <Link
           href="/app/profile"
-          className="flex items-center gap-2.5 px-2 py-2 rounded-md hover:bg-[var(--ansein-surface)] transition-colors group"
+          className="flex items-center gap-2.5 px-2 py-2 rounded-md hover:bg-card transition-colors group"
         >
           {(() => {
             const email = user?.email || 'default'
@@ -349,7 +349,7 @@ function SidebarContent({
             const hue2 = (hue1 + 60) % 360
             return (
               <div
-                className="flex h-8 w-8 items-center justify-center rounded-full text-white text-sm font-semibold flex-shrink-0 ring-2 ring-[var(--ansein-sidebar)]"
+                className="flex h-8 w-8 items-center justify-center rounded-full text-white text-sm font-semibold flex-shrink-0 ring-2 ring-card"
                 style={{ background: `linear-gradient(135deg, hsl(${hue1}, 70%, 45%) 0%, hsl(${hue2}, 70%, 35%) 100%)` }}
               >
                 {initials}
@@ -357,7 +357,7 @@ function SidebarContent({
             )
           })()}
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-[var(--ansein-text)] truncate">
+            <p className="text-xs font-medium text-foreground truncate">
               {user?.full_name || user?.email || 'Analyst'}
             </p>
             <p className="text-[10px] uppercase tracking-wider flex items-center gap-1">
@@ -373,7 +373,7 @@ function SidebarContent({
               e.stopPropagation()
               onLogout()
             }}
-            className="h-3.5 w-3.5 text-[var(--ansein-text-dim)] hover:text-rose-400 transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100"
+            className="h-3.5 w-3.5 text-muted-foreground/50 hover:text-rose-400 transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100"
           />
         </Link>
       </div>

@@ -115,9 +115,9 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
   // Initialize / reset the slider to "show all" when the underlying graph data
   // changes (e.g. user switches investigations, pipeline re-runs).
   useEffect(() => {
-    // eslint-disable-next-line
+
     setTimelineAt(null)
-    // eslint-disable-next-line
+
     setIsPlaying(false)
   }, [data])
 
@@ -353,7 +353,7 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
       .attr('fill', '#64748b')
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'central')
-      .attr('font-family', 'var(--font-geist-mono), monospace')
+      .attr('font-family', 'var(--font-courier), monospace')
       .text((d) => d.label)
 
     // Node groups
@@ -451,7 +451,7 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
       .attr('dominant-baseline', 'central')
       .attr('font-size', 9)
       .attr('fill', '#cbd5e1')
-      .attr('font-family', 'var(--font-geist-mono), monospace')
+      .attr('font-family', 'var(--font-courier), monospace')
       .text((d) => (d.label.length > 20 ? d.label.slice(0, 18) + '…' : d.label))
 
     // Click handler — when community data is available, highlight every node
@@ -741,13 +741,13 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
   void handleNodeClick
 
   return (
-    <div className="relative ansein-graph-bg rounded-lg border border-[var(--ansein-border)] overflow-hidden" style={{ height }}>
+    <div className="relative bg-background rounded-lg border border-border overflow-hidden" style={{ height }}>
       <div ref={containerRef} className="absolute inset-0">
         {data.nodes.length === 0 ? (
           <div className="flex items-center justify-center h-full text-center px-6">
             <div>
-              <Grid3x3 className="h-10 w-10 text-[var(--ansein-text-dim)] mx-auto mb-3" />
-              <p className="text-sm text-[var(--ansein-text-muted)]">
+              <Grid3x3 className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground">
                 No graph data yet. Run the extraction pipeline to populate the knowledge graph.
               </p>
             </div>
@@ -762,21 +762,21 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
         <div className="absolute top-3 right-3 flex flex-col gap-1.5">
           <button
             onClick={() => zoomBy(1.3)}
-            className="p-1.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] hover:border-[var(--ansein-border-strong)] transition-colors"
+            className="p-1.5 rounded-md bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
             title="Zoom in"
           >
             <ZoomIn className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={() => zoomBy(1 / 1.3)}
-            className="p-1.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] hover:border-[var(--ansein-border-strong)] transition-colors"
+            className="p-1.5 rounded-md bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
             title="Zoom out"
           >
             <ZoomOut className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={resetZoom}
-            className="p-1.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] hover:border-[var(--ansein-border-strong)] transition-colors"
+            className="p-1.5 rounded-md bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
             title="Reset view"
           >
             <Maximize2 className="h-3.5 w-3.5" />
@@ -786,8 +786,8 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
             className={
               'p-1.5 rounded-md border transition-colors ' +
               (simRunning
-                ? 'bg-[var(--ansein-primary)]/10 border-[var(--ansein-primary)]/30 text-[var(--ansein-primary)]'
-                : 'bg-[var(--ansein-surface)] border-[var(--ansein-border)] text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)]')
+                ? 'bg-primary/10 border-primary/30 text-primary'
+                : 'bg-card border-border text-muted-foreground hover:text-foreground')
             }
             title={simRunning ? 'Pause simulation' : 'Resume simulation'}
           >
@@ -798,8 +798,8 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
             className={
               'p-1.5 rounded-md border transition-colors ' +
               (showGrid
-                ? 'bg-[var(--ansein-primary)]/10 border-[var(--ansein-primary)]/30 text-[var(--ansein-primary)]'
-                : 'bg-[var(--ansein-surface)] border-[var(--ansein-border)] text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)]')
+                ? 'bg-primary/10 border-primary/30 text-primary'
+                : 'bg-card border-border text-muted-foreground hover:text-foreground')
             }
             title="Toggle grid"
           >
@@ -811,8 +811,8 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
               className={
                 'p-1.5 rounded-md border transition-colors ' +
                 (colorMode === 'community'
-                  ? 'bg-[var(--ansein-primary)]/10 border-[var(--ansein-primary)]/30 text-[var(--ansein-primary)]'
-                  : 'bg-[var(--ansein-surface)] border-[var(--ansein-border)] text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)]')
+                  ? 'bg-primary/10 border-primary/30 text-primary'
+                  : 'bg-card border-border text-muted-foreground hover:text-foreground')
               }
               title={
                 colorMode === 'community'
@@ -828,7 +828,7 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
 
       {/* Selected node info panel */}
       {selectedNode && (
-        <div className="absolute bottom-3 left-3 right-3 md:right-auto md:w-80 ansein-card rounded-lg p-4">
+        <div className="absolute bottom-3 left-3 right-3 md:right-auto md:w-80 bg-card border border-border rounded-lg p-4">
           <div className="flex items-start gap-3">
             <div
               className="h-10 w-10 rounded-lg flex-shrink-0 border flex items-center justify-center"
@@ -840,13 +840,13 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
               <div className="h-4 w-4 rounded-full" style={{ background: colorFor(selectedNode) }} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] uppercase tracking-wider ansein-mono text-[var(--ansein-text-dim)]">
+              <p className="text-[10px] uppercase tracking-wider ansein-mono text-muted-foreground/50">
                 {selectedNode.type.replace(/_/g, ' ')}
               </p>
-              <p className="text-sm font-medium text-[var(--ansein-text)] break-all">
+              <p className="text-sm font-medium text-foreground break-all">
                 {selectedNode.label}
               </p>
-              <div className="mt-2 flex items-center gap-3 text-[10px] text-[var(--ansein-text-muted)]">
+              <div className="mt-2 flex items-center gap-3 text-[10px] text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <span className="h-1.5 w-1.5 rounded-full" style={{ background: selectedNode.color }} />
                   confidence: {(selectedNode.confidence * 100).toFixed(0)}%
@@ -871,8 +871,8 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
               {data.edges.filter((e) =>
                 e.source === selectedNode.id || e.target === selectedNode.id
               ).length > 0 && (
-                <div className="mt-3 pt-3 border-t border-[var(--ansein-border)]">
-                  <p className="text-[9px] uppercase tracking-widest text-[var(--ansein-text-dim)] mb-1.5">
+                <div className="mt-3 pt-3 border-t border-border">
+                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground/50 mb-1.5">
                     Relationships
                   </p>
                   <div className="space-y-1 max-h-32 overflow-y-auto">
@@ -884,9 +884,9 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
                         )
                         return (
                           <div key={i} className="flex items-center gap-1.5 text-[10px]">
-                            <span className="text-[var(--ansein-text-dim)] ansein-mono">{e.label}</span>
-                            <span className="text-[var(--ansein-text-dim)]">→</span>
-                            <span className="text-[var(--ansein-text-muted)] truncate ansein-mono">
+                            <span className="text-muted-foreground/50 ansein-mono">{e.label}</span>
+                            <span className="text-muted-foreground/50">→</span>
+                            <span className="text-muted-foreground truncate ansein-mono">
                               {targetNode?.label || '?'}
                             </span>
                           </div>
@@ -898,7 +898,7 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
             </div>
             <button
               onClick={() => setSelectedNode(null)}
-              className="text-[var(--ansein-text-dim)] hover:text-[var(--ansein-text)] text-xs flex-shrink-0"
+              className="text-muted-foreground/50 hover:text-foreground text-xs flex-shrink-0"
             >
               ✕
             </button>
@@ -908,14 +908,14 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
 
       {/* Legend + Stats */}
       {data.nodes.length > 0 && (
-        <div className="absolute top-3 left-3 ansein-card rounded-md p-2.5 max-w-[210px]">
+        <div className="absolute top-3 left-3 bg-card border border-border rounded-md p-2.5 max-w-[210px]">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[9px] uppercase tracking-widest ansein-mono text-[var(--ansein-text-dim)]">
+            <p className="text-[9px] uppercase tracking-widest ansein-mono text-muted-foreground/50">
               Graph
             </p>
             <div className="flex items-center gap-2 text-[10px] ansein-mono">
-              <span className="text-[var(--ansein-primary)]">{data.nodes.length} nodes</span>
-              <span className="text-[var(--ansein-text-dim)]">·</span>
+              <span className="text-primary">{data.nodes.length} nodes</span>
+              <span className="text-muted-foreground/50">·</span>
               <span className="text-amber-400">{data.edges.length} edges</span>
             </div>
           </div>
@@ -928,10 +928,10 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
           {hasCommunities && data.communities && data.communities.length > 0 && (
             <div className={colorMode === 'community' ? '' : 'opacity-50'}>
               <div className="flex items-center justify-between mb-1.5">
-                <p className="text-[9px] uppercase tracking-widest ansein-mono text-[var(--ansein-text-dim)]">
+                <p className="text-[9px] uppercase tracking-widest ansein-mono text-muted-foreground/50">
                   Communities
                 </p>
-                <span className="text-[9px] text-[var(--ansein-text-dim)] ansein-mono">
+                <span className="text-[9px] text-muted-foreground/50 ansein-mono">
                   {data.communities.length} cluster{data.communities.length === 1 ? '' : 's'}
                 </span>
               </div>
@@ -942,14 +942,14 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
                       className="h-1.5 w-1.5 rounded-full flex-shrink-0"
                       style={{ background: c.color }}
                     />
-                    <span className="text-[var(--ansein-text-muted)] truncate">cluster #{c.id}</span>
-                    <span className="text-[var(--ansein-text-dim)] ml-auto ansein-mono">{c.size}</span>
+                    <span className="text-muted-foreground truncate">cluster #{c.id}</span>
+                    <span className="text-muted-foreground/50 ml-auto ansein-mono">{c.size}</span>
                   </div>
                 ))}
               </div>
             </div>
           )}
-          <p className="text-[9px] uppercase tracking-widest ansein-mono text-[var(--ansein-text-dim)] mb-1.5">
+          <p className="text-[9px] uppercase tracking-widest ansein-mono text-muted-foreground/50 mb-1.5">
             Entity types
           </p>
           <div
@@ -967,8 +967,8 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
                     className="h-1.5 w-1.5 rounded-full flex-shrink-0"
                     style={{ background: n.color }}
                   />
-                  <span className="text-[var(--ansein-text-muted)] truncate">{t.replace(/_/g, ' ')}</span>
-                  <span className="text-[var(--ansein-text-dim)] ml-auto ansein-mono">{count}</span>
+                  <span className="text-muted-foreground truncate">{t.replace(/_/g, ' ')}</span>
+                  <span className="text-muted-foreground/50 ml-auto ansein-mono">{count}</span>
                 </div>
               )
             })}
@@ -978,13 +978,13 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
 
       {/* 4D Timeline Playback Slider */}
       {data.nodes.length > 0 && hasTemporal && (
-        <div className="absolute bottom-0 left-0 right-0 ansein-card border-t border-[var(--ansein-border)] rounded-none px-4 py-2.5">
+        <div className="absolute bottom-0 left-0 right-0 bg-card border border-border border-t border-border rounded-none px-4 py-2.5">
           <div className="flex items-center gap-3">
             {/* Playback buttons */}
             <div className="flex items-center gap-1 flex-shrink-0">
               <button
                 onClick={rewindTimeline}
-                className="p-1.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] hover:border-[var(--ansein-border-strong)] transition-colors"
+                className="p-1.5 rounded-md bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
                 title="Rewind to start"
               >
                 <Rewind className="h-3.5 w-3.5" />
@@ -994,8 +994,8 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
                 className={
                   'p-1.5 rounded-md border transition-colors ' +
                   (isPlaying
-                    ? 'bg-[var(--ansein-primary)]/10 border-[var(--ansein-primary)]/30 text-[var(--ansein-primary)]'
-                    : 'bg-[var(--ansein-primary)] text-[var(--ansein-bg)] border-[var(--ansein-primary)] hover:bg-[var(--ansein-primary-hover)]')
+                    ? 'bg-primary/10 border-primary/30 text-primary'
+                    : 'bg-primary text-primary-foreground border-primary hover:bg-primary/90')
                 }
                 title={isPlaying ? 'Pause playback' : 'Play timeline (~10s)'}
               >
@@ -1004,7 +1004,7 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
             </div>
 
             {/* Clock icon + start label */}
-            <div className="flex items-center gap-1.5 flex-shrink-0 text-[10px] ansein-mono text-[var(--ansein-text-dim)]">
+            <div className="flex items-center gap-1.5 flex-shrink-0 text-[10px] ansein-mono text-muted-foreground/50">
               <Clock className="h-3 w-3" />
               <span>{fmtDate(minTs)}</span>
             </div>
@@ -1022,15 +1022,15 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
             />
 
             {/* End label + live count */}
-            <div className="flex items-center gap-1.5 flex-shrink-0 text-[10px] ansein-mono text-[var(--ansein-text-dim)]">
+            <div className="flex items-center gap-1.5 flex-shrink-0 text-[10px] ansein-mono text-muted-foreground/50">
               <span>{fmtDate(maxTs)}</span>
             </div>
           </div>
 
           {/* Status row: live count + current position */}
           <div className="mt-1.5 flex items-center justify-between text-[9px] uppercase tracking-widest ansein-mono">
-            <span className="text-[var(--ansein-text-dim)]">
-              <span className="text-[var(--ansein-primary)]">{visibleNodeCount}</span>
+            <span className="text-muted-foreground/50">
+              <span className="text-primary">{visibleNodeCount}</span>
               <span className="mx-1">/</span>
               <span>{data.nodes.length} nodes</span>
               <span className="mx-2">·</span>
@@ -1038,7 +1038,7 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
               <span className="mx-1">/</span>
               <span>{data.edges.length} edges</span>
             </span>
-            <span className="text-[var(--ansein-text-dim)]">
+            <span className="text-muted-foreground/50">
               {timelineAt == null
                 ? 'showing all · drag to scrub'
                 : `at ${fmtDate(timelineAt)}`}

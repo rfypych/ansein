@@ -76,9 +76,9 @@ export default function AdminPage() {
   if (!isAdmin) {
     return (
       <div className="px-6 py-8 max-w-5xl mx-auto">
-        <div className="ansein-card rounded-xl">
+        <div className="bg-card border border-border rounded-xl">
           <EmptyState
-            icon={<Shield className="h-6 w-6 text-[var(--ansein-text-dim)]" />}
+            icon={<Shield className="h-6 w-6 text-muted-foreground/50" />}
             title="Administrator access required"
             description="This page is only visible to workspace administrators."
             className="py-16"
@@ -92,14 +92,14 @@ export default function AdminPage() {
     <div className="px-6 py-8 max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <p className="ansein-mono text-xs uppercase tracking-widest text-[var(--ansein-text-dim)] mb-1">
+        <p className="ansein-mono text-xs uppercase tracking-widest text-muted-foreground/50 mb-1">
           Administration
         </p>
-        <h1 className="text-2xl font-semibold tracking-tight text-[var(--ansein-text)] flex items-center gap-3">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground flex items-center gap-3">
           Admin console
           <Badge color="danger" dot>Admin</Badge>
         </h1>
-        <p className="text-sm text-[var(--ansein-text-muted)] mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           Manage users, roles, and monitor workspace health.
         </p>
       </div>
@@ -172,8 +172,8 @@ function SystemOverview() {
       </div>
 
       {/* Role distribution */}
-      <div className="ansein-card rounded-xl p-6">
-        <h3 className="text-sm font-semibold text-[var(--ansein-text)] mb-4 flex items-center gap-2">
+      <div className="bg-card border border-border rounded-xl p-6">
+        <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-rose-500/15 border border-rose-500/30">
             <Shield className="h-3.5 w-3.5 text-rose-400" />
           </div>
@@ -209,13 +209,13 @@ function SystemOverview() {
                     {opt.value === 'admin' ? <Crown className="h-3 w-3" /> : <Pencil className="h-3 w-3" />}
                     {opt.value}
                   </span>
-                  <div className="flex-1 h-2 rounded-full bg-[var(--ansein-border)]">
+                  <div className="flex-1 h-2 rounded-full bg-[border]">
                     <div
                       className={cn('h-full rounded-full transition-all', colors.dot)}
                       style={{ width: `${pct}%` }}
                     />
                   </div>
-                  <span className="text-xs ansein-mono text-[var(--ansein-text-muted)] w-10 text-right">
+                  <span className="text-xs ansein-mono text-muted-foreground w-10 text-right">
                     {count} ({pct}%)
                   </span>
                 </div>
@@ -329,15 +329,15 @@ function UserManagementSection() {
   }
 
   return (
-    <div className="ansein-card rounded-xl p-6">
+    <div className="bg-card border border-border rounded-xl p-6">
       {/* Section header */}
       <div className="flex items-start justify-between gap-3 mb-4 flex-wrap">
         <div>
-          <h3 className="text-sm font-semibold text-[var(--ansein-text)] flex items-center gap-2">
-            <Users className="h-4 w-4 text-[var(--ansein-primary)]" />
+          <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <Users className="h-4 w-4 text-primary" />
             User Management
           </h3>
-          <p className="text-xs text-[var(--ansein-text-muted)] mt-0.5">
+          <p className="text-xs text-muted-foreground mt-0.5">
             Manage workspace users and roles. {total} user{total === 1 ? '' : 's'} total ·{' '}
             <span className="text-rose-300">{roleCounts.admin} admin</span> ·{' '}
             <span className="text-amber-300">{roleCounts.editor} editor{roleCounts.editor === 1 ? '' : 's'}</span> ·{' '}
@@ -346,7 +346,7 @@ function UserManagementSection() {
         </div>
         <button
           onClick={() => setShowCreateUser(true)}
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md bg-[var(--ansein-primary)] text-[var(--ansein-bg)] text-xs font-medium hover:bg-[var(--ansein-primary-hover)] transition-colors whitespace-nowrap"
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors whitespace-nowrap"
         >
           <UserPlus className="h-3.5 w-3.5" />
           Create user
@@ -355,18 +355,18 @@ function UserManagementSection() {
 
       {/* Search */}
       <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--ansein-text-dim)]" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by name, email, or role…"
-          className="w-full pl-9 pr-3 py-2 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-sm focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)]"
+          className="w-full pl-9 pr-3 py-2 rounded-md bg-card border border-border text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
         />
         {search && (
           <button
             onClick={() => setSearch('')}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[var(--ansein-text-dim)] hover:text-[var(--ansein-text)]"
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground/50 hover:text-foreground"
           >
             <X className="h-3.5 w-3.5" />
           </button>
@@ -380,7 +380,7 @@ function UserManagementSection() {
         </div>
       ) : filtered.length === 0 ? (
         <EmptyState
-          icon={<Users className="h-6 w-6 text-[var(--ansein-text-dim)]" />}
+          icon={<Users className="h-6 w-6 text-muted-foreground/50" />}
           title={search ? 'No users match your search' : 'No users found'}
           description={search ? 'Try a different search term.' : 'Create a user to get started.'}
           className="py-10"
@@ -399,8 +399,8 @@ function UserManagementSection() {
                 className={cn(
                   'flex items-center gap-3 p-3 rounded-md border transition-colors',
                   u.is_active
-                    ? 'bg-[var(--ansein-surface)] border-[var(--ansein-border)] hover:border-[var(--ansein-border-strong)]'
-                    : 'bg-[var(--ansein-surface)]/50 border-[var(--ansein-border)] opacity-70'
+                    ? 'bg-card border-border hover:border-primary/50'
+                    : 'bg-card/50 border-border opacity-70'
                 )}
               >
                 {/* Avatar */}
@@ -416,7 +416,7 @@ function UserManagementSection() {
                 {/* Identity + stats */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-sm font-medium text-[var(--ansein-text)] truncate">
+                    <p className="text-sm font-medium text-foreground truncate">
                       {u.full_name || 'Analyst'}
                     </p>
                     {isSelf && (
@@ -426,8 +426,8 @@ function UserManagementSection() {
                     )}
                     {!u.is_active && <Badge color="danger">Inactive</Badge>}
                   </div>
-                  <p className="text-[11px] text-[var(--ansein-text-dim)] ansein-mono truncate">{u.email}</p>
-                  <div className="mt-1 flex items-center gap-3 text-[10px] text-[var(--ansein-text-dim)]">
+                  <p className="text-[11px] text-muted-foreground/50 ansein-mono truncate">{u.email}</p>
+                  <div className="mt-1 flex items-center gap-3 text-[10px] text-muted-foreground/50">
                     <span>{u.stats.investigations} inv.</span>
                     <span>{u.stats.copilot_sessions} chats</span>
                     <span>{u.stats.audit_events} events</span>
@@ -441,7 +441,7 @@ function UserManagementSection() {
 
                 {/* Role selector */}
                 <div className="flex items-center gap-1.5 flex-shrink-0">
-                  <div className="flex rounded-md border border-[var(--ansein-border)] bg-[var(--ansein-bg)] overflow-hidden">
+                  <div className="flex rounded-md border border-border bg-background overflow-hidden">
                     {ROLE_OPTIONS.map((opt) => {
                       const active = uRole === opt.value
                       const colors = ROLE_COLORS[opt.value as RbacRole]
@@ -460,7 +460,7 @@ function UserManagementSection() {
                             'px-2.5 py-1.5 text-[11px] font-medium border-0 transition-colors capitalize',
                             active
                               ? cn(colors.bg, colors.fg)
-                              : 'bg-transparent text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] hover:bg-[var(--ansein-surface)]',
+                              : 'bg-transparent text-muted-foreground hover:text-foreground hover:bg-card',
                             (isRolePending || isSelf) && 'opacity-50 cursor-not-allowed'
                           )}
                         >
@@ -489,7 +489,7 @@ function UserManagementSection() {
                   className={cn(
                     'inline-flex items-center justify-center h-8 w-8 rounded-md border transition-colors flex-shrink-0',
                     u.is_active
-                      ? 'bg-[var(--ansein-surface)] border-[var(--ansein-border)] text-[var(--ansein-text-muted)] hover:text-rose-400 hover:border-rose-500/40 hover:bg-rose-500/10'
+                      ? 'bg-card border-border text-muted-foreground hover:text-rose-400 hover:border-rose-500/40 hover:bg-rose-500/10'
                       : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20',
                     (isStatusPending || isSelf) && 'opacity-50 cursor-not-allowed'
                   )}
@@ -509,9 +509,9 @@ function UserManagementSection() {
       )}
 
       {/* Footer note */}
-      <div className="mt-4 pt-4 border-t border-[var(--ansein-border)] flex items-start gap-2.5">
+      <div className="mt-4 pt-4 border-t border-border flex items-start gap-2.5">
         <AlertCircle className="h-3.5 w-3.5 text-amber-400 flex-shrink-0 mt-0.5" />
-        <p className="text-[11px] text-[var(--ansein-text-muted)] leading-relaxed">
+        <p className="text-[11px] text-muted-foreground leading-relaxed">
           Role changes take effect immediately for new API requests. The user&apos;s current access
           token remains valid until it expires. Deactivated users cannot log in. You cannot deactivate
           your own account.
@@ -585,36 +585,36 @@ function CreateUserModal({ onClose }: { onClose: () => void }) {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md mx-4 ansein-card rounded-xl p-6 border border-[var(--ansein-border)] shadow-2xl">
+      <div className="relative w-full max-w-md mx-4 bg-card border border-border rounded-xl p-6 border border-border shadow-2xl">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1 text-[var(--ansein-text-dim)] hover:text-[var(--ansein-text)] transition-colors"
+          className="absolute top-4 right-4 p-1 text-muted-foreground/50 hover:text-foreground transition-colors"
         >
           <X className="h-4 w-4" />
         </button>
 
-        <h3 className="text-base font-semibold text-[var(--ansein-text)] mb-1 flex items-center gap-2">
-          <UserPlus className="h-4 w-4 text-[var(--ansein-primary)]" />
+        <h3 className="text-base font-semibold text-foreground mb-1 flex items-center gap-2">
+          <UserPlus className="h-4 w-4 text-primary" />
           Create new user
         </h3>
-        <p className="text-xs text-[var(--ansein-text-muted)] mb-5">
+        <p className="text-xs text-muted-foreground mb-5">
           Provision a new account directly. The user can change their password after first login.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Email */}
           <div>
-            <label className="block text-xs font-medium text-[var(--ansein-text-muted)] uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5">
               Email
             </label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--ansein-text-dim)]" />
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full pl-9 pr-3 py-2 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-sm focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)]"
+                className="w-full pl-9 pr-3 py-2 rounded-md bg-card border border-border text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 placeholder="analyst@company.com"
                 autoFocus
               />
@@ -623,16 +623,16 @@ function CreateUserModal({ onClose }: { onClose: () => void }) {
 
           {/* Full name */}
           <div>
-            <label className="block text-xs font-medium text-[var(--ansein-text-muted)] uppercase tracking-wider mb-1.5">
-              Full name <span className="text-[var(--ansein-text-dim)] normal-case">(optional)</span>
+            <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5">
+              Full name <span className="text-muted-foreground/50 normal-case">(optional)</span>
             </label>
             <div className="relative">
-              <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--ansein-text-dim)]" />
+              <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
               <input
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-sm focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)]"
+                className="w-full pl-9 pr-3 py-2 rounded-md bg-card border border-border text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 placeholder="Jane Analyst"
                 maxLength={120}
               />
@@ -641,11 +641,11 @@ function CreateUserModal({ onClose }: { onClose: () => void }) {
 
           {/* Password */}
           <div>
-            <label className="block text-xs font-medium text-[var(--ansein-text-muted)] uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5">
               Temporary password
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--ansein-text-dim)]" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
               <input
                 type={showPw ? 'text' : 'password'}
                 value={password}
@@ -653,13 +653,13 @@ function CreateUserModal({ onClose }: { onClose: () => void }) {
                 required
                 minLength={8}
                 autoComplete="new-password"
-                className="w-full pl-9 pr-10 py-2 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-sm focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)]"
+                className="w-full pl-9 pr-10 py-2 rounded-md bg-card border border-border text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 placeholder="At least 8 characters"
               />
               <button
                 type="button"
                 onClick={() => setShowPw((s) => !s)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[var(--ansein-text-dim)] hover:text-[var(--ansein-text)]"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground/50 hover:text-foreground"
               >
                 {showPw ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
               </button>
@@ -682,12 +682,12 @@ function CreateUserModal({ onClose }: { onClose: () => void }) {
                             : strength === 3
                             ? '#facc15'
                             : '#10b981'
-                          : 'var(--ansein-border)',
+                          : 'border',
                       }}
                     />
                   )
                 })}
-                <span className="text-[10px] ansein-mono text-[var(--ansein-text-dim)] ml-2 w-16">
+                <span className="text-[10px] ansein-mono text-muted-foreground/50 ml-2 w-16">
                   {['weak', 'fair', 'good', 'strong'][passwordStrength(password) - 1] || 'weak'}
                 </span>
               </div>
@@ -696,7 +696,7 @@ function CreateUserModal({ onClose }: { onClose: () => void }) {
 
           {/* Role selector */}
           <div>
-            <label className="block text-xs font-medium text-[var(--ansein-text-muted)] uppercase tracking-wider mb-2">
+            <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
               Role
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -712,11 +712,11 @@ function CreateUserModal({ onClose }: { onClose: () => void }) {
                       'flex flex-col items-center gap-1 px-3 py-2.5 rounded-md border text-center transition-all',
                       active
                         ? cn(colors.bg, colors.fg, colors.border)
-                        : 'bg-[var(--ansein-surface)] border-[var(--ansein-border)] text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] hover:border-[var(--ansein-border-strong)]'
+                        : 'bg-card border-border text-muted-foreground hover:text-foreground hover:border-primary/50'
                     )}
                   >
                     <span className="text-xs font-medium capitalize">{opt.label}</span>
-                    <span className="text-[9px] leading-tight text-[var(--ansein-text-dim)]">{opt.description.split('—')[1]?.trim() || opt.description}</span>
+                    <span className="text-[9px] leading-tight text-muted-foreground/50">{opt.description.split('—')[1]?.trim() || opt.description}</span>
                   </button>
                 )
               })}
@@ -727,7 +727,7 @@ function CreateUserModal({ onClose }: { onClose: () => void }) {
           <button
             type="submit"
             disabled={createUserMutation.isPending || !email.trim() || password.length < 8}
-            className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md bg-[var(--ansein-primary)] text-[var(--ansein-bg)] text-sm font-medium hover:bg-[var(--ansein-primary-hover)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+            className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
           >
             {createUserMutation.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -758,16 +758,16 @@ function StatCard({
   sub?: string
 }) {
   return (
-    <div className="ansein-card rounded-lg p-3 relative overflow-hidden">
+    <div className="bg-card border border-border rounded-lg p-3 relative overflow-hidden">
       <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: color }} />
-      <div className="flex items-center gap-1.5 text-[var(--ansein-text-dim)] mb-1">
+      <div className="flex items-center gap-1.5 text-muted-foreground/50 mb-1">
         {icon}
         <span className="text-[10px] uppercase tracking-widest">{label}</span>
       </div>
-      <p className="text-lg font-semibold ansein-mono text-[var(--ansein-text)]">
+      <p className="text-lg font-semibold ansein-mono text-foreground">
         <AnimatedNumber value={value} />
       </p>
-      {sub && <p className="text-[9px] text-[var(--ansein-text-dim)] mt-0.5">{sub}</p>}
+      {sub && <p className="text-[9px] text-muted-foreground/50 mt-0.5">{sub}</p>}
     </div>
   )
 }

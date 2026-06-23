@@ -32,10 +32,10 @@ export function AuthGuard({ children }: { children: ReactNode }) {
 
   if (!hasMounted || !accessToken) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[var(--ansein-bg)]">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 rounded-full border-2 border-[var(--ansein-border-strong)] border-t-[var(--ansein-primary)] ansein-spin" />
-          <p className="ansein-mono text-xs uppercase tracking-widest text-[var(--ansein-text-muted)]">
+          <div className="h-8 w-8 rounded-full border-2 border-primary/50 border-t-primary ansein-spin" />
+          <p className="ansein-mono text-xs uppercase tracking-widest text-muted-foreground">
             Authenticating…
           </p>
         </div>

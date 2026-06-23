@@ -122,7 +122,7 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex">
       {/* ---------- Left: branded panel ---------- */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-[var(--ansein-sidebar)]">
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-card">
         {/* Background grid */}
         <div
           className="absolute inset-0 opacity-[0.04]"
@@ -144,7 +144,7 @@ export default function RegisterPage() {
 
         <div className="relative flex flex-col justify-between p-12 w-full">
           {/* Brand */}
-          <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] transition-colors w-fit">
+          <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit">
             <ChevronLeft className="h-4 w-4" />
             Back to home
           </Link>
@@ -152,12 +152,12 @@ export default function RegisterPage() {
           {/* Center content */}
           <div className="flex flex-col items-start max-w-md">
             <BrandMark size={56} />
-            <h1 className="mt-8 text-4xl font-semibold tracking-tight text-[var(--ansein-text)] leading-tight">
+            <h1 className="mt-8 text-4xl font-semibold tracking-tight text-foreground leading-tight">
               Start extracting
               <br />
               <span className="ansein-gradient-text">threat intel.</span>
             </h1>
-            <p className="mt-4 text-sm text-[var(--ansein-text-muted)] leading-relaxed">
+            <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
               Create your workspace in seconds. No CLI, no infrastructure setup —
               just an email and password.
             </p>
@@ -179,12 +179,12 @@ export default function RegisterPage() {
                 const Icon = h.icon
                 return (
                   <div key={h.title} className="flex items-start gap-2.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-primary)] flex-shrink-0">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-md bg-card border border-border text-primary flex-shrink-0">
                       <Icon className="h-3.5 w-3.5" />
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-[var(--ansein-text)]">{h.title}</p>
-                      <p className="text-[11px] text-[var(--ansein-text-dim)] leading-relaxed">{h.desc}</p>
+                      <p className="text-xs font-semibold text-foreground">{h.title}</p>
+                      <p className="text-[11px] text-muted-foreground/50 leading-relaxed">{h.desc}</p>
                     </div>
                   </div>
                 )
@@ -193,7 +193,7 @@ export default function RegisterPage() {
           </div>
 
           {/* Footer */}
-          <p className="text-[10px] text-[var(--ansein-text-dim)] ansein-mono">
+          <p className="text-[10px] text-muted-foreground/50 ansein-mono">
             v3.0 · MySQL-ready · Open-source CTI/OSINT platform
           </p>
         </div>
@@ -204,7 +204,7 @@ export default function RegisterPage() {
         {/* Mobile back link */}
         <Link
           href="/"
-          className="lg:hidden absolute top-6 left-6 inline-flex items-center gap-1.5 text-sm text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] transition-colors"
+          className="lg:hidden absolute top-6 left-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ChevronLeft className="h-4 w-4" />
           Back
@@ -212,13 +212,13 @@ export default function RegisterPage() {
 
         <div className="w-full max-w-sm">
           <div className="mb-8">
-            <p className="ansein-mono text-xs uppercase tracking-widest text-[var(--ansein-text-dim)] mb-1">
+            <p className="ansein-mono text-xs uppercase tracking-widest text-muted-foreground/50 mb-1">
               New workspace
             </p>
-            <h2 className="text-2xl font-semibold text-[var(--ansein-text)] tracking-tight">
+            <h2 className="text-2xl font-semibold text-foreground tracking-tight">
               Create your account
             </h2>
-            <p className="text-sm text-[var(--ansein-text-muted)] mt-1 h-5">
+            <p className="text-sm text-muted-foreground mt-1 h-5">
               {!checking && isFirstAccount ? 'First account becomes the workspace administrator.' : ''}
             </p>
           </div>
@@ -234,19 +234,19 @@ export default function RegisterPage() {
             <div>
               <label
                 htmlFor="full_name"
-                className="block text-xs font-medium text-[var(--ansein-text-muted)] uppercase tracking-wider mb-1.5"
+                className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5"
               >
-                Full name <span className="text-[var(--ansein-text-dim)] normal-case">(optional)</span>
+                Full name <span className="text-muted-foreground/50 normal-case">(optional)</span>
               </label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--ansein-text-dim)]" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                 <input
                   id="full_name"
                   type="text"
                   autoComplete="name"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text)] placeholder:text-[var(--ansein-text-dim)] text-sm focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)] transition-colors"
+                  className="w-full pl-9 pr-3 py-2.5 rounded-md bg-card border border-border text-foreground placeholder:text-muted-foreground/50 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
                   placeholder="Alex Analyst"
                 />
               </div>
@@ -255,12 +255,12 @@ export default function RegisterPage() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-xs font-medium text-[var(--ansein-text-muted)] uppercase tracking-wider mb-1.5"
+                className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5"
               >
                 Email
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--ansein-text-dim)]" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                 <input
                   id="email"
                   type="email"
@@ -269,7 +269,7 @@ export default function RegisterPage() {
                   autoFocus
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text)] placeholder:text-[var(--ansein-text-dim)] text-sm focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)] transition-colors"
+                  className="w-full pl-9 pr-3 py-2.5 rounded-md bg-card border border-border text-foreground placeholder:text-muted-foreground/50 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
                   placeholder="analyst@company.com"
                 />
               </div>
@@ -278,12 +278,12 @@ export default function RegisterPage() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-xs font-medium text-[var(--ansein-text-muted)] uppercase tracking-wider mb-1.5"
+                className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5"
               >
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--ansein-text-dim)]" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                 <input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
@@ -292,13 +292,13 @@ export default function RegisterPage() {
                   minLength={8}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-9 pr-10 py-2.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text)] placeholder:text-[var(--ansein-text-dim)] text-sm focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)] transition-colors"
+                  className="w-full pl-9 pr-10 py-2.5 rounded-md bg-card border border-border text-foreground placeholder:text-muted-foreground/50 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
                   placeholder="At least 8 characters"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((s) => !s)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[var(--ansein-text-dim)] hover:text-[var(--ansein-text)] transition-colors"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground/50 hover:text-foreground transition-colors"
                   tabIndex={-1}
                 >
                   {showPassword ? (
@@ -317,13 +317,13 @@ export default function RegisterPage() {
                         key={i}
                         className="h-1 flex-1 rounded-full transition-all"
                         style={{
-                          background: i <= strength.score ? strength.color : 'var(--ansein-border)',
+                          background: i <= strength.score ? strength.color : 'border',
                         }}
                       />
                     ))}
                   </div>
                   <div className="flex items-center justify-between mt-1.5">
-                    <span className="text-[10px] text-[var(--ansein-text-dim)]">
+                    <span className="text-[10px] text-muted-foreground/50">
                       Strength: <span style={{ color: strength.color }}>{strength.label}</span>
                     </span>
                     {strength.score >= 4 && (
@@ -340,7 +340,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md bg-[var(--ansein-primary)] text-[var(--ansein-bg)] text-sm font-medium hover:bg-[var(--ansein-primary-hover)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
             >
               {loading ? (
                 <>
@@ -356,12 +356,12 @@ export default function RegisterPage() {
             </button>
           </form>
 
-          <div className="mt-6 pt-5 border-t border-[var(--ansein-border)] text-center">
-            <p className="text-sm text-[var(--ansein-text-muted)]">
+          <div className="mt-6 pt-5 border-t border-border text-center">
+            <p className="text-sm text-muted-foreground">
               Already have an account?{' '}
               <Link
                 href="/login"
-                className="text-[var(--ansein-primary)] hover:text-[var(--ansein-primary-hover)] font-medium"
+                className="text-primary hover:text-primary/90 font-medium"
               >
                 Sign in
               </Link>

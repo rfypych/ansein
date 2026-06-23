@@ -153,19 +153,19 @@ export default function SettingsPage() {
     <div className="px-6 py-8 max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <p className="ansein-mono text-xs uppercase tracking-widest text-[var(--ansein-text-dim)] mb-1">
+        <p className="ansein-mono text-xs uppercase tracking-widest text-muted-foreground/50 mb-1">
           Configuration
         </p>
-        <h1 className="text-2xl font-semibold tracking-tight text-[var(--ansein-text)]">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
           Settings
           {!canEdit && (
-            <span className="ml-3 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text-muted)] align-middle">
+            <span className="ml-3 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-card border border-border text-muted-foreground align-middle">
               <ShieldCheck className="h-3 w-3" />
               Read-only · {role}
             </span>
           )}
         </h1>
-        <p className="text-sm text-[var(--ansein-text-muted)] mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           Manage your bring-your-own-key (BYOK) API credentials.
         </p>
       </div>
@@ -176,12 +176,12 @@ export default function SettingsPage() {
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-amber-500/10 border border-amber-500/20 flex-shrink-0">
             <Info className="h-3.5 w-3.5 text-amber-400" />
           </div>
-          <div className="text-xs text-[var(--ansein-text-muted)] leading-relaxed">
-            <strong className="text-[var(--ansein-text)]">
+          <div className="text-xs text-muted-foreground leading-relaxed">
+            <strong className="text-foreground">
               You are viewing this page as <span className="capitalize">{role}</span>.
             </strong>{' '}
             Only workspace administrators can add or rotate API keys. Your role grants:{' '}
-            <span className="text-[var(--ansein-text-muted)]">
+            <span className="text-muted-foreground">
               {ROLE_DESCRIPTIONS[role]}
             </span>
           </div>
@@ -189,13 +189,13 @@ export default function SettingsPage() {
       )}
 
       {/* Encryption banner */}
-      <div className="mb-6 flex items-start gap-3 p-4 rounded-lg bg-[var(--ansein-primary)]/[0.04] border border-[var(--ansein-primary)]/15">
-        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[var(--ansein-primary)]/10 border border-[var(--ansein-primary)]/20 flex-shrink-0">
-          <Lock className="h-3.5 w-3.5 text-[var(--ansein-primary)]" />
+      <div className="mb-6 flex items-start gap-3 p-4 rounded-lg bg-primary/[0.04] border border-primary/15">
+        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 border border-primary/20 flex-shrink-0">
+          <Lock className="h-3.5 w-3.5 text-primary" />
         </div>
-        <div className="text-xs text-[var(--ansein-text-muted)] leading-relaxed">
-          <strong className="text-[var(--ansein-text)]">Encryption at rest.</strong> All API keys are
-          encrypted with <span className="ansein-mono text-[var(--ansein-primary)]">AES-256-GCM</span> using the application&apos;s <code className="ansein-mono px-1 py-0.5 rounded bg-[var(--ansein-surface)] text-[var(--ansein-text-muted)]">SECRET_KEY</code> before being stored.
+        <div className="text-xs text-muted-foreground leading-relaxed">
+          <strong className="text-foreground">Encryption at rest.</strong> All API keys are
+          encrypted with <span className="ansein-mono text-primary">AES-256-GCM</span> using the application&apos;s <code className="ansein-mono px-1 py-0.5 rounded bg-card text-muted-foreground">SECRET_KEY</code> before being stored.
           Keys are never logged, never returned in API responses, and never sent to third parties.
         </div>
       </div>
@@ -207,16 +207,16 @@ export default function SettingsPage() {
       ) : (
         <>
           {/* Preferred LLM */}
-          <div className="ansein-card rounded-xl p-6 mb-6">
+          <div className="bg-card border border-border rounded-xl p-6 mb-6">
             <div className="flex items-start justify-between gap-4 mb-1">
-              <h3 className="text-sm font-semibold text-[var(--ansein-text)]">
+              <h3 className="text-sm font-semibold text-foreground">
                 Preferred LLM provider
               </h3>
-              <span className="text-[10px] uppercase tracking-[0.15em] text-[var(--ansein-text-dim)] ansein-mono">
+              <span className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/50 ansein-mono">
                 Optional
               </span>
             </div>
-            <p className="text-xs text-[var(--ansein-text-muted)] mb-4">
+            <p className="text-xs text-muted-foreground mb-4">
               Which LLM to use when both OpenAI and Groq keys are configured.
             </p>
             <div className="flex flex-wrap gap-2">
@@ -237,15 +237,15 @@ export default function SettingsPage() {
                     className={cn(
                       'inline-flex flex-col items-start px-3 py-2 rounded-md text-sm border transition-all text-left',
                       active
-                        ? 'bg-[var(--ansein-primary)]/10 text-[var(--ansein-text)] border-[var(--ansein-primary)]/40'
-                        : 'bg-[var(--ansein-surface)] text-[var(--ansein-text-muted)] border-[var(--ansein-border)] hover:text-[var(--ansein-text)] hover:border-[var(--ansein-border-strong)]',
-                      disabled && 'cursor-not-allowed opacity-50 hover:text-[var(--ansein-text-muted)] hover:border-[var(--ansein-border)]'
+                        ? 'bg-primary/10 text-foreground border-primary/40'
+                        : 'bg-card text-muted-foreground border-border hover:text-foreground hover:border-primary/50',
+                      disabled && 'cursor-not-allowed opacity-50 hover:text-muted-foreground hover:border-border'
                     )}
                   >
                     <span className="font-medium">{p.label}</span>
                     <span className={cn(
                       'text-[10px] mt-0.5',
-                      active ? 'text-[var(--ansein-primary)]' : 'text-[var(--ansein-text-dim)]'
+                      active ? 'text-primary' : 'text-muted-foreground/50'
                     )}>
                       {p.desc}
                     </span>
@@ -260,12 +260,12 @@ export default function SettingsPage() {
             {/* LLM providers */}
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[var(--ansein-primary)]/15 border border-[var(--ansein-primary)]/30">
-                  <Bot className="h-3.5 w-3.5 text-[var(--ansein-primary)]" />
+                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/15 border border-primary/30">
+                  <Bot className="h-3.5 w-3.5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-[var(--ansein-text)]">LLM providers</h3>
-                  <p className="text-[10px] text-[var(--ansein-text-dim)]">Used for extraction, analysis, and copilot</p>
+                  <h3 className="text-sm font-semibold text-foreground">LLM providers</h3>
+                  <p className="text-[10px] text-muted-foreground/50">Used for extraction, analysis, and copilot</p>
                 </div>
               </div>
               <div className="space-y-3">
@@ -293,8 +293,8 @@ export default function SettingsPage() {
                   <Cpu className="h-3.5 w-3.5 text-violet-400" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-[var(--ansein-text)]">Custom LLM provider</h3>
-                  <p className="text-[10px] text-[var(--ansein-text-dim)]">Any OpenAI-compatible endpoint (Ollama, LM Studio, vLLM, OpenRouter, Together, Mistral, etc.)</p>
+                  <h3 className="text-sm font-semibold text-foreground">Custom LLM provider</h3>
+                  <p className="text-[10px] text-muted-foreground/50">Any OpenAI-compatible endpoint (Ollama, LM Studio, vLLM, OpenRouter, Together, Mistral, etc.)</p>
                 </div>
               </div>
               <CustomLlmCard
@@ -318,8 +318,8 @@ export default function SettingsPage() {
                   <ShieldAlert className="h-3.5 w-3.5 text-amber-400" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-[var(--ansein-text)]">Enrichment providers</h3>
-                  <p className="text-[10px] text-[var(--ansein-text-dim)]">Used to enrich IOCs with reputation and context</p>
+                  <h3 className="text-sm font-semibold text-foreground">Enrichment providers</h3>
+                  <p className="text-[10px] text-muted-foreground/50">Used to enrich IOCs with reputation and context</p>
                 </div>
               </div>
               <div className="space-y-3">
@@ -348,8 +348,8 @@ export default function SettingsPage() {
                 <Webhook className="h-3.5 w-3.5 text-violet-400" />
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-[var(--ansein-text)]">Webhook integration</h3>
-                <p className="text-[10px] text-[var(--ansein-text-dim)]">Allow SIEMs and email gateways to forward alerts for automatic triage</p>
+                <h3 className="text-sm font-semibold text-foreground">Webhook integration</h3>
+                <p className="text-[10px] text-muted-foreground/50">Allow SIEMs and email gateways to forward alerts for automatic triage</p>
               </div>
             </div>
             <WebhookIntegrationCard
@@ -365,9 +365,9 @@ export default function SettingsPage() {
           </div>
 
           {/* Clear key hint */}
-          <div className="mt-6 p-4 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] flex items-start gap-2.5">
+          <div className="mt-6 p-4 rounded-md bg-card border border-border flex items-start gap-2.5">
             <AlertCircle className="h-4 w-4 text-amber-400 flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-[var(--ansein-text-muted)]">
+            <p className="text-xs text-muted-foreground">
               To remove a key, save an empty value. The system will fall back to environment-configured
               keys (if any) for that provider.
             </p>
@@ -375,7 +375,7 @@ export default function SettingsPage() {
 
           {/* Last updated */}
           {settingsQuery.data?.updated_at && (
-            <p className="mt-6 text-center text-xs text-[var(--ansein-text-dim)]">
+            <p className="mt-6 text-center text-xs text-muted-foreground/50">
               Last updated: {new Date(settingsQuery.data.updated_at).toLocaleString()}
             </p>
           )}
@@ -411,7 +411,7 @@ function ProviderCard({
   const isVisible = visible[provider.key]
   const isSaving = savingKey === provider.key
   return (
-    <div className="ansein-card rounded-xl p-5 relative overflow-hidden">
+    <div className="bg-card border border-border rounded-xl p-5 relative overflow-hidden">
       {has && (
         <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: provider.color }} />
       )}
@@ -428,32 +428,32 @@ function ProviderCard({
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <h3 className="text-sm font-semibold text-[var(--ansein-text)]">{provider.name}</h3>
+            <h3 className="text-sm font-semibold text-foreground">{provider.name}</h3>
             {has ? (
               <Badge color="success" dot>Configured</Badge>
             ) : (
               <Badge color="warning" dot>Not set</Badge>
             )}
           </div>
-          <p className="text-xs text-[var(--ansein-text-muted)] mb-3">{provider.description}</p>
+          <p className="text-xs text-muted-foreground mb-3">{provider.description}</p>
 
           <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative flex-1">
-              <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--ansein-text-dim)]" />
+              <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
               <input
                 type={isVisible ? 'text' : 'password'}
                 value={values[provider.key] || ''}
                 onChange={(e) => onValueChange(provider.key, e.target.value)}
                 disabled={readOnly}
                 placeholder={has ? '•••••••• (enter new key to replace)' : 'Paste your API key…'}
-                className="w-full pl-9 pr-10 py-2 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-sm ansein-mono focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)] disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full pl-9 pr-10 py-2 rounded-md bg-card border border-border text-sm ansein-mono focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-60 disabled:cursor-not-allowed"
                 autoComplete="off"
               />
               <button
                 type="button"
                 onClick={() => onToggleVisible(provider.key)}
                 disabled={readOnly}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[var(--ansein-text-dim)] hover:text-[var(--ansein-text)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground/50 hover:text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isVisible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
               </button>
@@ -461,7 +461,7 @@ function ProviderCard({
             <button
               onClick={() => onSave(provider.key)}
               disabled={readOnly || isSaving || !(values[provider.key] || '').trim()}
-              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-md bg-[var(--ansein-primary)] text-[var(--ansein-bg)] text-sm font-medium hover:bg-[var(--ansein-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
             >
               {isSaving ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -476,7 +476,7 @@ function ProviderCard({
             href={provider.url}
             target="_blank"
             rel="noreferrer"
-            className="mt-2 inline-flex items-center gap-1 text-xs text-[var(--ansein-primary)] hover:text-[var(--ansein-primary-hover)]"
+            className="mt-2 inline-flex items-center gap-1 text-xs text-primary hover:text-primary/90"
           >
             Get key
             <ExternalLink className="h-3 w-3" />
@@ -542,7 +542,7 @@ function WebhookIntegrationCard({
   }
 
   return (
-    <div className="ansein-card rounded-xl p-5 relative overflow-hidden">
+    <div className="bg-card border border-border rounded-xl p-5 relative overflow-hidden">
       {hasWebhookSecret && (
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-violet-500" />
       )}
@@ -559,30 +559,30 @@ function WebhookIntegrationCard({
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <h3 className="text-sm font-semibold text-[var(--ansein-text)]">SIEM / email-gateway webhook</h3>
+            <h3 className="text-sm font-semibold text-foreground">SIEM / email-gateway webhook</h3>
             {hasWebhookSecret ? (
               <Badge color="success" dot>Enabled</Badge>
             ) : (
               <Badge color="warning" dot>Not configured</Badge>
             )}
           </div>
-          <p className="text-xs text-[var(--ansein-text-muted)] mb-3">
+          <p className="text-xs text-muted-foreground mb-3">
             Forward alerts from Splunk, Elastic, email gateways, or any custom SIEM. AnseIn will create an investigation, run the extraction pipeline (optional), and apply SOAR playbooks automatically.
           </p>
 
           {/* Webhook URL display + copy button */}
           <div className="mb-3">
-            <p className="text-[10px] uppercase tracking-widest ansein-mono text-[var(--ansein-text-dim)] mb-1">
+            <p className="text-[10px] uppercase tracking-widest ansein-mono text-muted-foreground/50 mb-1">
               Webhook URL
             </p>
             <div className="flex items-center gap-2">
-              <code className="flex-1 px-3 py-2 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-xs ansein-mono text-[var(--ansein-text-muted)] truncate">
+              <code className="flex-1 px-3 py-2 rounded-md bg-card border border-border text-xs ansein-mono text-muted-foreground truncate">
                 POST {webhookUrl}
               </code>
               <button
                 onClick={copyUrl}
                 type="button"
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-xs text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] hover:border-[var(--ansein-border-strong)] transition-colors whitespace-nowrap"
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md bg-card border border-border text-xs text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors whitespace-nowrap"
                 title="Copy webhook URL"
               >
                 <Copy className="h-3.5 w-3.5" />
@@ -594,21 +594,21 @@ function WebhookIntegrationCard({
           {/* Secret input */}
           <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative flex-1">
-              <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--ansein-text-dim)]" />
+              <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
               <input
                 type={isVisible ? 'text' : 'password'}
                 value={values[WEBHOOK_KEY] || ''}
                 onChange={(e) => onValueChange(WEBHOOK_KEY, e.target.value)}
                 disabled={!canEdit}
                 placeholder={hasWebhookSecret ? '•••••••• (enter new secret to rotate)' : 'Set a webhook secret…'}
-                className="w-full pl-9 pr-10 py-2 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-sm ansein-mono focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)] disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full pl-9 pr-10 py-2 rounded-md bg-card border border-border text-sm ansein-mono focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-60 disabled:cursor-not-allowed"
                 autoComplete="off"
               />
               <button
                 type="button"
                 onClick={() => onToggleVisible(WEBHOOK_KEY)}
                 disabled={!canEdit}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[var(--ansein-text-dim)] hover:text-[var(--ansein-text)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground/50 hover:text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isVisible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
               </button>
@@ -616,7 +616,7 @@ function WebhookIntegrationCard({
             <button
               onClick={() => onSave(WEBHOOK_KEY)}
               disabled={!canEdit || isSaving || !(values[WEBHOOK_KEY] || '').trim()}
-              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-md bg-[var(--ansein-primary)] text-[var(--ansein-bg)] text-sm font-medium hover:bg-[var(--ansein-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
             >
               {isSaving ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -628,22 +628,22 @@ function WebhookIntegrationCard({
           </div>
 
           {/* SIEM forwarding instructions */}
-          <div className="mt-4 p-3 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)]">
+          <div className="mt-4 p-3 rounded-md bg-card border border-border">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[10px] uppercase tracking-widest ansein-mono text-[var(--ansein-text-dim)] flex items-center gap-1.5">
+              <p className="text-[10px] uppercase tracking-widest ansein-mono text-muted-foreground/50 flex items-center gap-1.5">
                 <Terminal className="h-3 w-3" />
                 Quick start — cURL example
               </p>
               <button
                 onClick={copyCurlExample}
                 type="button"
-                className="text-[10px] text-[var(--ansein-primary)] hover:text-[var(--ansein-primary-hover)] flex items-center gap-1"
+                className="text-[10px] text-primary hover:text-primary/90 flex items-center gap-1"
               >
                 <Copy className="h-3 w-3" />
                 Copy
               </button>
             </div>
-            <pre className="text-[10px] ansein-mono text-[var(--ansein-text-muted)] whitespace-pre-wrap break-all leading-relaxed">
+            <pre className="text-[10px] ansein-mono text-muted-foreground whitespace-pre-wrap break-all leading-relaxed">
 {`curl -X POST ${webhookUrl} \\
   -H "Content-Type: application/json" \\
   -H "X-Webhook-Key: <your-webhook-secret>" \\
@@ -656,25 +656,25 @@ function WebhookIntegrationCard({
     "auto_investigate": true
   }'`}
             </pre>
-            <ul className="mt-3 space-y-1 text-[10px] text-[var(--ansein-text-muted)]">
+            <ul className="mt-3 space-y-1 text-[10px] text-muted-foreground">
               <li className="flex gap-1.5">
-                <span className="text-[var(--ansein-primary)]">▸</span>
-                <span><strong className="text-[var(--ansein-text)]">Splunk</strong>: add a webhook action to your alert and point it at the URL above. Pass the search results in <code className="ansein-mono px-1 py-0.5 rounded bg-[var(--ansein-bg)] text-[var(--ansein-text-dim)]">raw_data</code>.</span>
+                <span className="text-primary">▸</span>
+                <span><strong className="text-foreground">Splunk</strong>: add a webhook action to your alert and point it at the URL above. Pass the search results in <code className="ansein-mono px-1 py-0.5 rounded bg-background text-muted-foreground/50">raw_data</code>.</span>
               </li>
               <li className="flex gap-1.5">
-                <span className="text-[var(--ansein-primary)]">▸</span>
-                <span><strong className="text-[var(--ansein-text)]">Elastic / Kibana</strong>: configure a webhook connector on the alert rule. Use <code className="ansein-mono px-1 py-0.5 rounded bg-[var(--ansein-bg)] text-[var(--ansein-text-dim)]">source: "elastic"</code> in the body.</span>
+                <span className="text-primary">▸</span>
+                <span><strong className="text-foreground">Elastic / Kibana</strong>: configure a webhook connector on the alert rule. Use <code className="ansein-mono px-1 py-0.5 rounded bg-background text-muted-foreground/50">source: "elastic"</code> in the body.</span>
               </li>
               <li className="flex gap-1.5">
-                <span className="text-[var(--ansein-primary)]">▸</span>
-                <span><strong className="text-[var(--ansein-text)]">Email gateway</strong>: forward suspicious email body/headers as <code className="ansein-mono px-1 py-0.5 rounded bg-[var(--ansein-bg)] text-[var(--ansein-text-dim)]">raw_data</code> with <code className="ansein-mono px-1 py-0.5 rounded bg-[var(--ansein-bg)] text-[var(--ansein-text-dim)]">alert_type: "phishing"</code>.</span>
+                <span className="text-primary">▸</span>
+                <span><strong className="text-foreground">Email gateway</strong>: forward suspicious email body/headers as <code className="ansein-mono px-1 py-0.5 rounded bg-background text-muted-foreground/50">raw_data</code> with <code className="ansein-mono px-1 py-0.5 rounded bg-background text-muted-foreground/50">alert_type: "phishing"</code>.</span>
               </li>
               <li className="flex gap-1.5">
-                <span className="text-[var(--ansein-primary)]">▸</span>
-                <span>Set <code className="ansein-mono px-1 py-0.5 rounded bg-[var(--ansein-bg)] text-[var(--ansein-text-dim)]">auto_investigate: true</code> to run the extraction pipeline immediately.</span>
+                <span className="text-primary">▸</span>
+                <span>Set <code className="ansein-mono px-1 py-0.5 rounded bg-background text-muted-foreground/50">auto_investigate: true</code> to run the extraction pipeline immediately.</span>
               </li>
               <li className="flex gap-1.5">
-                <span className="text-[var(--ansein-primary)]">▸</span>
+                <span className="text-primary">▸</span>
                 <span>Rate limit: 100 requests per minute per source IP.</span>
               </li>
             </ul>
@@ -739,7 +739,7 @@ function CustomLlmCard({
                      (values['custom_llm_api_key'] !== undefined && values['custom_llm_api_key'].trim() !== '')
 
   return (
-    <div className="ansein-card rounded-xl p-5 relative overflow-hidden">
+    <div className="bg-card border border-border rounded-xl p-5 relative overflow-hidden">
       {hasCustomLlm && (
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-violet-500" />
       )}
@@ -747,49 +747,49 @@ function CustomLlmCard({
         
         {/* Base URL */}
         <div>
-          <label className="block text-xs font-medium text-[var(--ansein-text)] mb-1">Base URL</label>
+          <label className="block text-xs font-medium text-foreground mb-1">Base URL</label>
           <input
             type="text"
             value={values['custom_llm_base_url'] !== undefined ? values['custom_llm_base_url'] : baseUrl}
             onChange={(e) => onValueChange('custom_llm_base_url', e.target.value)}
             disabled={!canEdit}
             placeholder="e.g. http://localhost:11434/v1"
-            className="w-full px-3 py-2 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-sm ansein-mono focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)] disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full px-3 py-2 rounded-md bg-card border border-border text-sm ansein-mono focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-60 disabled:cursor-not-allowed"
           />
         </div>
 
         {/* Model */}
         <div>
-          <label className="block text-xs font-medium text-[var(--ansein-text)] mb-1">Model ID</label>
+          <label className="block text-xs font-medium text-foreground mb-1">Model ID</label>
           <input
             type="text"
             value={values['custom_llm_model'] !== undefined ? values['custom_llm_model'] : model}
             onChange={(e) => onValueChange('custom_llm_model', e.target.value)}
             disabled={!canEdit}
             placeholder="e.g. llama3, mistral-instruct"
-            className="w-full px-3 py-2 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-sm ansein-mono focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)] disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full px-3 py-2 rounded-md bg-card border border-border text-sm ansein-mono focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-60 disabled:cursor-not-allowed"
           />
         </div>
 
         {/* API Key */}
         <div>
-          <label className="block text-xs font-medium text-[var(--ansein-text)] mb-1">API Key (Optional)</label>
+          <label className="block text-xs font-medium text-foreground mb-1">API Key (Optional)</label>
           <div className="relative">
-            <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--ansein-text-dim)]" />
+            <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
             <input
               type={isVisible ? 'text' : 'password'}
               value={values['custom_llm_api_key'] || ''}
               onChange={(e) => onValueChange('custom_llm_api_key', e.target.value)}
               disabled={!canEdit}
               placeholder={hasCustomLlm ? '•••••••• (leave blank to keep current)' : 'API key if required by provider…'}
-              className="w-full pl-9 pr-10 py-2 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-sm ansein-mono focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)] disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full pl-9 pr-10 py-2 rounded-md bg-card border border-border text-sm ansein-mono focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-60 disabled:cursor-not-allowed"
               autoComplete="off"
             />
             <button
               type="button"
               onClick={() => onToggleVisible('custom_llm_api_key')}
               disabled={!canEdit}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[var(--ansein-text-dim)] hover:text-[var(--ansein-text)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground/50 hover:text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isVisible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
             </button>
@@ -801,7 +801,7 @@ function CustomLlmCard({
           <button
             onClick={handleSaveCustom}
             disabled={!canEdit || localSaving || !hasChanges}
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-md bg-[var(--ansein-primary)] text-[var(--ansein-bg)] text-sm font-medium hover:bg-[var(--ansein-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {localSaving ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />

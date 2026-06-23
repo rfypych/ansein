@@ -19,7 +19,7 @@ export function Markdown({ content, className }: MarkdownProps) {
     <div
       className={cn(
         'prose-ansein',
-        'text-sm leading-relaxed text-[var(--ansein-text)]',
+        'text-sm leading-relaxed text-foreground',
         className
       )}
     >
@@ -28,38 +28,38 @@ export function Markdown({ content, className }: MarkdownProps) {
         components={{
           // Headings
           h1: ({ children }) => (
-            <h1 className="text-xl font-semibold text-[var(--ansein-text)] mt-5 mb-3 first:mt-0">
+            <h1 className="text-xl font-semibold text-foreground mt-5 mb-3 first:mt-0">
               {children}
             </h1>
           ),
           h2: ({ children }) => (
-            <h2 className="text-lg font-semibold text-[var(--ansein-text)] mt-4 mb-2 first:mt-0">
+            <h2 className="text-lg font-semibold text-foreground mt-4 mb-2 first:mt-0">
               {children}
             </h2>
           ),
           h3: ({ children }) => (
-            <h3 className="text-base font-semibold text-[var(--ansein-text)] mt-3 mb-2 first:mt-0">
+            <h3 className="text-base font-semibold text-foreground mt-3 mb-2 first:mt-0">
               {children}
             </h3>
           ),
           h4: ({ children }) => (
-            <h4 className="text-sm font-semibold text-[var(--ansein-text)] mt-2 mb-1 first:mt-0">
+            <h4 className="text-sm font-semibold text-foreground mt-2 mb-1 first:mt-0">
               {children}
             </h4>
           ),
           // Paragraphs
           p: ({ children }) => (
-            <p className="mb-3 last:mb-0 text-[var(--ansein-text-muted)] leading-relaxed">
+            <p className="mb-3 last:mb-0 text-muted-foreground leading-relaxed">
               {children}
             </p>
           ),
           // Bold
           strong: ({ children }) => (
-            <strong className="font-semibold text-[var(--ansein-text)]">{children}</strong>
+            <strong className="font-semibold text-foreground">{children}</strong>
           ),
           // Italic
           em: ({ children }) => (
-            <em className="italic text-[var(--ansein-text-muted)]">{children}</em>
+            <em className="italic text-muted-foreground">{children}</em>
           ),
           // Inline code
           code: ({ children, className: cls }) => {
@@ -72,14 +72,14 @@ export function Markdown({ content, className }: MarkdownProps) {
               )
             }
             return (
-              <code className="ansein-mono text-[11px] px-1.5 py-0.5 rounded bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-primary)]">
+              <code className="ansein-mono text-[11px] px-1.5 py-0.5 rounded bg-card border border-border text-primary">
                 {children}
               </code>
             )
           },
           // Code blocks
           pre: ({ children }) => (
-            <pre className="overflow-x-auto rounded-md bg-[var(--ansein-bg)] border border-[var(--ansein-border)] p-3 my-3 text-xs ansein-mono">
+            <pre className="overflow-x-auto rounded-md bg-background border border-border p-3 my-3 text-xs ansein-mono">
               {children}
             </pre>
           ),
@@ -90,13 +90,13 @@ export function Markdown({ content, className }: MarkdownProps) {
             </ul>
           ),
           ol: ({ children }) => (
-            <ol className="list-decimal space-y-1.5 mb-3 last:mb-0 pl-5 marker:text-[var(--ansein-text-dim)]">
+            <ol className="list-decimal space-y-1.5 mb-3 last:mb-0 pl-5 marker:text-muted-foreground/50">
               {children}
             </ol>
           ),
           li: ({ children }) => {
             return (
-              <li className="text-[var(--ansein-text-muted)] leading-relaxed relative pl-2">
+              <li className="text-muted-foreground leading-relaxed relative pl-2">
                 {children}
               </li>
             )
@@ -107,14 +107,14 @@ export function Markdown({ content, className }: MarkdownProps) {
               href={href}
               target="_blank"
               rel="noreferrer"
-              className="text-[var(--ansein-primary)] hover:text-[var(--ansein-primary-hover)] underline decoration-dotted underline-offset-2 transition-colors"
+              className="text-primary hover:text-primary/90 underline decoration-dotted underline-offset-2 transition-colors"
             >
               {children}
             </a>
           ),
           // Blockquotes
           blockquote: ({ children }) => (
-            <blockquote className="border-l-2 border-[var(--ansein-primary)]/40 pl-4 my-3 italic text-[var(--ansein-text-muted)]">
+            <blockquote className="border-l-2 border-primary/40 pl-4 my-3 italic text-muted-foreground">
               {children}
             </blockquote>
           ),
@@ -127,23 +127,23 @@ export function Markdown({ content, className }: MarkdownProps) {
             </div>
           ),
           thead: ({ children }) => (
-            <thead className="border-b border-[var(--ansein-border)]">
+            <thead className="border-b border-border">
               {children}
             </thead>
           ),
           th: ({ children }) => (
-            <th className="text-left py-2 px-3 font-semibold text-[var(--ansein-text)]">
+            <th className="text-left py-2 px-3 font-semibold text-foreground">
               {children}
             </th>
           ),
           td: ({ children }) => (
-            <td className="py-2 px-3 border-b border-[var(--ansein-border)] text-[var(--ansein-text-muted)]">
+            <td className="py-2 px-3 border-b border-border text-muted-foreground">
               {children}
             </td>
           ),
           // Horizontal rule
           hr: () => (
-            <hr className="my-4 border-[var(--ansein-border)]" />
+            <hr className="my-4 border-border" />
           ),
         }}
       >

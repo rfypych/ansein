@@ -133,9 +133,9 @@ export default function SetupWizardPage() {
 
         {/* Loading step */}
         {step === 'loading' && (
-          <div className="ansein-card rounded-xl p-8 text-center">
-            <Loader2 className="h-8 w-8 mx-auto text-[var(--ansein-primary)] animate-spin mb-4" />
-            <p className="text-sm text-[var(--ansein-text-muted)]">
+          <div className="bg-card border border-border rounded-xl p-8 text-center">
+            <Loader2 className="h-8 w-8 mx-auto text-primary animate-spin mb-4" />
+            <p className="text-sm text-muted-foreground">
               Checking system status…
             </p>
           </div>
@@ -143,16 +143,16 @@ export default function SetupWizardPage() {
 
         {/* Admin step */}
         {step === 'admin' && (
-          <div className="ansein-card rounded-xl p-7">
+          <div className="bg-card border border-border rounded-xl p-7">
             <div className="flex items-start gap-3 mb-6">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-500/10 border border-teal-500/30 text-[var(--ansein-primary)]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-500/10 border border-teal-500/30 text-primary">
                 <UserCog className="h-5 w-5" />
               </div>
               <div>
-                <h2 className="text-base font-semibold text-[var(--ansein-text)]">
+                <h2 className="text-base font-semibold text-foreground">
                   Create administrator account
                 </h2>
-                <p className="text-sm text-[var(--ansein-text-muted)] mt-0.5">
+                <p className="text-sm text-muted-foreground mt-0.5">
                   The first user becomes the workspace superuser.
                 </p>
               </div>
@@ -167,7 +167,7 @@ export default function SetupWizardPage() {
 
             <form onSubmit={handleCreateAdmin} className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-[var(--ansein-text-muted)] uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5">
                   Full name
                 </label>
                 <input
@@ -175,12 +175,12 @@ export default function SetupWizardPage() {
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text)] text-sm focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)] transition-colors"
+                  className="w-full px-3 py-2.5 rounded-md bg-card border border-border text-foreground text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
                   placeholder="Alex Analyst"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-[var(--ansein-text-muted)] uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5">
                   Email
                 </label>
                 <input
@@ -189,12 +189,12 @@ export default function SetupWizardPage() {
                   autoFocus
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text)] text-sm focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)] transition-colors"
+                  className="w-full px-3 py-2.5 rounded-md bg-card border border-border text-foreground text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
                   placeholder="admin@company.com"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-[var(--ansein-text-muted)] uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5">
                   Password
                 </label>
                 <input
@@ -203,14 +203,14 @@ export default function SetupWizardPage() {
                   minLength={8}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text)] text-sm focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)] transition-colors"
+                  className="w-full px-3 py-2.5 rounded-md bg-card border border-border text-foreground text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
                   placeholder="At least 8 characters"
                 />
               </div>
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md bg-[var(--ansein-primary)] text-[var(--ansein-bg)] text-sm font-medium hover:bg-[var(--ansein-primary-hover)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
               >
                 {loading ? (
                   <>
@@ -227,20 +227,20 @@ export default function SetupWizardPage() {
 
         {/* Done step */}
         {step === 'done' && (
-          <div className="ansein-card rounded-xl p-8 text-center">
+          <div className="bg-card border border-border rounded-xl p-8 text-center">
             <div className="flex justify-center mb-4">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/30">
                 <CheckCircle2 className="h-7 w-7 text-emerald-400" />
               </div>
             </div>
-            <h2 className="text-lg font-semibold text-[var(--ansein-text)]">
+            <h2 className="text-lg font-semibold text-foreground">
               Setup complete
             </h2>
-            <p className="text-sm text-[var(--ansein-text-muted)] mt-1.5">
+            <p className="text-sm text-muted-foreground mt-1.5">
               Redirecting you to your workspace…
             </p>
             <div className="flex justify-center mt-5">
-              <Loader2 className="h-4 w-4 text-[var(--ansein-primary)] animate-spin" />
+              <Loader2 className="h-4 w-4 text-primary animate-spin" />
             </div>
           </div>
         )}
@@ -277,10 +277,10 @@ function StepDot({ label, state }: { label: string; state: 'pending' | 'active' 
         className={
           'h-7 w-7 rounded-full flex items-center justify-center text-xs font-semibold border ' +
           (state === 'done'
-            ? 'bg-[var(--ansein-primary)] border-[var(--ansein-primary)] text-[var(--ansein-bg)]'
+            ? 'bg-primary border-primary text-primary-foreground'
             : state === 'active'
-            ? 'bg-[var(--ansein-surface-2)] border-[var(--ansein-primary)] text-[var(--ansein-primary)]'
-            : 'bg-[var(--ansein-surface)] border-[var(--ansein-border)] text-[var(--ansein-text-dim)]')
+            ? 'bg-muted border-primary text-primary'
+            : 'bg-card border-border text-muted-foreground/50')
         }
       >
         {state === 'done' ? <CheckCircle2 className="h-3.5 w-3.5" /> : label[0]}
@@ -289,8 +289,8 @@ function StepDot({ label, state }: { label: string; state: 'pending' | 'active' 
         className={
           'text-[10px] uppercase tracking-wider ansein-mono ' +
           (state === 'pending'
-            ? 'text-[var(--ansein-text-dim)]'
-            : 'text-[var(--ansein-text-muted)]')
+            ? 'text-muted-foreground/50'
+            : 'text-muted-foreground')
         }
       >
         {label}
@@ -300,7 +300,7 @@ function StepDot({ label, state }: { label: string; state: 'pending' | 'active' 
 }
 
 function Connector() {
-  return <div className="h-px w-8 bg-[var(--ansein-border-strong)] mt-3.5" />
+  return <div className="h-px w-8 bg-[primary/50] mt-3.5" />
 }
 
 function StatusTile({ icon, label, ok }: { icon: React.ReactNode; label: string; ok: boolean }) {
@@ -310,7 +310,7 @@ function StatusTile({ icon, label, ok }: { icon: React.ReactNode; label: string;
         'flex items-center gap-1.5 px-2.5 py-2 rounded-md border text-[11px] ' +
         (ok
           ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-300'
-          : 'bg-[var(--ansein-surface)] border-[var(--ansein-border)] text-[var(--ansein-text-dim)]')
+          : 'bg-card border-border text-muted-foreground/50')
       }
     >
       {icon}

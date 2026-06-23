@@ -163,19 +163,19 @@ export default function InvestigationListPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
         <div>
-          <p className="ansein-mono text-xs uppercase tracking-widest text-[var(--ansein-text-dim)] mb-1">
+          <p className="ansein-mono text-xs uppercase tracking-widest text-muted-foreground/50 mb-1">
             Cases
           </p>
-          <h1 className="text-2xl font-semibold tracking-tight text-[var(--ansein-text)]">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
             Investigations
           </h1>
-          <p className="text-sm text-[var(--ansein-text-muted)] mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             {total} total · {filtered.length} shown{starredCount > 0 && ` · ${starredCount} starred`}
           </p>
         </div>
         <Link
           href="/app/investigations/new"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-[var(--ansein-primary)] text-[var(--ansein-bg)] text-sm font-medium hover:bg-[var(--ansein-primary-hover)] transition-colors w-fit"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors w-fit"
         >
           <Plus className="h-4 w-4" />
           New investigation
@@ -185,13 +185,13 @@ export default function InvestigationListPage() {
       {/* Search + filters */}
       <div className="flex flex-col gap-3 mb-6">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--ansein-text-dim)]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by title or description…"
-            className="w-full pl-9 pr-3 py-2.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text)] placeholder:text-[var(--ansein-text-dim)] text-sm focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)] transition-colors"
+            className="w-full pl-9 pr-3 py-2.5 rounded-md bg-card border border-border text-foreground placeholder:text-muted-foreground/50 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
           />
         </div>
         <div className="flex items-center gap-1.5 overflow-x-auto ansein-no-scrollbar pb-1">
@@ -205,15 +205,15 @@ export default function InvestigationListPage() {
                 className={cn(
                   'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs whitespace-nowrap transition-colors border',
                   isActive
-                    ? 'bg-[var(--ansein-primary)] text-[var(--ansein-bg)] border-[var(--ansein-primary)]'
-                    : 'bg-[var(--ansein-surface)] text-[var(--ansein-text-muted)] border-[var(--ansein-border)] hover:text-[var(--ansein-text)] hover:border-[var(--ansein-border-strong)]'
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-card text-muted-foreground border-border hover:text-foreground hover:border-primary/50'
                 )}
               >
                 {f.label}
                 {count > 0 && (
                   <span className={cn(
                     'ansein-mono text-[9px] px-1 rounded',
-                    isActive ? 'bg-[var(--ansein-bg)]/20' : 'bg-[var(--ansein-bg)]/50'
+                    isActive ? 'bg-background/20' : 'bg-background/50'
                   )}>
                     {count}
                   </span>
@@ -222,14 +222,14 @@ export default function InvestigationListPage() {
             )
           })}
           {/* Starred filter */}
-          <div className="w-px h-5 bg-[var(--ansein-border)] mx-1 flex-shrink-0" />
+          <div className="w-px h-5 bg-[border] mx-1 flex-shrink-0" />
           <button
             onClick={() => setStarredOnly((v) => !v)}
             className={cn(
               'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs whitespace-nowrap transition-colors border',
               starredOnly
                 ? 'bg-amber-500/15 text-amber-400 border-amber-500/40'
-                : 'bg-[var(--ansein-surface)] text-[var(--ansein-text-muted)] border-[var(--ansein-border)] hover:text-amber-400 hover:border-amber-500/30'
+                : 'bg-card text-muted-foreground border-border hover:text-amber-400 hover:border-amber-500/30'
             )}
             title="Show only starred investigations"
           >
@@ -238,7 +238,7 @@ export default function InvestigationListPage() {
             {starredCount > 0 && (
               <span className={cn(
                 'ansein-mono text-[9px] px-1 rounded',
-                starredOnly ? 'bg-amber-500/20' : 'bg-[var(--ansein-bg)]/50'
+                starredOnly ? 'bg-amber-500/20' : 'bg-background/50'
               )}>
                 {starredCount}
               </span>
@@ -250,21 +250,21 @@ export default function InvestigationListPage() {
       {/* Bulk action bar */}
       {selected.size > 0 && (
         <div className="sticky top-0 z-20 mb-4 -mx-2 px-2">
-          <div className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-lg bg-[var(--ansein-surface-hover)] border border-[var(--ansein-primary)]/30 backdrop-blur ansein-fade-in">
+          <div className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-lg bg-card/80 border border-primary/30 backdrop-blur ansein-fade-in">
             <div className="flex items-center gap-3">
               <button
                 onClick={clearSelection}
-                className="text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors"
                 title="Clear selection"
               >
                 <X className="h-4 w-4" />
               </button>
-              <span className="text-sm text-[var(--ansein-text)]">
+              <span className="text-sm text-foreground">
                 <span className="ansein-mono font-semibold">{selected.size}</span> selected
               </span>
               <button
                 onClick={selectAll}
-                className="text-xs text-[var(--ansein-primary)] hover:text-[var(--ansein-primary-hover)] transition-colors"
+                className="text-xs text-primary hover:text-primary/90 transition-colors"
               >
                 Select all visible ({filtered.length})
               </button>
@@ -287,7 +287,7 @@ export default function InvestigationListPage() {
                   </button>
                   <button
                     onClick={() => setBulkConfirm(false)}
-                    className="px-2 py-1 rounded-md text-xs text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] transition-colors"
+                    className="px-2 py-1 rounded-md text-xs text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Cancel
                   </button>
@@ -314,9 +314,9 @@ export default function InvestigationListPage() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="ansein-card rounded-xl">
+        <div className="bg-card border border-border rounded-xl">
           <EmptyState
-            icon={<FolderSearch className="h-6 w-6 text-[var(--ansein-primary)]" />}
+            icon={<FolderSearch className="h-6 w-6 text-primary" />}
             title={search || statusFilter !== 'all' || starredOnly ? 'No matching investigations' : 'No investigations yet'}
             description={
               search || statusFilter !== 'all' || starredOnly
@@ -328,7 +328,7 @@ export default function InvestigationListPage() {
               !search && statusFilter === 'all' && !starredOnly && (
                 <Link
                   href="/app/investigations/new"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[var(--ansein-primary)] text-[var(--ansein-bg)] text-sm font-medium hover:bg-[var(--ansein-primary-hover)] transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   New investigation
@@ -346,8 +346,8 @@ export default function InvestigationListPage() {
               <div
                 key={inv.id}
                 className={cn(
-                  'ansein-card rounded-xl relative overflow-hidden group transition-all',
-                  isSelected && 'ring-1 ring-[var(--ansein-primary)] border-[var(--ansein-primary)]/40'
+                  'bg-card border border-border rounded-xl relative overflow-hidden group transition-all',
+                  isSelected && 'ring-1 ring-[primary] border-primary/40'
                 )}
               >
                 {/* Selection checkbox */}
@@ -356,8 +356,8 @@ export default function InvestigationListPage() {
                   className={cn(
                     'absolute top-3 left-3 z-10 flex h-5 w-5 items-center justify-center rounded border transition-all',
                     isSelected
-                      ? 'bg-[var(--ansein-primary)] border-[var(--ansein-primary)] text-[var(--ansein-bg)]'
-                      : 'bg-[var(--ansein-surface)]/80 border-[var(--ansein-border)] text-transparent opacity-0 group-hover:opacity-100 hover:border-[var(--ansein-primary)]'
+                      ? 'bg-primary border-primary text-primary-foreground'
+                      : 'bg-card/80 border-border text-transparent opacity-0 group-hover:opacity-100 hover:border-primary'
                   )}
                   title={isSelected ? 'Deselect' : 'Select for bulk action'}
                 >
@@ -375,7 +375,7 @@ export default function InvestigationListPage() {
                     'absolute top-3 right-3 z-10 flex h-7 w-7 items-center justify-center rounded-md border transition-all disabled:opacity-60',
                     inv.is_starred
                       ? 'bg-amber-500/15 border-amber-500/40 text-amber-400 opacity-100'
-                      : 'bg-[var(--ansein-surface)]/80 border-[var(--ansein-border)] text-[var(--ansein-text-dim)] opacity-0 group-hover:opacity-100 hover:text-amber-400 hover:border-amber-500/30'
+                      : 'bg-card/80 border-border text-muted-foreground/50 opacity-0 group-hover:opacity-100 hover:text-amber-400 hover:border-amber-500/30'
                   )}
                   title={inv.is_starred ? 'Remove star' : 'Star this investigation'}
                 >
@@ -390,7 +390,7 @@ export default function InvestigationListPage() {
                   href={`/app/investigations/${inv.id}`}
                   className="block p-5 pt-10 flex flex-col gap-3"
                 >
-                  <h3 className="text-base font-semibold text-[var(--ansein-text)] leading-tight group-hover:text-[var(--ansein-primary)] transition-colors">
+                  <h3 className="text-base font-semibold text-foreground leading-tight group-hover:text-primary transition-colors">
                     {inv.title}
                   </h3>
                   <span className={cn('self-start inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border flex-shrink-0', s.bg, s.text, s.border)}>
@@ -398,31 +398,31 @@ export default function InvestigationListPage() {
                     {inv.status}
                   </span>
                   {inv.description && (
-                    <p className="text-sm text-[var(--ansein-text-muted)] line-clamp-2 leading-relaxed">
+                    <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
                       {inv.description}
                     </p>
                   )}
                   {inv.tags?.length > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {inv.tags.slice(0, 4).map((t, i) => (
-                        <span key={i} className="text-[10px] ansein-mono px-1.5 py-0.5 rounded bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text-dim)]">
+                        <span key={i} className="text-[10px] ansein-mono px-1.5 py-0.5 rounded bg-card border border-border text-muted-foreground/50">
                           #{t}
                         </span>
                       ))}
                       {inv.tags.length > 4 && (
-                        <span className="text-[10px] ansein-mono px-1.5 py-0.5 text-[var(--ansein-text-dim)]">
+                        <span className="text-[10px] ansein-mono px-1.5 py-0.5 text-muted-foreground/50">
                           +{inv.tags.length - 4}
                         </span>
                       )}
                     </div>
                   )}
-                  <div className="grid grid-cols-3 gap-2 mt-2 pt-3 border-t border-[var(--ansein-border)]">
+                  <div className="grid grid-cols-3 gap-2 mt-2 pt-3 border-t border-border">
                     <Stat icon={<FileText className="h-3 w-3" />} value={inv.source_count} label="sources" />
                     <Stat icon={<Network className="h-3 w-3" />} value={inv.entity_count} label="entities" />
                     <Stat icon={<Share2 className="h-3 w-3" />} value={inv.relationship_count} label="rels" />
                   </div>
                   <div className="flex items-center justify-between mt-1">
-                    <span className="text-[10px] text-[var(--ansein-text-dim)]">
+                    <span className="text-[10px] text-muted-foreground/50">
                       {formatRelative(inv.updated_at)}
                     </span>
                     <SeverityMeter score={inv.severity_score} size="sm" />
@@ -440,17 +440,17 @@ export default function InvestigationListPage() {
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="px-3 py-1.5 rounded-md border border-[var(--ansein-border)] bg-[var(--ansein-surface)] text-sm text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] hover:border-[var(--ansein-border-strong)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="px-3 py-1.5 rounded-md border border-border bg-card text-sm text-muted-foreground hover:text-foreground hover:border-primary/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             Previous
           </button>
-          <span className="text-sm text-[var(--ansein-text-muted)] ansein-mono">
+          <span className="text-sm text-muted-foreground ansein-mono">
             {page} / {totalPages}
           </span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className="px-3 py-1.5 rounded-md border border-[var(--ansein-border)] bg-[var(--ansein-surface)] text-sm text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] hover:border-[var(--ansein-border-strong)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="px-3 py-1.5 rounded-md border border-border bg-card text-sm text-muted-foreground hover:text-foreground hover:border-primary/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             Next
           </button>
@@ -463,11 +463,11 @@ export default function InvestigationListPage() {
 function Stat({ icon, value, label }: { icon: React.ReactNode; value: number; label: string }) {
   return (
     <div className="flex flex-col items-center text-center">
-      <div className="flex items-center gap-1 text-[var(--ansein-text-muted)]">
+      <div className="flex items-center gap-1 text-muted-foreground">
         {icon}
         <span className="ansein-mono text-sm font-semibold">{value}</span>
       </div>
-      <span className="text-[9px] uppercase tracking-wider text-[var(--ansein-text-dim)] mt-0.5">
+      <span className="text-[9px] uppercase tracking-wider text-muted-foreground/50 mt-0.5">
         {label}
       </span>
     </div>

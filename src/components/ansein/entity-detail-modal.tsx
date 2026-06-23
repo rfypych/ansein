@@ -118,11 +118,11 @@ export function EntityDetailModal({
       >
         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
         <div
-          className="relative ansein-card rounded-xl p-8 flex items-center gap-3"
+          className="relative bg-card border border-border rounded-xl p-8 flex items-center gap-3"
           onClick={(e) => e.stopPropagation()}
         >
           <Spinner />
-          <p className="text-sm text-[var(--ansein-text-muted)]">Loading entity…</p>
+          <p className="text-sm text-muted-foreground">Loading entity…</p>
         </div>
       </div>
     )
@@ -173,12 +173,12 @@ export function EntityDetailModal({
     >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm ansein-fade-in" />
       <div
-        className="relative w-full max-w-2xl ansein-card rounded-xl overflow-hidden"
+        className="relative w-full max-w-2xl bg-card border border-border rounded-xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div
-          className="px-5 py-4 border-b border-[var(--ansein-border)] flex items-start gap-3"
+          className="px-5 py-4 border-b border-border flex items-start gap-3"
           style={{ background: `linear-gradient(135deg, ${color}10, transparent)` }}
         >
           <div
@@ -190,20 +190,20 @@ export function EntityDetailModal({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-0.5">
               <Badge color="slate">{ENTITY_TYPE_LABELS[entity.entity_type] || entity.entity_type}</Badge>
-              <span className="text-[10px] ansein-mono uppercase tracking-widest text-[var(--ansein-text-dim)]">
+              <span className="text-[10px] ansein-mono uppercase tracking-widest text-muted-foreground/50">
                 via {entity.source_method}
               </span>
-              <span className="text-[10px] ansein-mono text-[var(--ansein-text-dim)]">
+              <span className="text-[10px] ansein-mono text-muted-foreground/50">
                 conf {(entity.confidence * 100).toFixed(0)}%
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <p className="text-base font-medium text-[var(--ansein-text)] ansein-mono truncate flex-1" title={entity.value}>
+              <p className="text-base font-medium text-foreground ansein-mono truncate flex-1" title={entity.value}>
                 {entity.value}
               </p>
               <button
                 onClick={copyValue}
-                className="p-1 rounded text-[var(--ansein-text-dim)] hover:text-[var(--ansein-text)] transition-colors"
+                className="p-1 rounded text-muted-foreground/50 hover:text-foreground transition-colors"
                 title="Copy value"
               >
                 {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
@@ -212,7 +212,7 @@ export function EntityDetailModal({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-md text-[var(--ansein-text-dim)] hover:text-[var(--ansein-text)] hover:bg-[var(--ansein-surface)] transition-colors flex-shrink-0"
+            className="p-1.5 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-card transition-colors flex-shrink-0"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
@@ -223,13 +223,13 @@ export function EntityDetailModal({
         <div className="max-h-[60vh] overflow-y-auto p-5 space-y-5">
           {/* Enrichment */}
           <section>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--ansein-text-dim)] mb-2 flex items-center gap-1.5">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/50 mb-2 flex items-center gap-1.5">
               <ShieldCheck className="h-3.5 w-3.5" />
               Enrichment
               <Badge color="slate">{enrKeys.length} providers</Badge>
             </h3>
             {enrKeys.length === 0 ? (
-              <div className="rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] p-4 text-xs text-[var(--ansein-text-muted)]">
+              <div className="rounded-md bg-card border border-border p-4 text-xs text-muted-foreground">
                 No enrichment data for this entity. Configure VirusTotal, AbuseIPDB, or Shodan API
                 keys in Settings to populate enrichment on the next pipeline run.
               </div>
@@ -242,7 +242,7 @@ export function EntityDetailModal({
                   return (
                     <div
                       key={k}
-                      className="rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] p-3"
+                      className="rounded-md bg-card border border-border p-3"
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
@@ -252,7 +252,7 @@ export function EntityDetailModal({
                               summary.malicious ? 'text-rose-400' : 'text-emerald-400'
                             )}
                           />
-                          <span className="text-sm font-medium text-[var(--ansein-text)] capitalize">
+                          <span className="text-sm font-medium text-foreground capitalize">
                             {k}
                           </span>
                         </div>
@@ -267,7 +267,7 @@ export function EntityDetailModal({
                           {summary.malicious ? 'MALICIOUS' : 'BENIGN'}
                         </span>
                       </div>
-                      <p className="text-xs text-[var(--ansein-text-muted)] ansein-mono mb-2">
+                      <p className="text-xs text-muted-foreground ansein-mono mb-2">
                         {summary.summary}
                       </p>
                       <div className="grid grid-cols-2 gap-1 text-[11px]">
@@ -276,10 +276,10 @@ export function EntityDetailModal({
                           .slice(0, 8)
                           .map(([kk, vv]) => (
                             <div key={kk} className="flex flex-col">
-                              <span className="text-[9px] uppercase tracking-wider text-[var(--ansein-text-dim)]">
+                              <span className="text-[9px] uppercase tracking-wider text-muted-foreground/50">
                                 {kk.replace(/_/g, ' ')}
                               </span>
-                              <span className="text-[var(--ansein-text)] ansein-mono truncate" title={String(vv)}>
+                              <span className="text-foreground ansein-mono truncate" title={String(vv)}>
                                 {Array.isArray(vv) ? vv.join(', ') : String(vv)}
                               </span>
                             </div>
@@ -294,13 +294,13 @@ export function EntityDetailModal({
 
           {/* Relationships */}
           <section>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--ansein-text-dim)] mb-2 flex items-center gap-1.5">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/50 mb-2 flex items-center gap-1.5">
               <Activity className="h-3.5 w-3.5" />
               Relationships
               <Badge color="slate">{involved.length}</Badge>
             </h3>
             {involved.length === 0 ? (
-              <div className="rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] p-4 text-xs text-[var(--ansein-text-muted)]">
+              <div className="rounded-md bg-card border border-border p-4 text-xs text-muted-foreground">
                 No relationships involving this entity were inferred from the source text.
               </div>
             ) : (
@@ -312,25 +312,25 @@ export function EntityDetailModal({
                   return (
                     <div
                       key={r.id}
-                      className="flex items-center gap-2 px-3 py-2 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-xs"
+                      className="flex items-center gap-2 px-3 py-2 rounded-md bg-card border border-border text-xs"
                     >
-                      <span className="ansein-mono text-[var(--ansein-text-dim)]">
+                      <span className="ansein-mono text-muted-foreground/50">
                         {isSource ? '→' : '←'}
                       </span>
-                      <span className="ansein-mono px-1.5 py-0.5 rounded bg-[var(--ansein-bg)] border border-[var(--ansein-border)] text-[var(--ansein-text-muted)]">
+                      <span className="ansein-mono px-1.5 py-0.5 rounded bg-background border border-border text-muted-foreground">
                         {r.relation_type}
                       </span>
-                      <span className="ansein-mono text-[var(--ansein-text)] truncate" title={other?.value}>
+                      <span className="ansein-mono text-foreground truncate" title={other?.value}>
                         {other?.value || `#${isSource ? r.target_id : r.source_id}`}
                       </span>
-                      <span className="ml-auto text-[10px] ansein-mono text-[var(--ansein-text-dim)] flex-shrink-0">
+                      <span className="ml-auto text-[10px] ansein-mono text-muted-foreground/50 flex-shrink-0">
                         w={r.weight.toFixed(2)}
                       </span>
                     </div>
                   )
                 })}
                 {involved.length > 20 && (
-                  <p className="text-[10px] text-[var(--ansein-text-dim)] text-center pt-1">
+                  <p className="text-[10px] text-muted-foreground/50 text-center pt-1">
                     Showing 20 of {involved.length}
                   </p>
                 )}
@@ -341,7 +341,7 @@ export function EntityDetailModal({
           {/* Evidence (if any relationships have evidence snippets) */}
           {involved.some((r) => r.evidence) && (
             <section>
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--ansein-text-dim)] mb-2 flex items-center gap-1.5">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/50 mb-2 flex items-center gap-1.5">
                 <ExternalLink className="h-3.5 w-3.5" />
                 Evidence snippets
               </h3>
@@ -352,12 +352,12 @@ export function EntityDetailModal({
                   .map((r) => (
                     <div
                       key={`ev-${r.id}`}
-                      className="rounded-md bg-[var(--ansein-surface)] border-l-2 border-[var(--ansein-primary)] p-3"
+                      className="rounded-md bg-card border-l-2 border-primary p-3"
                     >
-                      <p className="text-[10px] uppercase tracking-wider text-[var(--ansein-text-dim)] mb-1">
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground/50 mb-1">
                         {r.relation_type} · weight {r.weight.toFixed(2)}
                       </p>
-                      <p className="text-xs text-[var(--ansein-text-muted)] ansein-mono leading-relaxed">
+                      <p className="text-xs text-muted-foreground ansein-mono leading-relaxed">
                         "{r.evidence}"
                       </p>
                     </div>
@@ -367,7 +367,7 @@ export function EntityDetailModal({
           )}
 
           {/* Meta */}
-          <section className="pt-2 border-t border-[var(--ansein-border)] text-[10px] text-[var(--ansein-text-dim)] flex items-center justify-between">
+          <section className="pt-2 border-t border-border text-[10px] text-muted-foreground/50 flex items-center justify-between">
             <span>Entity ID #{entity.id}</span>
             <span>Extracted {formatRelative(entity.created_at)}</span>
           </section>

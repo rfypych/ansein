@@ -44,11 +44,11 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* ------------------------------------------------------------------
-   AnseIn — "Intelligence Terminal" palette
+
+/* AnseIn — "Intelligence Terminal" palette
    Light mode: Crisp corporate aesthetics
-   Dark mode: Hermes Agent deep green/beige aesthetic
------------------------------------------------------------------- */
+   Dark mode: Hermes Agent deep green/beige aesthetic */
+
 :root {
   --radius: 0.625rem;
 
@@ -117,13 +117,13 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    border-color: var(--border); outline-color: color-mix(in srgb, var(--ring) 50%, transparent);
   }
   html {
     color-scheme: light dark;
   }
   body {
-    @apply bg-background text-foreground transition-colors duration-300;
+    background-color: var(--background); color: var(--foreground); transition-property: color, background-color, border-color, text-decoration-color, fill, stroke; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 300ms;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
     background-attachment: fixed;
     background-size: 120px 120px;
@@ -158,51 +158,16 @@
   }
 }
 
-/* ------------------------------------------------------------------
-   AnseIn utility classes
------------------------------------------------------------------- */
+
+
+/* AnseIn utility classes (Hermes/Organic Tech Refactor) */
 @layer components {
-  /* Glass card with subtle border + backdrop blur + refined shadow */
-  .ansein-card {
-    background: linear-gradient(180deg, rgba(24, 29, 44, 0.5) 0%, rgba(13, 17, 28, 0.8) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 
-      inset 0 1px 1px rgba(255, 255, 255, 0.06),
-      0 4px 20px -2px rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(16px) saturate(1.2);
-    -webkit-backdrop-filter: blur(16px) saturate(1.2);
-  }
-
-  .ansein-card-hover {
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .ansein-card-hover:hover {
-    background: linear-gradient(180deg, rgba(28, 34, 51, 0.6) 0%, rgba(15, 20, 31, 0.9) 100%);
-    border-color: rgba(255, 255, 255, 0.1);
-    box-shadow: 
-      inset 0 1px 1px rgba(255, 255, 255, 0.1),
-      0 0 0 1px rgba(20, 184, 166, 0.1),
-      0 8px 32px -8px rgba(0, 0, 0, 0.5);
-    transform: translateY(-2px);
-  }
-
-  /* Subtle inner glow on primary surfaces */
-  .ansein-glow {
-    box-shadow: 0 0 0 1px rgba(20, 184, 166, 0.15), 0 0 24px -4px rgba(20, 184, 166, 0.2);
-  }
+  /* No more heavy glass cards, using native Tailwind classes instead */
 
   /* Monospace label chips */
   .ansein-mono {
-    font-family: var(--font-geist-mono), "JetBrains Mono", ui-monospace, monospace;
+    font-family: var(--font-courier), "JetBrains Mono", ui-monospace, monospace;
     font-feature-settings: "ss01", "cv11";
-  }
-
-  /* Gradient text used for hero wordmark highlights */
-  .ansein-gradient-text {
-    background: linear-gradient(135deg, #14b8a6 0%, #2dd4bf 60%, #f59e0b 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
   }
 
   /* Animated underline indicator */
@@ -216,7 +181,7 @@
     bottom: -2px;
     height: 1px;
     width: 0;
-    background: linear-gradient(90deg, #14b8a6, transparent);
+    background: linear-gradient(90deg, var(--primary), transparent);
     transition: width 0.3s ease;
   }
   .ansein-underline:hover::after,
@@ -238,28 +203,22 @@
     animation: ansein-pulse 2s ease-in-out infinite;
   }
 
-  /* Refined button focus ring */
-  .ansein-focus-ring:focus-visible {
-    outline: 2px solid var(--ansein-primary);
-    outline-offset: 2px;
-  }
-
   /* Smooth shimmer line for skeletons */
   .ansein-skeleton {
     background: linear-gradient(
       90deg,
-      var(--ansein-surface) 0%,
-      var(--ansein-surface-2) 50%,
-      var(--ansein-surface) 100%
+      var(--muted) 0%,
+      var(--border) 50%,
+      var(--muted) 100%
     );
     background-size: 200% 100%;
     animation: ansein-shimmer 1.5s ease-in-out infinite;
   }
 }
 
-/* ------------------------------------------------------------------
-   Keyframes
------------------------------------------------------------------- */
+
+   /* Keyframes
+
 @keyframes ansein-pulse {
   0%, 100% { transform: scale(1); opacity: 0.3; }
   50% { transform: scale(1.5); opacity: 0; }
@@ -281,49 +240,9 @@
   animation: ansein-fade-in-fast 0.2s ease-out both;
 }
 
-@keyframes ansein-float {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-20px) scale(1.05); }
-}
-.ansein-float {
-  animation: ansein-float 8s ease-in-out infinite;
-}
-
 @keyframes ansein-shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
-}
-.ansein-shimmer {
-  background: linear-gradient(
-    90deg,
-    var(--ansein-surface) 0%,
-    var(--ansein-surface-2) 50%,
-    var(--ansein-surface) 100%
-  );
-  background-size: 200% 100%;
-  animation: ansein-shimmer 1.5s ease-in-out infinite;
-}
-
-@keyframes ansein-spin {
-  to { transform: rotate(360deg); }
-}
-.ansein-spin {
-  animation: ansein-spin 0.8s linear infinite;
-}
-
-@keyframes ansein-slide-up {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.ansein-slide-up {
-  animation: ansein-slide-up 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-/* Graph view background — radial noir */
-.ansein-graph-bg {
-  background:
-    radial-gradient(circle at center, rgba(20, 184, 166, 0.04) 0%, transparent 50%),
-    radial-gradient(circle at center, #0d111c 0%, #060912 100%);
 }
 
 /* Hide scrollbar but keep functionality */
@@ -337,99 +256,16 @@
 
 /* Custom scrollbar styling for visible scrollbars */
 .ansein-scrollbar::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 .ansein-scrollbar::-webkit-scrollbar-track {
-  background: var(--ansein-bg);
+  background: transparent;
 }
 .ansein-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--ansein-border-strong);
-  border-radius: 4px;
-  border: 2px solid var(--ansein-bg);
+  background: var(--border);
+  border-radius: 3px;
 }
 .ansein-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: var(--ansein-text-dim);
-}
-
-/* Selection color */
-::selection {
-  background: rgba(20, 184, 166, 0.25);
-  color: #e8ecf4;
-}
-
-/* Refined prose styling for markdown content */
-.prose-ansein {
-  font-size: 0.875rem;
-  line-height: 1.7;
-}
-.prose-ansein > :first-child {
-  margin-top: 0;
-}
-.prose-ansein > :last-child {
-  margin-bottom: 0;
-}
-
-/* =========================================================== 4D Timeline Slider
- * Styled range input for the knowledge-graph temporal playback.
- * Uses the AnseIn teal accent + noir surface tokens so the slider matches
- * the rest of the "intelligence terminal" aesthetic.
- */
-.ansein-timeline-slider {
-  -webkit-appearance: none;
-  appearance: none;
-  height: 6px;
-  border-radius: 3px;
-  background: linear-gradient(
-    to right,
-    var(--ansein-primary) 0%,
-    var(--ansein-primary) var(--ansein-timeline-fill, 100%),
-    var(--ansein-surface) var(--ansein-timeline-fill, 100%),
-    var(--ansein-surface) 100%
-  );
-  border: 1px solid var(--ansein-border);
-  outline: none;
-  cursor: pointer;
-}
-.ansein-timeline-slider:hover {
-  border-color: var(--ansein-border-strong);
-}
-/* WebKit thumb */
-.ansein-timeline-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--ansein-primary);
-  border: 2px solid var(--ansein-bg);
-  box-shadow: 0 0 0 1px var(--ansein-primary), 0 0 8px rgba(20, 184, 166, 0.5);
-  cursor: pointer;
-  transition: transform 0.15s ease;
-}
-.ansein-timeline-slider::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
-  box-shadow: 0 0 0 1px var(--ansein-primary), 0 0 12px rgba(20, 184, 166, 0.7);
-}
-.ansein-timeline-slider::-webkit-slider-thumb:active {
-  transform: scale(1.15);
-}
-/* Firefox thumb */
-.ansein-timeline-slider::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--ansein-primary);
-  border: 2px solid var(--ansein-bg);
-  box-shadow: 0 0 0 1px var(--ansein-primary), 0 0 8px rgba(20, 184, 166, 0.5);
-  cursor: pointer;
-}
-.ansein-timeline-slider::-moz-range-track {
-  height: 6px;
-  border-radius: 3px;
-  background: var(--ansein-surface);
-  border: 1px solid var(--ansein-border);
-}
-.ansein-timeline-slider:focus {
-  box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.2);
+  background: var(--muted-foreground);
 }

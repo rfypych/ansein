@@ -108,26 +108,26 @@ export default function PlaybooksPage() {
       {/* Header */}
       <div className="mb-8 flex items-start justify-between gap-4">
         <div>
-          <p className="ansein-mono text-xs uppercase tracking-widest text-[var(--ansein-text-dim)] mb-1">
+          <p className="ansein-mono text-xs uppercase tracking-widest text-muted-foreground/50 mb-1">
             SOAR
           </p>
-          <h1 className="text-2xl font-semibold tracking-tight text-[var(--ansein-text)] flex items-center gap-2">
-            <Workflow className="h-6 w-6 text-[var(--ansein-primary)]" />
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground flex items-center gap-2">
+            <Workflow className="h-6 w-6 text-primary" />
             Playbooks
             {!canEdit && (
-              <span className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-[var(--ansein-text-muted)] align-middle">
+              <span className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-card border border-border text-muted-foreground align-middle">
                 Read-only · {role}
               </span>
             )}
           </h1>
-          <p className="text-sm text-[var(--ansein-text-muted)] mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             Automated actions triggered when pipeline results match a condition.
           </p>
         </div>
         {canEdit && (
           <button
             onClick={() => setShowCreate(true)}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-[var(--ansein-primary)] text-[var(--ansein-bg)] text-sm font-medium hover:bg-[var(--ansein-primary-hover)] transition-colors"
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
           >
             <Plus className="h-4 w-4" />
             New playbook
@@ -136,12 +136,12 @@ export default function PlaybooksPage() {
       </div>
 
       {/* What is SOAR callout */}
-      <div className="mb-6 flex items-start gap-3 p-4 rounded-lg bg-[var(--ansein-primary)]/[0.04] border border-[var(--ansein-primary)]/15">
-        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[var(--ansein-primary)]/10 border border-[var(--ansein-primary)]/20 flex-shrink-0">
-          <Zap className="h-3.5 w-3.5 text-[var(--ansein-primary)]" />
+      <div className="mb-6 flex items-start gap-3 p-4 rounded-lg bg-primary/[0.04] border border-primary/15">
+        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 border border-primary/20 flex-shrink-0">
+          <Zap className="h-3.5 w-3.5 text-primary" />
         </div>
-        <div className="text-xs text-[var(--ansein-text-muted)] leading-relaxed">
-          <strong className="text-[var(--ansein-text)]">Security Orchestration, Automation, and Response.</strong>{' '}
+        <div className="text-xs text-muted-foreground leading-relaxed">
+          <strong className="text-foreground">Security Orchestration, Automation, and Response.</strong>{' '}
           Playbooks run automatically after every pipeline completion. Each playbook defines a <em>trigger</em> (e.g. severity ≥ 70)
           and a list of <em>actions</em> (notify, tag, star, export). When a trigger matches the pipeline result, the actions fire
           in order — no manual triage required.
@@ -153,9 +153,9 @@ export default function PlaybooksPage() {
           <Spinner />
         </div>
       ) : playbooksQuery.data?.items.length === 0 ? (
-        <div className="ansein-card rounded-xl">
+        <div className="bg-card border border-border rounded-xl">
           <EmptyState
-            icon={<Workflow className="h-6 w-6 text-[var(--ansein-text-dim)]" />}
+            icon={<Workflow className="h-6 w-6 text-muted-foreground/50" />}
             title="No playbooks yet"
             description="Create your first playbook to automate responses when pipeline results match a condition."
             className="py-16"
@@ -163,7 +163,7 @@ export default function PlaybooksPage() {
               canEdit ? (
                 <button
                   onClick={() => setShowCreate(true)}
-                  className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-[var(--ansein-primary)] text-[var(--ansein-bg)] text-sm font-medium hover:bg-[var(--ansein-primary-hover)] transition-colors"
+                  className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
                 >
                   <Plus className="h-4 w-4" />
                   Create playbook
@@ -218,48 +218,48 @@ function PlaybookCard({
   return (
     <div
       className={cn(
-        'ansein-card rounded-xl p-5 relative overflow-hidden transition-opacity',
+        'bg-card border border-border rounded-xl p-5 relative overflow-hidden transition-opacity',
         !playbook.enabled && 'opacity-60'
       )}
     >
       {!playbook.enabled && (
-        <div className="absolute top-0 left-0 right-0 h-0.5 bg-[var(--ansein-border)]" />
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-[border]" />
       )}
       {playbook.enabled && (
-        <div className="absolute top-0 left-0 right-0 h-0.5 bg-[var(--ansein-primary)]" />
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-primary" />
       )}
       <div className="flex items-start gap-4">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0 bg-[var(--ansein-primary)]/10 border border-[var(--ansein-primary)]/20 text-[var(--ansein-primary)]">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0 bg-primary/10 border border-primary/20 text-primary">
           <Workflow className="h-5 w-5" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <h3 className="text-sm font-semibold text-[var(--ansein-text)]">{playbook.name}</h3>
+            <h3 className="text-sm font-semibold text-foreground">{playbook.name}</h3>
             {playbook.enabled ? (
               <Badge color="success" dot>Active</Badge>
             ) : (
               <Badge color="slate" dot>Disabled</Badge>
             )}
-            <span className="text-[10px] text-[var(--ansein-text-dim)] ansein-mono ml-auto">
+            <span className="text-[10px] text-muted-foreground/50 ansein-mono ml-auto">
               #{playbook.id}
             </span>
           </div>
           {playbook.description && (
-            <p className="text-xs text-[var(--ansein-text-muted)] mb-3">{playbook.description}</p>
+            <p className="text-xs text-muted-foreground mb-3">{playbook.description}</p>
           )}
 
           {/* Trigger */}
           <div className="mb-3">
-            <p className="text-[10px] uppercase tracking-widest ansein-mono text-[var(--ansein-text-dim)] mb-1">
+            <p className="text-[10px] uppercase tracking-widest ansein-mono text-muted-foreground/50 mb-1">
               Trigger
             </p>
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-xs">
+            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-card border border-border text-xs">
               <ShieldAlert className="h-3 w-3 text-amber-400" />
-              <span className="text-[var(--ansein-text-muted)]">{triggerMeta?.label || 'No trigger'}</span>
+              <span className="text-muted-foreground">{triggerMeta?.label || 'No trigger'}</span>
               {playbook.trigger?.value !== undefined && (
                 <>
-                  <span className="text-[var(--ansein-text-dim)]">·</span>
-                  <code className="ansein-mono text-[var(--ansein-primary)]">
+                  <span className="text-muted-foreground/50">·</span>
+                  <code className="ansein-mono text-primary">
                     {String(playbook.trigger.value)}
                   </code>
                 </>
@@ -269,11 +269,11 @@ function PlaybookCard({
 
           {/* Actions */}
           <div>
-            <p className="text-[10px] uppercase tracking-widest ansein-mono text-[var(--ansein-text-dim)] mb-1">
+            <p className="text-[10px] uppercase tracking-widest ansein-mono text-muted-foreground/50 mb-1">
               Actions ({playbook.actions.length})
             </p>
             {playbook.actions.length === 0 ? (
-              <p className="text-xs text-[var(--ansein-text-dim)] italic">No actions</p>
+              <p className="text-xs text-muted-foreground/50 italic">No actions</p>
             ) : (
               <div className="flex flex-wrap gap-1.5">
                 {playbook.actions.map((a, i) => {
@@ -304,8 +304,8 @@ function PlaybookCard({
           </div>
 
           {/* Footer */}
-          <div className="mt-4 pt-3 border-t border-[var(--ansein-border)] flex items-center justify-between">
-            <span className="text-[10px] text-[var(--ansein-text-dim)] ansein-mono">
+          <div className="mt-4 pt-3 border-t border-border flex items-center justify-between">
+            <span className="text-[10px] text-muted-foreground/50 ansein-mono">
               Updated {new Date(playbook.updated_at).toLocaleString()}
             </span>
             {canEdit && (
@@ -317,7 +317,7 @@ function PlaybookCard({
                     'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs border transition-colors',
                     playbook.enabled
                       ? 'bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/15'
-                      : 'bg-[var(--ansein-primary)]/10 border-[var(--ansein-primary)]/30 text-[var(--ansein-primary)] hover:bg-[var(--ansein-primary)]/15'
+                      : 'bg-primary/10 border-primary/30 text-primary hover:bg-primary/15'
                   )}
                   title={playbook.enabled ? 'Disable playbook' : 'Enable playbook'}
                 >
@@ -425,15 +425,15 @@ function CreatePlaybookModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative ansein-card rounded-xl border border-[var(--ansein-border)] max-w-2xl w-full max-h-[90vh] overflow-y-auto ansein-scrollbar">
-        <div className="sticky top-0 bg-[var(--ansein-surface)] border-b border-[var(--ansein-border)] px-5 py-4 flex items-center justify-between z-10">
-          <h2 className="text-sm font-semibold text-[var(--ansein-text)] flex items-center gap-2">
-            <Workflow className="h-4 w-4 text-[var(--ansein-primary)]" />
+      <div className="relative bg-card border border-border rounded-xl border border-border max-w-2xl w-full max-h-[90vh] overflow-y-auto ansein-scrollbar">
+        <div className="sticky top-0 bg-card border-b border-border px-5 py-4 flex items-center justify-between z-10">
+          <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <Workflow className="h-4 w-4 text-primary" />
             New playbook
           </h2>
           <button
             onClick={onClose}
-            className="p-1 rounded-md text-[var(--ansein-text-dim)] hover:text-[var(--ansein-text)] hover:bg-[var(--ansein-surface-hover)] transition-colors"
+            className="p-1 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-card/80 transition-colors"
           >
             <X className="h-4 w-4" />
           </button>
@@ -442,7 +442,7 @@ function CreatePlaybookModal({
         <div className="p-5 space-y-4">
           {/* Name */}
           <div>
-            <label className="block text-[10px] uppercase tracking-widest ansein-mono text-[var(--ansein-text-dim)] mb-1.5">
+            <label className="block text-[10px] uppercase tracking-widest ansein-mono text-muted-foreground/50 mb-1.5">
               Name <span className="text-rose-400">*</span>
             </label>
             <input
@@ -450,14 +450,14 @@ function CreatePlaybookModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. High-severity auto-tag"
-              className="w-full px-3 py-2 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-sm text-[var(--ansein-text)] focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)]"
+              className="w-full px-3 py-2 rounded-md bg-card border border-border text-sm text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               autoFocus
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-[10px] uppercase tracking-widest ansein-mono text-[var(--ansein-text-dim)] mb-1.5">
+            <label className="block text-[10px] uppercase tracking-widest ansein-mono text-muted-foreground/50 mb-1.5">
               Description
             </label>
             <textarea
@@ -465,13 +465,13 @@ function CreatePlaybookModal({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="What does this playbook do?"
               rows={2}
-              className="w-full px-3 py-2 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-sm text-[var(--ansein-text)] focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)] resize-none"
+              className="w-full px-3 py-2 rounded-md bg-card border border-border text-sm text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-none"
             />
           </div>
 
           {/* Trigger */}
           <div>
-            <label className="block text-[10px] uppercase tracking-widest ansein-mono text-[var(--ansein-text-dim)] mb-1.5">
+            <label className="block text-[10px] uppercase tracking-widest ansein-mono text-muted-foreground/50 mb-1.5">
               Trigger
             </label>
             <div className="grid grid-cols-2 gap-2 mb-2">
@@ -488,18 +488,18 @@ function CreatePlaybookModal({
                   className={cn(
                     'flex flex-col items-start px-3 py-2 rounded-md text-left border transition-all',
                     triggerType === t.value
-                      ? 'bg-[var(--ansein-primary)]/10 border-[var(--ansein-primary)]/40 text-[var(--ansein-text)]'
-                      : 'bg-[var(--ansein-surface)] border-[var(--ansein-border)] text-[var(--ansein-text-muted)] hover:border-[var(--ansein-border-strong)]'
+                      ? 'bg-primary/10 border-primary/40 text-foreground'
+                      : 'bg-card border-border text-muted-foreground hover:border-primary/50'
                   )}
                 >
                   <span className="text-xs font-medium">{t.label}</span>
-                  <span className="text-[10px] text-[var(--ansein-text-dim)] mt-0.5">{t.description}</span>
+                  <span className="text-[10px] text-muted-foreground/50 mt-0.5">{t.description}</span>
                 </button>
               ))}
             </div>
             {triggerType !== 'always' && (
               <div className="flex items-center gap-2">
-                <label className="text-[10px] uppercase tracking-widest ansein-mono text-[var(--ansein-text-dim)]">
+                <label className="text-[10px] uppercase tracking-widest ansein-mono text-muted-foreground/50">
                   Value
                 </label>
                 {triggerType === 'severity_threshold' ? (
@@ -509,13 +509,13 @@ function CreatePlaybookModal({
                     max={100}
                     value={triggerValue}
                     onChange={(e) => setTriggerValue(e.target.value)}
-                    className="flex-1 px-3 py-1.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-sm text-[var(--ansein-text)] ansein-mono focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)]"
+                    className="flex-1 px-3 py-1.5 rounded-md bg-card border border-border text-sm text-foreground ansein-mono focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                   />
                 ) : triggerType === 'entity_type' ? (
                   <select
                     value={triggerValue}
                     onChange={(e) => setTriggerValue(e.target.value)}
-                    className="flex-1 px-3 py-1.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-sm text-[var(--ansein-text)] focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)]"
+                    className="flex-1 px-3 py-1.5 rounded-md bg-card border border-border text-sm text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                   >
                     {ENTITY_TYPES.map((t) => (
                       <option key={t} value={t}>{t}</option>
@@ -525,7 +525,7 @@ function CreatePlaybookModal({
                   <select
                     value={triggerValue}
                     onChange={(e) => setTriggerValue(e.target.value)}
-                    className="flex-1 px-3 py-1.5 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] text-sm text-[var(--ansein-text)] focus:outline-none focus:border-[var(--ansein-primary)] focus:ring-1 focus:ring-[var(--ansein-primary)]"
+                    className="flex-1 px-3 py-1.5 rounded-md bg-card border border-border text-sm text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                   >
                     {ALERT_TYPES.map((t) => (
                       <option key={t} value={t}>{t}</option>
@@ -539,7 +539,7 @@ function CreatePlaybookModal({
           {/* Actions */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-[10px] uppercase tracking-widest ansein-mono text-[var(--ansein-text-dim)]">
+              <label className="block text-[10px] uppercase tracking-widest ansein-mono text-muted-foreground/50">
                 Actions
               </label>
               <div className="flex items-center gap-1">
@@ -565,7 +565,7 @@ function CreatePlaybookModal({
               </div>
             </div>
             {actions.length === 0 ? (
-              <p className="text-xs text-[var(--ansein-text-dim)] italic px-3 py-2 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)] border-dashed">
+              <p className="text-xs text-muted-foreground/50 italic px-3 py-2 rounded-md bg-card border border-border border-dashed">
                 No actions yet. Use the buttons above to add one.
               </p>
             ) : (
@@ -576,11 +576,11 @@ function CreatePlaybookModal({
                   return (
                     <div
                       key={i}
-                      className="flex items-center gap-2 p-2 rounded-md bg-[var(--ansein-surface)] border border-[var(--ansein-border)]"
+                      className="flex items-center gap-2 p-2 rounded-md bg-card border border-border"
                     >
-                      <GripVertical className="h-3 w-3 text-[var(--ansein-text-dim)] flex-shrink-0" />
+                      <GripVertical className="h-3 w-3 text-muted-foreground/50 flex-shrink-0" />
                       <Icon className="h-3.5 w-3.5 flex-shrink-0" style={{ color: meta.color }} />
-                      <span className="text-xs text-[var(--ansein-text-muted)] w-20 flex-shrink-0">{meta.label}</span>
+                      <span className="text-xs text-muted-foreground w-20 flex-shrink-0">{meta.label}</span>
                       {/* Action-specific params */}
                       {a.type === 'tag' && (
                         <input
@@ -588,7 +588,7 @@ function CreatePlaybookModal({
                           value={(a.params.tag as string) || ''}
                           onChange={(e) => updateAction(i, { params: { ...a.params, tag: e.target.value } })}
                           placeholder="tag name"
-                          className="flex-1 px-2 py-1 rounded bg-[var(--ansein-bg)] border border-[var(--ansein-border)] text-xs ansein-mono text-[var(--ansein-text)] focus:outline-none focus:border-[var(--ansein-primary)]"
+                          className="flex-1 px-2 py-1 rounded bg-background border border-border text-xs ansein-mono text-foreground focus:outline-none focus:border-primary"
                         />
                       )}
                       {a.type === 'notify' && (
@@ -597,18 +597,18 @@ function CreatePlaybookModal({
                           value={(a.params.message as string) || ''}
                           onChange={(e) => updateAction(i, { params: { ...a.params, message: e.target.value } })}
                           placeholder="notification message"
-                          className="flex-1 px-2 py-1 rounded bg-[var(--ansein-bg)] border border-[var(--ansein-border)] text-xs text-[var(--ansein-text)] focus:outline-none focus:border-[var(--ansein-primary)]"
+                          className="flex-1 px-2 py-1 rounded bg-background border border-border text-xs text-foreground focus:outline-none focus:border-primary"
                         />
                       )}
                       {a.type === 'star' && (
-                        <span className="text-xs text-[var(--ansein-text-dim)] italic flex-1">No parameters</span>
+                        <span className="text-xs text-muted-foreground/50 italic flex-1">No parameters</span>
                       )}
                       {a.type === 'export' && (
-                        <span className="text-xs text-[var(--ansein-text-dim)] italic flex-1">Triggers a JSON export of the investigation</span>
+                        <span className="text-xs text-muted-foreground/50 italic flex-1">Triggers a JSON export of the investigation</span>
                       )}
                       <button
                         onClick={() => removeAction(i)}
-                        className="p-1 text-[var(--ansein-text-dim)] hover:text-rose-400 transition-colors"
+                        className="p-1 text-muted-foreground/50 hover:text-rose-400 transition-colors"
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -622,24 +622,24 @@ function CreatePlaybookModal({
           {/* Validation hint */}
           <div className="flex items-start gap-2 p-3 rounded-md bg-amber-500/[0.04] border border-amber-500/15">
             <AlertTriangle className="h-3.5 w-3.5 text-amber-400 flex-shrink-0 mt-0.5" />
-            <p className="text-[11px] text-[var(--ansein-text-muted)] leading-relaxed">
+            <p className="text-[11px] text-muted-foreground leading-relaxed">
               Playbooks run automatically after every pipeline completion for this workspace. The trigger is evaluated against the pipeline result; if it matches, all actions fire in order.
             </p>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-[var(--ansein-surface)] border-t border-[var(--ansein-border)] px-5 py-3 flex items-center justify-end gap-2">
+        <div className="sticky bottom-0 bg-card border-t border-border px-5 py-3 flex items-center justify-end gap-2">
           <button
             onClick={onClose}
-            className="px-3 py-1.5 rounded-md text-xs text-[var(--ansein-text-muted)] hover:text-[var(--ansein-text)] hover:bg-[var(--ansein-surface-hover)] transition-colors"
+            className="px-3 py-1.5 rounded-md text-xs text-muted-foreground hover:text-foreground hover:bg-card/80 transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={submit}
             disabled={createMutation.isPending || !name.trim()}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[var(--ansein-primary)] text-[var(--ansein-bg)] text-xs font-medium hover:bg-[var(--ansein-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {createMutation.isPending ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />

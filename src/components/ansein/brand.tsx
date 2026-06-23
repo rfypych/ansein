@@ -66,14 +66,14 @@ export function Brand({
         <div className="flex flex-col leading-none">
           <span
             className={cn(
-              'font-bold tracking-tight text-[var(--ansein-text)]',
+              'font-bold tracking-tight text-foreground',
               variant === 'compact' ? 'text-base' : 'text-lg'
             )}
           >
-            Anse<span className="text-[var(--ansein-primary)]">In</span>
+            Anse<span className="text-primary">In</span>
           </span>
           {!variant.includes('compact') && (
-            <span className="ansein-mono text-[9px] uppercase tracking-[0.18em] text-[var(--ansein-text-dim)] mt-0.5">
+            <span className="ansein-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground/50 mt-0.5">
               Threat Intelligence
             </span>
           )}
