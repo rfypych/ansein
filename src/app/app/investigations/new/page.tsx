@@ -3,22 +3,7 @@
 import { useState, type FormEvent, type KeyboardEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import {
-  ArrowLeft,
-  Tag,
-  X,
-  Loader2,
-  AlertCircle,
-  FileText,
-  Bug,
-  Crosshair,
-  ShieldAlert,
-  Globe,
-  Mail,
-  Network,
-  Sparkles,
-  Check,
-} from 'lucide-react'
+import { ArrowLeft, Bug, Check, CircleNotch as Loader2, Crosshair, Envelope as Mail, FileText, Globe, Graph as Network, ShieldWarning as ShieldAlert, Sparkle as Sparkles, Tag, WarningCircle as AlertCircle, X } from '@phosphor-icons/react'
 import { http } from '@/lib/http'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -186,7 +171,7 @@ export default function NewInvestigationPage() {
         href="/app/investigations"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
       >
-        <ArrowLeft className="h-4 w-4" />
+        <ArrowLeft weight="duotone" className="h-4 w-4" />
         Back to investigations
       </Link>
 
@@ -205,7 +190,7 @@ export default function NewInvestigationPage() {
       {/* Template picker */}
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-3">
-          <Sparkles className="h-4 w-4 text-primary" />
+          <Sparkles weight="duotone" className="h-4 w-4 text-primary" />
           <h2 className="text-sm font-semibold text-foreground">Choose a template</h2>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -236,7 +221,7 @@ export default function NewInvestigationPage() {
                   </div>
                   {isActive && (
                     <div className="flex h-4 w-4 items-center justify-center rounded-full bg-primary">
-                      <Check className="h-2.5 w-2.5 text-primary-foreground" />
+                      <Check weight="duotone" className="h-2.5 w-2.5 text-primary-foreground" />
                     </div>
                   )}
                 </div>
@@ -253,7 +238,7 @@ export default function NewInvestigationPage() {
       <form onSubmit={handleSubmit} className="bg-card border border-border rounded-xl p-6 space-y-6">
         {error && (
           <div className="flex items-start gap-2 p-3 rounded-md bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm">
-            <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+            <AlertCircle weight="duotone" className="h-4 w-4 flex-shrink-0 mt-0.5" />
             <span>{error}</span>
           </div>
         )}
@@ -296,7 +281,7 @@ export default function NewInvestigationPage() {
             Tags <span className="text-muted-foreground/50 normal-case">(press Enter to add)</span>
           </label>
           <div className="flex flex-wrap items-center gap-2 px-2.5 py-2 rounded-md bg-card border border-border focus-within:border-primary focus-within:ring-1 focus-within:ring-[primary] transition-colors">
-            <Tag className="h-3.5 w-3.5 text-muted-foreground/50" />
+            <Tag weight="duotone" className="h-3.5 w-3.5 text-muted-foreground/50" />
             {tags.map((t) => (
               <span
                 key={t}
@@ -308,7 +293,7 @@ export default function NewInvestigationPage() {
                   onClick={() => setTags(tags.filter((x) => x !== t))}
                   className="hover:text-teal-100"
                 >
-                  <X className="h-3 w-3" />
+                  <X weight="duotone" className="h-3 w-3" />
                 </button>
               </span>
             ))}
@@ -327,7 +312,7 @@ export default function NewInvestigationPage() {
         {/* Tips card */}
         <div className="rounded-md bg-card border border-border p-4">
           <div className="flex items-start gap-2.5">
-            <FileText className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+            <FileText weight="duotone" className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
             <div className="text-xs text-muted-foreground leading-relaxed">
               <strong className="text-foreground">Next step:</strong> after creating the
               investigation you&apos;ll be taken to its detail page where you can add sources (raw text,
@@ -350,7 +335,7 @@ export default function NewInvestigationPage() {
           >
             {loading ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 weight="duotone" className="h-4 w-4 animate-spin" />
                 Creating…
               </>
             ) : (

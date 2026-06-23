@@ -4,64 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import {
-  ArrowLeft,
-  Play,
-  Loader2,
-  Trash2,
-  Download,
-  FileText,
-  Upload,
-  Plus,
-  Send,
-  Bot,
-  Network,
-  Bug,
-  Wrench,
-  Code,
-  ShieldAlert,
-  Globe,
-  Link as LinkIcon,
-  Hash,
-  CreditCard,
-  Crosshair,
-  MapPin,
-  User,
-  Users,
-  AlertTriangle,
-  Activity,
-  Lightbulb,
-  Cpu,
-  Sparkles,
-  Tag,
-  ChevronRight,
-  Search,
-  Copy,
-  Check,
-  CopyPlus,
-  FileJson,
-  FileCode,
-  CheckCircle2,
-  Circle,
-  X as XIcon,
-  ClipboardList,
-  ArrowDownToLine,
-  Keyboard,
-  XCircle,
-  FileSearch,
-  Eye,
-  Maximize2,
-  Star,
-  StickyNote,
-  Pin,
-  PinOff,
-  Pencil,
-  History,
-  Lock,
-  KeyRound,
-  LayoutGrid,
-  Table as TableIcon,
-} from 'lucide-react'
+import { Activity, ArrowLeft, Bug, CaretRight as ChevronRight, Check, CheckCircle as CheckCircle2, Circle, CircleNotch as Loader2, ClipboardText as ClipboardList, ClockCounterClockwise as History, Code, Copy, Copy as CopyPlus, CornersOut as Maximize2, Cpu, CreditCard, Crosshair, Download, DownloadSimple as ArrowDownToLine, Eye, FileCode, FileSearch, FileText, FileText as FileJson, Globe, Graph as Network, GridFour as LayoutGrid, Hash, Key as KeyRound, Keyboard, Lightbulb, Link as LinkIcon, Lock, MagnifyingGlass as Search, MapPin, Note as StickyNote, PaperPlaneRight as Send, Pencil, Play, Plus, PushPin as Pin, PushPinSlash as PinOff, Robot as Bot, ShieldWarning as ShieldAlert, Sparkle as Sparkles, Star, Table as TableIcon, Tag, Trash as Trash2, Upload, User, Users, Warning as AlertTriangle, Wrench, X as XIcon, XCircle } from '@phosphor-icons/react'
 import { http } from '@/lib/http'
 import { Badge, SeverityMeter, EmptyState, Spinner } from '@/components/ansein/ui'
 import { EntityDetailModal } from '@/components/ansein/entity-detail-modal'
@@ -329,7 +272,7 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
     return (
       <div className="px-6 py-12 max-w-3xl mx-auto">
         <EmptyState
-          icon={<AlertTriangle className="h-6 w-6 text-rose-400" />}
+          icon={<AlertTriangle weight="duotone" className="h-6 w-6 text-rose-400" />}
           title="Investigation not found"
           description="The investigation may have been deleted, or you don't have access to it."
           action={
@@ -337,7 +280,7 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
               href="/app/investigations"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-card border border-border text-sm"
             >
-              <ArrowLeft className="h-3.5 w-3.5" />
+              <ArrowLeft weight="duotone" className="h-3.5 w-3.5" />
               Back to list
             </Link>
           }
@@ -356,7 +299,7 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
         href="/app/investigations"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
       >
-        <ArrowLeft className="h-3.5 w-3.5" />
+        <ArrowLeft weight="duotone" className="h-3.5 w-3.5" />
         All investigations
       </Link>
 
@@ -383,7 +326,7 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
                   </span>
                   {inv.is_starred && (
                     <span className="inline-flex items-center gap-1 text-[10px] text-amber-400">
-                      <Star className="h-2.5 w-2.5 fill-current" />
+                      <Star weight="duotone" className="h-2.5 w-2.5 fill-current" />
                       Starred
                     </span>
                   )}
@@ -417,12 +360,12 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
                 >
                   {isRunning || pipelineMutation.isPending ? (
                     <>
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      <Loader2 weight="duotone" className="h-3.5 w-3.5 animate-spin" />
                       {isRunning ? inv.status : 'Running…'}
                     </>
                   ) : (
                     <>
-                      <Play className="h-3.5 w-3.5" />
+                      <Play weight="duotone" className="h-3.5 w-3.5" />
                       Run pipeline
                     </>
                   )}
@@ -444,7 +387,7 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
                   title={inv.is_starred ? 'Remove star' : 'Star this investigation'}
                   aria-label={inv.is_starred ? 'Remove star' : 'Star this investigation'}
                 >
-                  <Star className={cn('h-4 w-4', inv.is_starred && 'fill-current')} />
+                  <Star weight="duotone" className={cn('h-4 w-4', inv.is_starred && 'fill-current')} />
                 </button>
 
                 {/* Divider */}
@@ -463,14 +406,14 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
                   filename={`ansein-investigation-${inv.id}.json`}
                   mimeType="application/json"
                   label="JSON"
-                  icon={<FileJson className="h-3.5 w-3.5" />}
+                  icon={<FileJson weight="duotone" className="h-3.5 w-3.5" />}
                 />
                 <ExportLink
                   path={`/export/${inv.id}/stix`}
                   filename={`ansein-investigation-${inv.id}-stix.json`}
                   mimeType="application/json"
                   label="STIX"
-                  icon={<FileCode className="h-3.5 w-3.5" />}
+                  icon={<FileCode weight="duotone" className="h-3.5 w-3.5" />}
                 />
 
                 {/* Divider */}
@@ -484,9 +427,9 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
                   title="Duplicate investigation"
                 >
                   {duplicateMutation.isPending ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <Loader2 weight="duotone" className="h-3.5 w-3.5 animate-spin" />
                   ) : (
-                    <CopyPlus className="h-3.5 w-3.5" />
+                    <CopyPlus weight="duotone" className="h-3.5 w-3.5" />
                   )}
                 </button>
                 <button
@@ -498,7 +441,7 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
                   className="inline-flex items-center justify-center h-[38px] w-[38px] rounded-md border border-border bg-card text-rose-400 hover:bg-rose-500/10 hover:border-rose-500/30 transition-colors"
                   title="Delete investigation"
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
+                  <Trash2 weight="duotone" className="h-3.5 w-3.5" />
                 </button>
               </div>
             </div>
@@ -506,9 +449,9 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
 
           {/* Stats strip */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-            <StatTile label="Sources" value={inv.source_count} icon={<FileText className="h-3.5 w-3.5" />} />
-            <StatTile label="Entities" value={inv.entity_count} icon={<Network className="h-3.5 w-3.5" />} />
-            <StatTile label="Relationships" value={inv.relationship_count} icon={<Activity className="h-3.5 w-3.5" />} />
+            <StatTile label="Sources" value={inv.source_count} icon={<FileText weight="duotone" className="h-3.5 w-3.5" />} />
+            <StatTile label="Entities" value={inv.entity_count} icon={<Network weight="duotone" className="h-3.5 w-3.5" />} />
+            <StatTile label="Relationships" value={inv.relationship_count} icon={<Activity weight="duotone" className="h-3.5 w-3.5" />} />
             <div className="bg-card border border-border rounded-lg p-3">
               <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50 mb-1">Severity</p>
               <SeverityMeter score={inv.severity_score} size="sm" />
@@ -582,7 +525,7 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
         className="fixed bottom-4 right-4 flex h-9 w-9 items-center justify-center rounded-full bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors z-40"
         title="Keyboard shortcuts (?)"
       >
-        <Keyboard className="h-4 w-4" />
+        <Keyboard weight="duotone" className="h-4 w-4" />
       </button>
     </div>
   )
@@ -604,7 +547,7 @@ function Breadcrumb({ items }: { items: { label: string; href?: string }[] }) {
           ) : (
             <span className="text-muted-foreground">{item.label}</span>
           )}
-          {i < items.length - 1 && <ChevronRight className="h-3 w-3" />}
+          {i < items.length - 1 && <ChevronRight weight="duotone" className="h-3 w-3" />}
         </span>
       ))}
     </nav>
@@ -639,7 +582,7 @@ function ShortcutsHelpModal({ onClose }: { onClose: () => void }) {
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/15 border border-primary/30">
-              <Keyboard className="h-4 w-4 text-primary" />
+              <Keyboard weight="duotone" className="h-4 w-4 text-primary" />
             </div>
             <h2 className="text-base font-semibold text-foreground">Keyboard shortcuts</h2>
           </div>
@@ -647,7 +590,7 @@ function ShortcutsHelpModal({ onClose }: { onClose: () => void }) {
             onClick={onClose}
             className="text-muted-foreground/50 hover:text-foreground transition-colors"
           >
-            <XIcon className="h-4 w-4" />
+            <XIcon weight="duotone" className="h-4 w-4" />
           </button>
         </div>
         <div className="space-y-2">
@@ -749,7 +692,7 @@ function OverviewTab({ inv, onSwitchTab }: { inv: Investigation; onSwitchTab: (t
         {/* Pipeline timeline */}
         <div className="bg-card border border-border rounded-xl p-6">
           <h3 className="text-sm font-semibold text-foreground mb-5 flex items-center gap-2">
-            <Activity className="h-4 w-4 text-primary" />
+            <Activity weight="duotone" className="h-4 w-4 text-primary" />
             Pipeline progress
           </h3>
           <PipelineTimeline status={inv.status} />
@@ -758,7 +701,7 @@ function OverviewTab({ inv, onSwitchTab }: { inv: Investigation; onSwitchTab: (t
         {/* Investigation summary */}
         <div className="bg-card border border-border rounded-xl p-6">
           <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-primary" />
+            <Sparkles weight="duotone" className="h-4 w-4 text-primary" />
             Investigation summary
           </h3>
           <div className="grid grid-cols-2 gap-4 text-sm">
@@ -788,7 +731,7 @@ function OverviewTab({ inv, onSwitchTab }: { inv: Investigation; onSwitchTab: (t
                 onClick={() => setShowTagInput(!showTagInput)}
                 className="text-[10px] text-primary hover:text-primary/90 flex items-center gap-1"
               >
-                <Plus className="h-2.5 w-2.5" />
+                <Plus weight="duotone" className="h-2.5 w-2.5" />
                 Add
               </button>
             </div>
@@ -823,7 +766,7 @@ function OverviewTab({ inv, onSwitchTab }: { inv: Investigation; onSwitchTab: (t
                       onClick={() => handleRemoveTag(t)}
                       className="opacity-0 group-hover:opacity-100 text-muted-foreground/50 hover:text-rose-400 transition-all"
                     >
-                      <XIcon className="h-2.5 w-2.5" />
+                      <XIcon weight="duotone" className="h-2.5 w-2.5" />
                     </button>
                   </span>
                 ))}
@@ -853,7 +796,7 @@ function OverviewTab({ inv, onSwitchTab }: { inv: Investigation; onSwitchTab: (t
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
                 <div className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-500/15 border border-amber-500/30">
-                  <Crosshair className="h-3.5 w-3.5 text-amber-400" />
+                  <Crosshair weight="duotone" className="h-3.5 w-3.5 text-amber-400" />
                 </div>
                 IOC summary
               </h3>
@@ -864,12 +807,12 @@ function OverviewTab({ inv, onSwitchTab }: { inv: Investigation; onSwitchTab: (t
               >
                 {copiedAll ? (
                   <>
-                    <Check className="h-3 w-3 text-emerald-400" />
+                    <Check weight="duotone" className="h-3 w-3 text-emerald-400" />
                     Copied
                   </>
                 ) : (
                   <>
-                    <Copy className="h-3 w-3" />
+                    <Copy weight="duotone" className="h-3 w-3" />
                     Copy all
                   </>
                 )}
@@ -911,16 +854,16 @@ function OverviewTab({ inv, onSwitchTab }: { inv: Investigation; onSwitchTab: (t
         <div className="bg-card border border-border rounded-xl p-6">
           <h3 className="text-sm font-semibold text-foreground mb-4">Quick actions</h3>
           <div className="space-y-2">
-            <QuickAction icon={<FileText className="h-3.5 w-3.5" />} label="Add a source" onClick={() => onSwitchTab('sources')} />
-            <QuickAction icon={<Network className="h-3.5 w-3.5" />} label="View graph" onClick={() => onSwitchTab('graph')} />
-            <QuickAction icon={<Bot className="h-3.5 w-3.5" />} label="Ask Copilot" onClick={() => onSwitchTab('copilot')} />
+            <QuickAction icon={<FileText weight="duotone" className="h-3.5 w-3.5" />} label="Add a source" onClick={() => onSwitchTab('sources')} />
+            <QuickAction icon={<Network weight="duotone" className="h-3.5 w-3.5" />} label="View graph" onClick={() => onSwitchTab('graph')} />
+            <QuickAction icon={<Bot weight="duotone" className="h-3.5 w-3.5" />} label="Ask Copilot" onClick={() => onSwitchTab('copilot')} />
             <ExportLink
               path={`/export/${inv.id}/json`}
               filename={`ansein-investigation-${inv.id}.json`}
               mimeType="application/json"
               variant="link"
               className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-card transition-colors"
-              icon={<span className="flex items-center gap-2"><FileJson className="h-3.5 w-3.5" />Export JSON</span>}
+              icon={<span className="flex items-center gap-2"><FileJson weight="duotone" className="h-3.5 w-3.5" />Export JSON</span>}
             />
             <ExportLink
               path={`/export/${inv.id}/stix`}
@@ -928,7 +871,7 @@ function OverviewTab({ inv, onSwitchTab }: { inv: Investigation; onSwitchTab: (t
               mimeType="application/json"
               variant="link"
               className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-card transition-colors"
-              icon={<span className="flex items-center gap-2"><FileCode className="h-3.5 w-3.5" />Export STIX 2.1</span>}
+              icon={<span className="flex items-center gap-2"><FileCode weight="duotone" className="h-3.5 w-3.5" />Export STIX 2.1</span>}
             />
           </div>
         </div>
@@ -983,11 +926,11 @@ function PipelineTimeline({ status }: { status: string }) {
                 )}
               >
                 {isCurrent && status !== 'completed' ? (
-                  <Loader2 className="h-4 w-4 animate-spin" style={{ color: step.color }} />
+                  <Loader2 weight="duotone" className="h-4 w-4 animate-spin" style={{ color: step.color }} />
                 ) : isCompleted ? (
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                  <CheckCircle2 weight="duotone" className="h-4 w-4 text-primary" />
                 ) : isFailed && i === currentIndex ? (
-                  <AlertTriangle className="h-4 w-4 text-rose-400" />
+                  <AlertTriangle weight="duotone" className="h-4 w-4 text-rose-400" />
                 ) : (
                   <StepIcon className="h-4 w-4 text-muted-foreground/50" />
                 )}
@@ -1055,7 +998,7 @@ function QuickAction({ icon, label, onClick }: { icon: React.ReactNode; label: s
         {icon}
         {label}
       </span>
-      <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50" />
+      <ChevronRight weight="duotone" className="h-3.5 w-3.5 text-muted-foreground/50" />
     </button>
   )
 }
@@ -1172,7 +1115,7 @@ function SourcesTab({ invId }: { invId: number }) {
         <div className="bg-card border border-border rounded-xl p-6">
           <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/15 border border-primary/30">
-              <Plus className="h-3.5 w-3.5 text-primary" />
+              <Plus weight="duotone" className="h-3.5 w-3.5 text-primary" />
             </div>
             Add source
           </h3>
@@ -1212,7 +1155,7 @@ function SourcesTab({ invId }: { invId: number }) {
                 disabled={!content.trim() || adding}
                 className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
               >
-                {adding ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+                {adding ? <Loader2 weight="duotone" className="h-3.5 w-3.5 animate-spin" /> : <Plus weight="duotone" className="h-3.5 w-3.5" />}
                 Add text source
               </button>
               <button
@@ -1220,7 +1163,7 @@ function SourcesTab({ invId }: { invId: number }) {
                 disabled={uploadMutation.isPending}
                 className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md border border-border bg-card text-sm text-muted-foreground hover:text-foreground hover:border-primary/50 disabled:opacity-60 transition-colors"
               >
-                {uploadMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+                {uploadMutation.isPending ? <Loader2 weight="duotone" className="h-3.5 w-3.5 animate-spin" /> : <Upload weight="duotone" className="h-3.5 w-3.5" />}
                 Upload file (5MB)
               </button>
               <input
@@ -1239,7 +1182,7 @@ function SourcesTab({ invId }: { invId: number }) {
           <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center justify-between">
             <span className="flex items-center gap-2">
               <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/15 border border-primary/30">
-                <FileText className="h-3.5 w-3.5 text-primary" />
+                <FileText weight="duotone" className="h-3.5 w-3.5 text-primary" />
               </div>
               Sources
               <Badge color="slate">{sources.length}</Badge>
@@ -1252,7 +1195,7 @@ function SourcesTab({ invId }: { invId: number }) {
             </div>
           ) : sources.length === 0 ? (
             <EmptyState
-              icon={<FileText className="h-5 w-5 text-primary" />}
+              icon={<FileText weight="duotone" className="h-5 w-5 text-primary" />}
               title="No sources yet"
               description="Add a text source or upload a file to populate this investigation."
               variant="branded"
@@ -1298,7 +1241,7 @@ function SourcesTab({ invId }: { invId: number }) {
                           className="text-muted-foreground/50 hover:text-primary transition-colors p-1"
                           title="View full source"
                         >
-                          <Eye className="h-3.5 w-3.5" />
+                          <Eye weight="duotone" className="h-3.5 w-3.5" />
                         </button>
                         <button
                           onClick={(ev) => {
@@ -1308,7 +1251,7 @@ function SourcesTab({ invId }: { invId: number }) {
                           className="text-muted-foreground/50 hover:text-rose-400 transition-colors p-1"
                           title="Delete source"
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
+                          <Trash2 weight="duotone" className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     </div>
@@ -1362,7 +1305,7 @@ function SourcePreviewModal({ source, onClose }: { source: Source; onClose: () =
         <div className="px-5 py-4 border-b border-border flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/15 border border-primary/30 flex-shrink-0">
-              <FileText className="h-4 w-4 text-primary" />
+              <FileText weight="duotone" className="h-4 w-4 text-primary" />
             </div>
             <div className="min-w-0">
               <h2 className="text-sm font-semibold text-foreground truncate">{source.title}</h2>
@@ -1379,12 +1322,12 @@ function SourcePreviewModal({ source, onClose }: { source: Source; onClose: () =
               >
                 {copied ? (
                   <>
-                    <Check className="h-3 w-3 text-emerald-400" />
+                    <Check weight="duotone" className="h-3 w-3 text-emerald-400" />
                     Copied
                   </>
                 ) : (
                   <>
-                    <Copy className="h-3 w-3" />
+                    <Copy weight="duotone" className="h-3 w-3" />
                     Copy
                   </>
                 )}
@@ -1394,7 +1337,7 @@ function SourcePreviewModal({ source, onClose }: { source: Source; onClose: () =
               onClick={onClose}
               className="text-muted-foreground/50 hover:text-foreground transition-colors p-1.5"
             >
-              <XIcon className="h-4 w-4" />
+              <XIcon weight="duotone" className="h-4 w-4" />
             </button>
           </div>
         </div>
@@ -1407,7 +1350,7 @@ function SourcePreviewModal({ source, onClose }: { source: Source; onClose: () =
             </pre>
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <FileText className="h-8 w-8 text-muted-foreground/50 mb-3" />
+              <FileText weight="duotone" className="h-8 w-8 text-muted-foreground/50 mb-3" />
               <p className="text-sm text-muted-foreground">No previewable content</p>
               <p className="text-xs text-muted-foreground/50 mt-1">
                 This source may be a binary file or empty.
@@ -1457,7 +1400,7 @@ function GraphTab({ invId }: { invId: number }) {
     return (
       <div className="bg-card border border-border rounded-xl">
         <EmptyState
-          icon={<Network className="h-6 w-6 text-muted-foreground/50" />}
+          icon={<Network weight="duotone" className="h-6 w-6 text-muted-foreground/50" />}
           title="No graph data"
           description="Run the extraction pipeline to populate the knowledge graph. The graph visualises entities and their relationships."
           className="py-16"
@@ -1519,7 +1462,7 @@ function EntitiesTab({ invId }: { invId: number }) {
     return (
       <div className="bg-card border border-border rounded-xl">
         <EmptyState
-          icon={<Network className="h-6 w-6 text-muted-foreground/50" />}
+          icon={<Network weight="duotone" className="h-6 w-6 text-muted-foreground/50" />}
           title="No entities yet"
           description="Run the extraction pipeline to extract entities (IOCs, actors, malware, etc.) from your sources."
           className="py-16"
@@ -1615,7 +1558,7 @@ function EntitiesTab({ invId }: { invId: number }) {
       {/* Search + filter row */}
       <div className="flex flex-col md:flex-row gap-3 md:items-center">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
+          <Search weight="duotone" className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
           <input
             type="text"
             value={search}
@@ -1641,7 +1584,7 @@ function EntitiesTab({ invId }: { invId: number }) {
             className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
             title="Copy filtered entities as CSV"
           >
-            <ClipboardList className="h-3 w-3" />
+            <ClipboardList weight="duotone" className="h-3 w-3" />
             CSV
           </button>
           <button
@@ -1658,7 +1601,7 @@ function EntitiesTab({ invId }: { invId: number }) {
             className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
             title="Copy filtered entities as JSON"
           >
-            <ArrowDownToLine className="h-3 w-3" />
+            <ArrowDownToLine weight="duotone" className="h-3 w-3" />
             JSON
           </button>
         </div>
@@ -1678,7 +1621,7 @@ function EntitiesTab({ invId }: { invId: number }) {
           )}
           title={maliciousCount === 0 ? 'No malicious entities detected' : 'Toggle malicious-only filter'}
         >
-          <ShieldAlert className="h-3 w-3" />
+          <ShieldAlert weight="duotone" className="h-3 w-3" />
           Malicious only
           {maliciousCount > 0 && (
             <span className="ansein-mono text-[10px] px-1 rounded bg-rose-500/20">{maliciousCount}</span>
@@ -1765,7 +1708,7 @@ function EntitiesTab({ invId }: { invId: number }) {
             )}
             title="Grid view"
           >
-            <LayoutGrid className="h-3 w-3" />
+            <LayoutGrid weight="duotone" className="h-3 w-3" />
             <span className="hidden sm:inline">Grid</span>
           </button>
           <button
@@ -1778,7 +1721,7 @@ function EntitiesTab({ invId }: { invId: number }) {
             )}
             title="Table view"
           >
-            <TableIcon className="h-3 w-3" />
+            <TableIcon weight="duotone" className="h-3 w-3" />
             <span className="hidden sm:inline">Table</span>
           </button>
         </div>
@@ -1847,9 +1790,9 @@ function EntitiesTab({ invId }: { invId: number }) {
                     title="Copy value"
                   >
                     {copiedId === e.id ? (
-                      <Check className="h-3 w-3 text-emerald-400" />
+                      <Check weight="duotone" className="h-3 w-3 text-emerald-400" />
                     ) : (
-                      <Copy className="h-3 w-3" />
+                      <Copy weight="duotone" className="h-3 w-3" />
                     )}
                   </button>
                 </div>
@@ -1902,7 +1845,7 @@ function EntitiesTab({ invId }: { invId: number }) {
       {rels.length > 0 && (
         <div className="bg-card border border-border rounded-xl p-5">
           <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-            <Activity className="h-4 w-4 text-primary" />
+            <Activity weight="duotone" className="h-4 w-4 text-primary" />
             Relationships
             <Badge color="slate">{rels.length}</Badge>
           </h3>
@@ -1995,7 +1938,7 @@ function AnalysisTab({ invId }: { invId: number }) {
     return (
       <div className="bg-card border border-border rounded-xl">
         <EmptyState
-          icon={<Lightbulb className="h-6 w-6 text-muted-foreground/50" />}
+          icon={<Lightbulb weight="duotone" className="h-6 w-6 text-muted-foreground/50" />}
           title="No analysis yet"
           description="Run the extraction pipeline to generate a cognitive threat analysis. The analysis includes a narrative, severity score, Admiralty code, and recommendations."
           className="py-16"
@@ -2054,7 +1997,7 @@ function AnalysisTab({ invId }: { invId: number }) {
           <div className="absolute top-0 left-0 right-0 h-1 bg-amber-500" />
           <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50 mb-3">Analysis model</p>
           <p className="text-sm font-medium text-foreground ansein-mono flex items-center gap-2">
-            <Cpu className="h-4 w-4 text-primary" />
+            <Cpu weight="duotone" className="h-4 w-4 text-primary" />
             {data.model_used || 'heuristic'}
           </p>
           <div className="mt-3 flex items-center gap-2">
@@ -2080,7 +2023,7 @@ function AnalysisTab({ invId }: { invId: number }) {
         <div className="bg-card border border-border rounded-xl p-6">
           <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/15 border border-primary/30">
-              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              <Sparkles weight="duotone" className="h-3.5 w-3.5 text-primary" />
             </div>
             Threat narrative
           </h3>
@@ -2093,7 +2036,7 @@ function AnalysisTab({ invId }: { invId: number }) {
         <div className="bg-card border border-border rounded-xl p-6">
           <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-rose-500/15 border border-rose-500/30">
-              <Users className="h-3.5 w-3.5 text-rose-400" />
+              <Users weight="duotone" className="h-3.5 w-3.5 text-rose-400" />
             </div>
             Actor hypothesis
           </h3>
@@ -2135,7 +2078,7 @@ function AnalysisTab({ invId }: { invId: number }) {
         <div className="bg-card border border-border rounded-xl p-6">
           <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-rose-500/15 border border-rose-500/30">
-              <AlertTriangle className="h-3.5 w-3.5 text-rose-400" />
+              <AlertTriangle weight="duotone" className="h-3.5 w-3.5 text-rose-400" />
             </div>
             Attack hypotheses
           </h3>
@@ -2191,7 +2134,7 @@ function AnalysisTab({ invId }: { invId: number }) {
         <div className="bg-card border border-border rounded-xl p-6">
           <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-500/15 border border-amber-500/30">
-              <Lightbulb className="h-3.5 w-3.5 text-amber-400" />
+              <Lightbulb weight="duotone" className="h-3.5 w-3.5 text-amber-400" />
             </div>
             Recommendations
           </h3>
@@ -2210,7 +2153,7 @@ function AnalysisTab({ invId }: { invId: number }) {
 
       {/* Generated at */}
       <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground/50">
-        <Cpu className="h-3 w-3" />
+        <Cpu weight="duotone" className="h-3 w-3" />
         Analysis generated {formatDate(data.created_at)} by AnseIn cognitive engine
       </div>
     </div>
@@ -2320,7 +2263,7 @@ function CopilotInline({
       <div className="bg-card border border-border rounded-xl flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <div className="px-5 py-3 border-b border-border flex items-center gap-2">
-          <Bot className="h-4 w-4 text-primary" />
+          <Bot weight="duotone" className="h-4 w-4 text-primary" />
           <div>
             <p className="text-sm font-medium text-foreground">Investigation Copilot</p>
             <p className="text-[10px] text-muted-foreground/50">
@@ -2334,7 +2277,7 @@ function CopilotInline({
           {messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-card border border-border mb-3">
-                <Bot className="h-5 w-5 text-primary" />
+                <Bot weight="duotone" className="h-5 w-5 text-primary" />
               </div>
               <p className="text-sm font-medium text-foreground">Ask the Copilot</p>
               <p className="text-xs text-muted-foreground mt-1 max-w-sm">
@@ -2373,7 +2316,7 @@ function CopilotInline({
                       : 'bg-card border border-border text-primary'
                   )}
                 >
-                  {m.role === 'user' ? <User className="h-3.5 w-3.5" /> : <Bot className="h-3.5 w-3.5" />}
+                  {m.role === 'user' ? <User weight="duotone" className="h-3.5 w-3.5" /> : <Bot weight="duotone" className="h-3.5 w-3.5" />}
                 </div>
                 <div
                   className={cn(
@@ -2405,10 +2348,10 @@ function CopilotInline({
           {sending && (
             <div className="flex gap-3">
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-card border border-border text-primary">
-                <Bot className="h-3.5 w-3.5" />
+                <Bot weight="duotone" className="h-3.5 w-3.5" />
               </div>
               <div className="bg-card border border-border rounded-lg px-3.5 py-2.5 text-sm text-muted-foreground">
-                <Loader2 className="h-3.5 w-3.5 animate-spin inline mr-2" />
+                <Loader2 weight="duotone" className="h-3.5 w-3.5 animate-spin inline mr-2" />
                 Thinking…
               </div>
             </div>
@@ -2448,7 +2391,7 @@ function CopilotInline({
               disabled={!input.trim() || sending}
               className="inline-flex items-center justify-center h-9 w-9 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <Send className="h-4 w-4" />
+              <Send weight="duotone" className="h-4 w-4" />
             </button>
           </div>
           <p className="text-[10px] text-muted-foreground/50 mt-1.5 text-center">
@@ -2543,7 +2486,7 @@ function NotesTab({ invId }: { invId: number }) {
         <div className="bg-card border border-border rounded-xl p-5">
           <div className="flex items-center gap-2 mb-3">
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/15 border border-primary/30">
-              <StickyNote className="h-3.5 w-3.5 text-primary" />
+              <StickyNote weight="duotone" className="h-3.5 w-3.5 text-primary" />
             </div>
             <h3 className="text-sm font-semibold text-foreground">Add a note</h3>
           </div>
@@ -2564,9 +2507,9 @@ function NotesTab({ invId }: { invId: number }) {
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {createMutation.isPending ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
+                <Loader2 weight="duotone" className="h-3 w-3 animate-spin" />
               ) : (
-                <Plus className="h-3 w-3" />
+                <Plus weight="duotone" className="h-3 w-3" />
               )}
               Post note
             </button>
@@ -2581,7 +2524,7 @@ function NotesTab({ invId }: { invId: number }) {
         ) : notes.length === 0 ? (
           <div className="bg-card border border-border rounded-xl">
             <EmptyState
-              icon={<StickyNote className="h-5 w-5 text-primary" />}
+              icon={<StickyNote weight="duotone" className="h-5 w-5 text-primary" />}
               title="No notes yet"
               description="Use notes to capture observations, hypotheses, and analyst-to-analyst context that doesn't fit elsewhere."
               variant="branded"
@@ -2592,7 +2535,7 @@ function NotesTab({ invId }: { invId: number }) {
             {pinnedNotes.length > 0 && (
               <div className="space-y-3">
                 <p className="px-1 text-[10px] uppercase tracking-widest text-amber-400/80 ansein-mono flex items-center gap-1.5">
-                  <Pin className="h-3 w-3" />
+                  <Pin weight="duotone" className="h-3 w-3" />
                   Pinned
                 </p>
                 {pinnedNotes.map((note) => (
@@ -2650,7 +2593,7 @@ function NotesTab({ invId }: { invId: number }) {
       <div className="space-y-6">
         <div className="bg-card border border-border rounded-xl p-5">
           <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-            <Lightbulb className="h-4 w-4 text-amber-400" />
+            <Lightbulb weight="duotone" className="h-4 w-4 text-amber-400" />
             Analyst notes
           </h3>
           <p className="text-xs text-muted-foreground leading-relaxed">
@@ -2762,7 +2705,7 @@ function NoteCard({
             )}
             title={note.pinned ? 'Unpin note' : 'Pin note to top'}
           >
-            {note.pinned ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />}
+            {note.pinned ? <PinOff weight="duotone" className="h-3.5 w-3.5" /> : <Pin weight="duotone" className="h-3.5 w-3.5" />}
           </button>
           {!editing && (
             <button
@@ -2770,7 +2713,7 @@ function NoteCard({
               className="p-1.5 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-card transition-colors"
               title="Edit note"
             >
-              <Pencil className="h-3.5 w-3.5" />
+              <Pencil weight="duotone" className="h-3.5 w-3.5" />
             </button>
           )}
           <button
@@ -2780,7 +2723,7 @@ function NoteCard({
             className="p-1.5 rounded-md text-muted-foreground/50 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
             title="Delete note"
           >
-            <Trash2 className="h-3.5 w-3.5" />
+            <Trash2 weight="duotone" className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>
@@ -2805,7 +2748,7 @@ function NoteCard({
               disabled={saving || !editBody.trim()}
               className="px-2.5 py-1 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Save'}
+              {saving ? <Loader2 weight="duotone" className="h-3 w-3 animate-spin" /> : 'Save'}
             </button>
           </div>
         </div>
@@ -2904,7 +2847,7 @@ function ActivityTab({ invId }: { invId: number }) {
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
               <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/15 border border-primary/30">
-                <History className="h-3.5 w-3.5 text-primary" />
+                <History weight="duotone" className="h-3.5 w-3.5 text-primary" />
               </div>
               <h3 className="text-sm font-semibold text-foreground">Activity timeline</h3>
             </div>
@@ -2922,7 +2865,7 @@ function ActivityTab({ invId }: { invId: number }) {
             </div>
           ) : items.length === 0 ? (
             <EmptyState
-              icon={<History className="h-5 w-5 text-primary" />}
+              icon={<History weight="duotone" className="h-5 w-5 text-primary" />}
               title="No activity yet"
               description="Actions taken on this investigation — adding sources, running the pipeline, posting notes — will appear here in chronological order."
               variant="branded"
@@ -2983,7 +2926,7 @@ function ActivityTab({ invId }: { invId: number }) {
                                 <div className="flex flex-wrap items-center gap-1.5 mt-2">
                                   {entry.ip_address && (
                                     <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] bg-card border border-border text-muted-foreground/50 ansein-mono">
-                                      <Globe className="h-2 w-2" />
+                                      <Globe weight="duotone" className="h-2 w-2" />
                                       {entry.ip_address}
                                     </span>
                                   )}
@@ -3027,7 +2970,7 @@ function ActivityTab({ invId }: { invId: number }) {
       <div className="space-y-6">
         <div className="bg-card border border-border rounded-xl p-5">
           <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
-            <Lightbulb className="h-4 w-4 text-amber-400" />
+            <Lightbulb weight="duotone" className="h-4 w-4 text-amber-400" />
             Action breakdown
           </h3>
           {items.length === 0 ? (
@@ -3062,7 +3005,7 @@ function ActivityTab({ invId }: { invId: number }) {
 
         <div className="bg-card border border-border rounded-xl p-5">
           <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-            <Lock className="h-4 w-4 text-primary" />
+            <Lock weight="duotone" className="h-4 w-4 text-primary" />
             Tamper-evident
           </h3>
           <p className="text-xs text-muted-foreground leading-relaxed">

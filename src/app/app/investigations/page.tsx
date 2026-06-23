@@ -4,20 +4,7 @@ import { useState, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import {
-  Search,
-  Plus,
-  FolderSearch,
-  FileText,
-  Network,
-  Share2,
-  Star,
-  Trash2,
-  X,
-  CheckSquare,
-  Square,
-  Loader2,
-} from 'lucide-react'
+import { CheckSquare, CircleNotch as Loader2, FileText, Folder as FolderSearch, Graph as Network, MagnifyingGlass as Search, Plus, ShareNetwork as Share2, Square, Star, Trash as Trash2, X } from '@phosphor-icons/react'
 import { http } from '@/lib/http'
 import { Badge, EmptyState, SeverityMeter, Spinner } from '@/components/ansein/ui'
 import { InvestigationCardSkeleton } from '@/components/ansein/skeletons'
@@ -177,7 +164,7 @@ export default function InvestigationListPage() {
           href="/app/investigations/new"
           className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors w-fit"
         >
-          <Plus className="h-4 w-4" />
+          <Plus weight="duotone" className="h-4 w-4" />
           New investigation
         </Link>
       </div>
@@ -185,7 +172,7 @@ export default function InvestigationListPage() {
       {/* Search + filters */}
       <div className="flex flex-col gap-3 mb-6">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+          <Search weight="duotone" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
           <input
             type="text"
             value={search}
@@ -233,7 +220,7 @@ export default function InvestigationListPage() {
             )}
             title="Show only starred investigations"
           >
-            <Star className={cn('h-3 w-3', starredOnly && 'fill-current')} />
+            <Star weight="duotone" className={cn('h-3 w-3', starredOnly && 'fill-current')} />
             Starred
             {starredCount > 0 && (
               <span className={cn(
@@ -257,7 +244,7 @@ export default function InvestigationListPage() {
                 className="text-muted-foreground hover:text-foreground transition-colors"
                 title="Clear selection"
               >
-                <X className="h-4 w-4" />
+                <X weight="duotone" className="h-4 w-4" />
               </button>
               <span className="text-sm text-foreground">
                 <span className="ansein-mono font-semibold">{selected.size}</span> selected
@@ -279,9 +266,9 @@ export default function InvestigationListPage() {
                     className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-rose-500 text-white text-xs font-medium hover:bg-rose-600 disabled:opacity-60 transition-colors"
                   >
                     {bulkDeleteMutation.isPending ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
+                      <Loader2 weight="duotone" className="h-3 w-3 animate-spin" />
                     ) : (
-                      <Trash2 className="h-3 w-3" />
+                      <Trash2 weight="duotone" className="h-3 w-3" />
                     )}
                     Confirm delete
                   </button>
@@ -297,7 +284,7 @@ export default function InvestigationListPage() {
                   onClick={() => setBulkConfirm(true)}
                   className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-rose-500/10 text-rose-400 border border-rose-500/30 text-xs font-medium hover:bg-rose-500/20 transition-colors"
                 >
-                  <Trash2 className="h-3 w-3" />
+                  <Trash2 weight="duotone" className="h-3 w-3" />
                   Delete
                 </button>
               )}
@@ -316,7 +303,7 @@ export default function InvestigationListPage() {
       ) : filtered.length === 0 ? (
         <div className="bg-card border border-border rounded-xl">
           <EmptyState
-            icon={<FolderSearch className="h-6 w-6 text-primary" />}
+            icon={<FolderSearch weight="duotone" className="h-6 w-6 text-primary" />}
             title={search || statusFilter !== 'all' || starredOnly ? 'No matching investigations' : 'No investigations yet'}
             description={
               search || statusFilter !== 'all' || starredOnly
@@ -330,7 +317,7 @@ export default function InvestigationListPage() {
                   href="/app/investigations/new"
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
                 >
-                  <Plus className="h-3.5 w-3.5" />
+                  <Plus weight="duotone" className="h-3.5 w-3.5" />
                   New investigation
                 </Link>
               )
@@ -362,9 +349,9 @@ export default function InvestigationListPage() {
                   title={isSelected ? 'Deselect' : 'Select for bulk action'}
                 >
                   {isSelected ? (
-                    <CheckSquare className="h-3 w-3" />
+                    <CheckSquare weight="duotone" className="h-3 w-3" />
                   ) : (
-                    <Square className="h-3 w-3" />
+                    <Square weight="duotone" className="h-3 w-3" />
                   )}
                 </button>
                 {/* Star button */}
@@ -379,7 +366,7 @@ export default function InvestigationListPage() {
                   )}
                   title={inv.is_starred ? 'Remove star' : 'Star this investigation'}
                 >
-                  <Star className={cn('h-3.5 w-3.5', inv.is_starred && 'fill-current')} />
+                  <Star weight="duotone" className={cn('h-3.5 w-3.5', inv.is_starred && 'fill-current')} />
                 </button>
                 {/* Status accent line */}
                 <div
@@ -417,9 +404,9 @@ export default function InvestigationListPage() {
                     </div>
                   )}
                   <div className="grid grid-cols-3 gap-2 mt-2 pt-3 border-t border-border">
-                    <Stat icon={<FileText className="h-3 w-3" />} value={inv.source_count} label="sources" />
-                    <Stat icon={<Network className="h-3 w-3" />} value={inv.entity_count} label="entities" />
-                    <Stat icon={<Share2 className="h-3 w-3" />} value={inv.relationship_count} label="rels" />
+                    <Stat icon={<FileText weight="duotone" className="h-3 w-3" />} value={inv.source_count} label="sources" />
+                    <Stat icon={<Network weight="duotone" className="h-3 w-3" />} value={inv.entity_count} label="entities" />
+                    <Stat icon={<Share2 weight="duotone" className="h-3 w-3" />} value={inv.relationship_count} label="rels" />
                   </div>
                   <div className="flex items-center justify-between mt-1">
                     <span className="text-[10px] text-muted-foreground/50">

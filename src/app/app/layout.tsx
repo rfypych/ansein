@@ -3,25 +3,7 @@
 import { type ReactNode, useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import {
-  LayoutDashboard,
-  FolderSearch,
-  Bot,
-  Settings as SettingsIcon,
-  LogOut,
-  Plus,
-  Menu,
-  X,
-  User as UserIcon,
-  Command as CommandIcon,
-  ShieldAlert,
-  Zap,
-  Keyboard as KeyboardIcon,
-  FlaskConical,
-  Workflow,
-  ShieldCheck,
-  Shield,
-} from 'lucide-react'
+import { Command as CommandIcon, Flask as FlaskConical, Folder as FolderSearch, Gear as SettingsIcon, Keyboard as KeyboardIcon, Lightning as Zap, List as Menu, Plus, Robot as Bot, Shield, ShieldCheck, ShieldWarning as ShieldAlert, SignOut as LogOut, SquaresFour as LayoutDashboard, TreeStructure as Workflow, User as UserIcon, X } from '@phosphor-icons/react'
 import { Brand, BrandMark } from '@/components/ansein/brand'
 import { useAuthStore, authUserRole, type AuthUser } from '@/lib/auth-store'
 import { ROLE_COLORS } from '@/lib/rbac'
@@ -129,7 +111,7 @@ function AppShell({ children }: { children: ReactNode }) {
               className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
               onClick={() => setMobileOpen(false)}
             >
-              <X className="h-5 w-5" />
+              <X weight="duotone" className="h-5 w-5" />
             </button>
             <SidebarContent
               pathname={pathname}
@@ -152,7 +134,7 @@ function AppShell({ children }: { children: ReactNode }) {
             className="p-1.5 rounded-md hover:hover:bg-card/80 text-muted-foreground"
             aria-label="Open menu"
           >
-            <Menu className="h-5 w-5" />
+            <Menu weight="duotone" className="h-5 w-5" />
           </button>
           <BrandMark size={24} />
           <button
@@ -160,7 +142,7 @@ function AppShell({ children }: { children: ReactNode }) {
             className="p-1.5 rounded-md bg-card border border-border text-muted-foreground"
             aria-label="Open command palette"
           >
-            <CommandIcon className="h-4 w-4" />
+            <CommandIcon weight="duotone" className="h-4 w-4" />
           </button>
         </div>
 
@@ -174,7 +156,7 @@ function AppShell({ children }: { children: ReactNode }) {
         title="Keyboard shortcuts (?)"
         aria-label="Keyboard shortcuts"
       >
-        <KeyboardIcon className="h-4 w-4" />
+        <KeyboardIcon weight="duotone" className="h-4 w-4" />
       </button>
     </div>
   )
@@ -223,7 +205,7 @@ function SidebarContent({
           href="/app/investigations/new"
           className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
         >
-          <Plus className="h-4 w-4" />
+          <Plus weight="duotone" className="h-4 w-4" />
           New investigation
         </Link>
         <button
@@ -232,7 +214,7 @@ function SidebarContent({
           title="Quick paste (Shift+P)"
         >
           <span className="flex items-center gap-1.5">
-            <Zap className="h-3 w-3 text-accent-foreground" />
+            <Zap weight="duotone" className="h-3 w-3 text-accent-foreground" />
             Quick paste
           </span>
           <kbd className="ansein-mono text-[9px] px-1 py-0.5 rounded bg-background border border-border text-muted-foreground/50">
@@ -248,7 +230,7 @@ function SidebarContent({
           className="w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-md bg-card border border-border text-xs text-muted-foreground hover:border-primary/50 hover:text-foreground transition-colors"
         >
           <span className="flex items-center gap-1.5">
-            <CommandIcon className="h-3 w-3" />
+            <CommandIcon weight="duotone" className="h-3 w-3" />
             Search…
           </span>
           <kbd className="ansein-mono text-[9px] px-1 py-0.5 rounded bg-background border border-border text-muted-foreground/50">
@@ -367,7 +349,7 @@ function SidebarContent({
               </span>
             </p>
           </div>
-          <LogOut
+          <LogOut weight="duotone"
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()

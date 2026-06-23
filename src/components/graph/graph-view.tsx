@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import * as d3 from 'd3'
-import { ZoomIn, ZoomOut, Maximize2, Grid3x3, Pause, Play, Network, Clock, Rewind } from 'lucide-react'
+import { Clock, CornersOut as Maximize2, Graph as Network, Grid3x3, Pause, Play, Rewind, ZoomIn, ZoomOut } from '@phosphor-icons/react'
 
 /**
  * Community color palette — 8 distinct hues. Must stay in sync with
@@ -746,7 +746,7 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
         {data.nodes.length === 0 ? (
           <div className="flex items-center justify-center h-full text-center px-6">
             <div>
-              <Grid3x3 className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
+              <Grid3x3 weight="duotone" className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
               <p className="text-sm text-muted-foreground">
                 No graph data yet. Run the extraction pipeline to populate the knowledge graph.
               </p>
@@ -765,21 +765,21 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
             className="p-1.5 rounded-md bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
             title="Zoom in"
           >
-            <ZoomIn className="h-3.5 w-3.5" />
+            <ZoomIn weight="duotone" className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={() => zoomBy(1 / 1.3)}
             className="p-1.5 rounded-md bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
             title="Zoom out"
           >
-            <ZoomOut className="h-3.5 w-3.5" />
+            <ZoomOut weight="duotone" className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={resetZoom}
             className="p-1.5 rounded-md bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
             title="Reset view"
           >
-            <Maximize2 className="h-3.5 w-3.5" />
+            <Maximize2 weight="duotone" className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={toggleSimulation}
@@ -791,7 +791,7 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
             }
             title={simRunning ? 'Pause simulation' : 'Resume simulation'}
           >
-            {simRunning ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+            {simRunning ? <Pause weight="duotone" className="h-3.5 w-3.5" /> : <Play weight="duotone" className="h-3.5 w-3.5" />}
           </button>
           <button
             onClick={() => setShowGrid((s) => !s)}
@@ -803,7 +803,7 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
             }
             title="Toggle grid"
           >
-            <Grid3x3 className="h-3.5 w-3.5" />
+            <Grid3x3 weight="duotone" className="h-3.5 w-3.5" />
           </button>
           {hasCommunities && (
             <button
@@ -820,7 +820,7 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
                   : 'Coloring by entity type — click to switch to community'
               }
             >
-              <Network className="h-3.5 w-3.5" />
+              <Network weight="duotone" className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
@@ -987,7 +987,7 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
                 className="p-1.5 rounded-md bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
                 title="Rewind to start"
               >
-                <Rewind className="h-3.5 w-3.5" />
+                <Rewind weight="duotone" className="h-3.5 w-3.5" />
               </button>
               <button
                 onClick={isPlaying ? stopPlayback : startPlayback}
@@ -999,13 +999,13 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
                 }
                 title={isPlaying ? 'Pause playback' : 'Play timeline (~10s)'}
               >
-                {isPlaying ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+                {isPlaying ? <Pause weight="duotone" className="h-3.5 w-3.5" /> : <Play weight="duotone" className="h-3.5 w-3.5" />}
               </button>
             </div>
 
             {/* Clock icon + start label */}
             <div className="flex items-center gap-1.5 flex-shrink-0 text-[10px] ansein-mono text-muted-foreground/50">
-              <Clock className="h-3 w-3" />
+              <Clock weight="duotone" className="h-3 w-3" />
               <span>{fmtDate(minTs)}</span>
             </div>
 

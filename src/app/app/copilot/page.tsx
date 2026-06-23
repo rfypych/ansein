@@ -2,19 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import {
-  Bot,
-  Plus,
-  Trash2,
-  Send,
-  User,
-  MessageSquare,
-  Pencil,
-  Check,
-  X,
-  Sparkles,
-  Clock,
-} from 'lucide-react'
+import { ChatCircle as MessageSquare, Check, Clock, PaperPlaneRight as Send, Pencil, Plus, Robot as Bot, Sparkle as Sparkles, Trash as Trash2, User, X } from '@phosphor-icons/react'
 import { http } from '@/lib/http'
 import { EmptyState, Spinner, Badge } from '@/components/ansein/ui'
 import { Markdown } from '@/components/ansein/markdown'
@@ -199,7 +187,7 @@ export default function CopilotPage() {
         <div className="p-4 border-b border-border">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <Bot className="h-4 w-4 text-primary" />
+              <Bot weight="duotone" className="h-4 w-4 text-primary" />
               Copilot
             </h2>
             <button
@@ -208,7 +196,7 @@ export default function CopilotPage() {
               className="p-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-60"
               title="New chat"
             >
-              <Plus className="h-3.5 w-3.5" />
+              <Plus weight="duotone" className="h-3.5 w-3.5" />
             </button>
           </div>
           <p className="text-xs text-muted-foreground">
@@ -223,7 +211,7 @@ export default function CopilotPage() {
             </div>
           ) : sessions.length === 0 ? (
             <div className="px-3 py-8 text-center">
-              <MessageSquare className="h-6 w-6 text-muted-foreground/50 mx-auto mb-2" />
+              <MessageSquare weight="duotone" className="h-6 w-6 text-muted-foreground/50 mx-auto mb-2" />
               <p className="text-xs text-muted-foreground">
                 No chats yet. Click + to start.
               </p>
@@ -250,7 +238,7 @@ export default function CopilotPage() {
                     }
                   }}
                 >
-                  <MessageSquare
+                  <MessageSquare weight="duotone"
                     className={cn(
                       'h-3.5 w-3.5 flex-shrink-0',
                       isActive ? 'text-primary' : 'text-muted-foreground/50'
@@ -281,7 +269,7 @@ export default function CopilotPage() {
                           {s.title}
                         </p>
                         <p className="text-[10px] text-muted-foreground/50 flex items-center gap-1">
-                          <Clock className="h-2 w-2" />
+                          <Clock weight="duotone" className="h-2 w-2" />
                           {formatRelative(s.updated_at)}
                           {s.investigation_id && (
                             <span className="ml-1 px-1 rounded bg-primary/15 text-primary ansein-mono">
@@ -303,7 +291,7 @@ export default function CopilotPage() {
                         className="p-1 text-emerald-400 hover:bg-emerald-500/10 transition-colors disabled:opacity-50"
                         title="Save name"
                       >
-                        <Check className="h-3 w-3" />
+                        <Check weight="duotone" className="h-3 w-3" />
                       </button>
                       <button
                         onClick={(e) => {
@@ -313,7 +301,7 @@ export default function CopilotPage() {
                         className="p-1 text-muted-foreground/50 hover:text-foreground transition-colors"
                         title="Cancel rename"
                       >
-                        <X className="h-3 w-3" />
+                        <X weight="duotone" className="h-3 w-3" />
                       </button>
                     </div>
                   ) : isConfirmingDelete ? (
@@ -330,7 +318,7 @@ export default function CopilotPage() {
                         {deleteMutation.isPending ? (
                           <Spinner className="h-3 w-3" />
                         ) : (
-                          <Check className="h-3 w-3" />
+                          <Check weight="duotone" className="h-3 w-3" />
                         )}
                       </button>
                       <button
@@ -341,7 +329,7 @@ export default function CopilotPage() {
                         className="p-1 text-muted-foreground/50 hover:text-foreground transition-colors"
                         title="Cancel delete"
                       >
-                        <X className="h-3 w-3" />
+                        <X weight="duotone" className="h-3 w-3" />
                       </button>
                     </div>
                   ) : (
@@ -354,7 +342,7 @@ export default function CopilotPage() {
                         className="p-1 text-muted-foreground/50 hover:text-primary transition-colors"
                         title="Rename session"
                       >
-                        <Pencil className="h-3 w-3" />
+                        <Pencil weight="duotone" className="h-3 w-3" />
                       </button>
                       <button
                         onClick={(e) => {
@@ -364,7 +352,7 @@ export default function CopilotPage() {
                         className="p-1 text-muted-foreground/50 hover:text-rose-400 transition-colors"
                         title="Delete session"
                       >
-                        <Trash2 className="h-3 w-3" />
+                        <Trash2 weight="duotone" className="h-3 w-3" />
                       </button>
                     </div>
                   )}
@@ -382,7 +370,7 @@ export default function CopilotPage() {
                 {sessions.length} session{sessions.length !== 1 ? 's' : ''}
               </span>
               <span className="flex items-center gap-1">
-                <Sparkles className="h-2.5 w-2.5" />
+                <Sparkles weight="duotone" className="h-2.5 w-2.5" />
                 RAG grounded
               </span>
             </div>
@@ -400,7 +388,7 @@ export default function CopilotPage() {
                 {selectedSession.title}
               </h2>
               <p className="text-[10px] text-muted-foreground/50 flex items-center gap-1.5">
-                <Bot className="h-2.5 w-2.5" />
+                <Bot weight="duotone" className="h-2.5 w-2.5" />
                 AnseIn Copilot
                 {selectedSession.investigation_id && (
                   <Badge color="primary" className="ml-1">
@@ -414,7 +402,7 @@ export default function CopilotPage() {
               className="p-1.5 rounded-md text-muted-foreground/50 hover:text-primary hover:bg-card transition-colors"
               title="Rename this session"
             >
-              <Pencil className="h-3.5 w-3.5" />
+              <Pencil weight="duotone" className="h-3.5 w-3.5" />
             </button>
           </div>
         )}
@@ -422,7 +410,7 @@ export default function CopilotPage() {
         {!selectedId && sessions.length === 0 ? (
           <div className="flex-1 flex items-center justify-center">
             <EmptyState
-              icon={<Bot className="h-6 w-6 text-primary" />}
+              icon={<Bot weight="duotone" className="h-6 w-6 text-primary" />}
               title="Start a conversation"
               description="Create a new chat to ask the AnseIn Copilot. General chats aren't bound to an investigation."
               variant="branded"
@@ -431,7 +419,7 @@ export default function CopilotPage() {
                   onClick={() => newSessionMutation.mutate()}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
                 >
-                  <Plus className="h-3.5 w-3.5" />
+                  <Plus weight="duotone" className="h-3.5 w-3.5" />
                   New chat
                 </button>
               }
@@ -440,7 +428,7 @@ export default function CopilotPage() {
         ) : !selectedId ? (
           <div className="flex-1 flex items-center justify-center">
             <EmptyState
-              icon={<MessageSquare className="h-6 w-6 text-muted-foreground/50" />}
+              icon={<MessageSquare weight="duotone" className="h-6 w-6 text-muted-foreground/50" />}
               title="Select a chat"
               description="Choose a session from the left, or start a new one."
               className="py-16"
@@ -452,7 +440,7 @@ export default function CopilotPage() {
               {messages.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center">
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[primary]/15 to-transparent border border-primary/30 mb-3">
-                    <Bot className="h-5 w-5 text-primary" />
+                    <Bot weight="duotone" className="h-5 w-5 text-primary" />
                   </div>
                   <p className="text-sm font-medium text-foreground">How can I help?</p>
                   <p className="text-xs text-muted-foreground mt-1 max-w-sm">
@@ -488,7 +476,7 @@ export default function CopilotPage() {
                           : 'bg-card border border-border text-primary'
                       )}
                     >
-                      {m.role === 'user' ? <User className="h-3.5 w-3.5" /> : <Bot className="h-3.5 w-3.5" />}
+                      {m.role === 'user' ? <User weight="duotone" className="h-3.5 w-3.5" /> : <Bot weight="duotone" className="h-3.5 w-3.5" />}
                     </div>
                     <div
                       className={cn(
@@ -520,7 +508,7 @@ export default function CopilotPage() {
               {sending && (
                 <div className="flex gap-3">
                   <div className="flex h-7 w-7 items-center justify-center rounded-full bg-card border border-border text-primary">
-                    <Bot className="h-3.5 w-3.5" />
+                    <Bot weight="duotone" className="h-3.5 w-3.5" />
                   </div>
                   <div className="bg-card border border-border rounded-lg px-3.5 py-2.5 text-sm text-muted-foreground">
                     <Spinner className="h-3.5 w-3.5 inline mr-2" />
@@ -546,7 +534,7 @@ export default function CopilotPage() {
                   disabled={!input.trim() || sending}
                   className="inline-flex items-center justify-center h-9 w-9 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  <Send className="h-4 w-4" />
+                  <Send weight="duotone" className="h-4 w-4" />
                 </button>
               </div>
               <p className="text-[10px] text-muted-foreground/50 mt-1.5 text-center">

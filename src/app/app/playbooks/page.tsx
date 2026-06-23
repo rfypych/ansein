@@ -2,23 +2,7 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import {
-  Workflow,
-  Plus,
-  Trash2,
-  Power,
-  Bell,
-  Tag,
-  Star,
-  FileDown,
-  Loader2,
-  Check,
-  AlertTriangle,
-  ShieldAlert,
-  Zap,
-  X,
-  GripVertical,
-} from 'lucide-react'
+import { Bell, Check, CircleNotch as Loader2, DotsSixVertical as GripVertical, FileArrowDown as FileDown, Lightning as Zap, Plus, Power, ShieldWarning as ShieldAlert, Star, Tag, Trash as Trash2, TreeStructure as Workflow, Warning as AlertTriangle, X } from '@phosphor-icons/react'
 import { http } from '@/lib/http'
 import { useAuthStore, authUserRole } from '@/lib/auth-store'
 import { Badge, Spinner, EmptyState } from '@/components/ansein/ui'
@@ -112,7 +96,7 @@ export default function PlaybooksPage() {
             SOAR
           </p>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground flex items-center gap-2">
-            <Workflow className="h-6 w-6 text-primary" />
+            <Workflow weight="duotone" className="h-6 w-6 text-primary" />
             Playbooks
             {!canEdit && (
               <span className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-card border border-border text-muted-foreground align-middle">
@@ -129,7 +113,7 @@ export default function PlaybooksPage() {
             onClick={() => setShowCreate(true)}
             className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
           >
-            <Plus className="h-4 w-4" />
+            <Plus weight="duotone" className="h-4 w-4" />
             New playbook
           </button>
         )}
@@ -138,7 +122,7 @@ export default function PlaybooksPage() {
       {/* What is SOAR callout */}
       <div className="mb-6 flex items-start gap-3 p-4 rounded-lg bg-primary/[0.04] border border-primary/15">
         <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 border border-primary/20 flex-shrink-0">
-          <Zap className="h-3.5 w-3.5 text-primary" />
+          <Zap weight="duotone" className="h-3.5 w-3.5 text-primary" />
         </div>
         <div className="text-xs text-muted-foreground leading-relaxed">
           <strong className="text-foreground">Security Orchestration, Automation, and Response.</strong>{' '}
@@ -155,7 +139,7 @@ export default function PlaybooksPage() {
       ) : playbooksQuery.data?.items.length === 0 ? (
         <div className="bg-card border border-border rounded-xl">
           <EmptyState
-            icon={<Workflow className="h-6 w-6 text-muted-foreground/50" />}
+            icon={<Workflow weight="duotone" className="h-6 w-6 text-muted-foreground/50" />}
             title="No playbooks yet"
             description="Create your first playbook to automate responses when pipeline results match a condition."
             className="py-16"
@@ -165,7 +149,7 @@ export default function PlaybooksPage() {
                   onClick={() => setShowCreate(true)}
                   className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
                 >
-                  <Plus className="h-4 w-4" />
+                  <Plus weight="duotone" className="h-4 w-4" />
                   Create playbook
                 </button>
               ) : undefined
@@ -230,7 +214,7 @@ function PlaybookCard({
       )}
       <div className="flex items-start gap-4">
         <div className="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0 bg-primary/10 border border-primary/20 text-primary">
-          <Workflow className="h-5 w-5" />
+          <Workflow weight="duotone" className="h-5 w-5" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -254,7 +238,7 @@ function PlaybookCard({
               Trigger
             </p>
             <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-card border border-border text-xs">
-              <ShieldAlert className="h-3 w-3 text-amber-400" />
+              <ShieldAlert weight="duotone" className="h-3 w-3 text-amber-400" />
               <span className="text-muted-foreground">{triggerMeta?.label || 'No trigger'}</span>
               {playbook.trigger?.value !== undefined && (
                 <>
@@ -322,9 +306,9 @@ function PlaybookCard({
                   title={playbook.enabled ? 'Disable playbook' : 'Enable playbook'}
                 >
                   {toggling ? (
-                    <Loader2 className="h-3 w-3 animate-spin" />
+                    <Loader2 weight="duotone" className="h-3 w-3 animate-spin" />
                   ) : (
-                    <Power className="h-3 w-3" />
+                    <Power weight="duotone" className="h-3 w-3" />
                   )}
                   {playbook.enabled ? 'Disable' : 'Enable'}
                 </button>
@@ -333,7 +317,7 @@ function PlaybookCard({
                   className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs border bg-rose-500/5 border-rose-500/20 text-rose-300 hover:bg-rose-500/10 transition-colors"
                   title="Delete playbook"
                 >
-                  <Trash2 className="h-3 w-3" />
+                  <Trash2 weight="duotone" className="h-3 w-3" />
                   Delete
                 </button>
               </div>
@@ -428,14 +412,14 @@ function CreatePlaybookModal({
       <div className="relative bg-card border border-border rounded-xl border border-border max-w-2xl w-full max-h-[90vh] overflow-y-auto ansein-scrollbar">
         <div className="sticky top-0 bg-card border-b border-border px-5 py-4 flex items-center justify-between z-10">
           <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
-            <Workflow className="h-4 w-4 text-primary" />
+            <Workflow weight="duotone" className="h-4 w-4 text-primary" />
             New playbook
           </h2>
           <button
             onClick={onClose}
             className="p-1 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-card/80 transition-colors"
           >
-            <X className="h-4 w-4" />
+            <X weight="duotone" className="h-4 w-4" />
           </button>
         </div>
 
@@ -558,7 +542,7 @@ function CreatePlaybookModal({
                       }}
                     >
                       <Icon className="h-3 w-3" />
-                      <Plus className="h-2.5 w-2.5" />
+                      <Plus weight="duotone" className="h-2.5 w-2.5" />
                     </button>
                   )
                 })}
@@ -578,7 +562,7 @@ function CreatePlaybookModal({
                       key={i}
                       className="flex items-center gap-2 p-2 rounded-md bg-card border border-border"
                     >
-                      <GripVertical className="h-3 w-3 text-muted-foreground/50 flex-shrink-0" />
+                      <GripVertical weight="duotone" className="h-3 w-3 text-muted-foreground/50 flex-shrink-0" />
                       <Icon className="h-3.5 w-3.5 flex-shrink-0" style={{ color: meta.color }} />
                       <span className="text-xs text-muted-foreground w-20 flex-shrink-0">{meta.label}</span>
                       {/* Action-specific params */}
@@ -610,7 +594,7 @@ function CreatePlaybookModal({
                         onClick={() => removeAction(i)}
                         className="p-1 text-muted-foreground/50 hover:text-rose-400 transition-colors"
                       >
-                        <X className="h-3 w-3" />
+                        <X weight="duotone" className="h-3 w-3" />
                       </button>
                     </div>
                   )
@@ -621,7 +605,7 @@ function CreatePlaybookModal({
 
           {/* Validation hint */}
           <div className="flex items-start gap-2 p-3 rounded-md bg-amber-500/[0.04] border border-amber-500/15">
-            <AlertTriangle className="h-3.5 w-3.5 text-amber-400 flex-shrink-0 mt-0.5" />
+            <AlertTriangle weight="duotone" className="h-3.5 w-3.5 text-amber-400 flex-shrink-0 mt-0.5" />
             <p className="text-[11px] text-muted-foreground leading-relaxed">
               Playbooks run automatically after every pipeline completion for this workspace. The trigger is evaluated against the pipeline result; if it matches, all actions fire in order.
             </p>
@@ -642,9 +626,9 @@ function CreatePlaybookModal({
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {createMutation.isPending ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              <Loader2 weight="duotone" className="h-3.5 w-3.5 animate-spin" />
             ) : (
-              <Check className="h-3.5 w-3.5" />
+              <Check weight="duotone" className="h-3.5 w-3.5" />
             )}
             Create playbook
           </button>

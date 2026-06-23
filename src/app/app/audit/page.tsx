@@ -2,31 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import {
-  Shield,
-  Activity,
-  User as UserIcon,
-  FolderSearch,
-  Bot,
-  Cpu,
-  Lock,
-  KeyRound,
-  Filter,
-  ChevronLeft,
-  ChevronRight,
-  CopyPlus,
-  FileText,
-  Sparkles,
-  Play,
-  StickyNote,
-  Star,
-  AlertTriangle,
-  ShieldCheck,
-  Link2,
-  Crown,
-  UserPlus,
-  UserMinus,
-} from 'lucide-react'
+import { Activity, CaretLeft as ChevronLeft, CaretRight as ChevronRight, Copy as CopyPlus, Cpu, Crown, FileText, Folder as FolderSearch, Funnel as Filter, Key as KeyRound, LinkSimple as Link2, Lock, Note as StickyNote, Play, Robot as Bot, Shield, ShieldCheck, Sparkle as Sparkles, Star, User as UserIcon, UserMinus, UserPlus, Warning as AlertTriangle } from '@phosphor-icons/react'
 import { http } from '@/lib/http'
 import { useAuthStore, authUserRole } from '@/lib/auth-store'
 import { Badge, EmptyState, Spinner } from '@/components/ansein/ui'
@@ -240,11 +216,11 @@ export default function AuditPage() {
             {verifyMutation.isPending ? (
               <Spinner className="h-3.5 w-3.5" />
             ) : chainStatus?.valid === false ? (
-              <AlertTriangle className="h-3.5 w-3.5" />
+              <AlertTriangle weight="duotone" className="h-3.5 w-3.5" />
             ) : chainStatus?.valid === true ? (
-              <ShieldCheck className="h-3.5 w-3.5" />
+              <ShieldCheck weight="duotone" className="h-3.5 w-3.5" />
             ) : (
-              <Link2 className="h-3.5 w-3.5" />
+              <Link2 weight="duotone" className="h-3.5 w-3.5" />
             )}
             {verifyMutation.isPending
               ? 'Verifying…'
@@ -259,10 +235,10 @@ export default function AuditPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <StatTile label="Total events" value={total} icon={<Activity className="h-3.5 w-3.5" />} color="#14b8a6" />
-        <StatTile label="This page" value={items.length} icon={<Shield className="h-3.5 w-3.5" />} color="#f59e0b" />
-        <StatTile label="Action types" value={Object.keys(actionBreakdown).length} icon={<Filter className="h-3.5 w-3.5" />} color="#a78bfa" />
-        <StatTile label="Page" value={`${page}/${totalPages}`} icon={<Activity className="h-3.5 w-3.5" />} color="#06b6d4" />
+        <StatTile label="Total events" value={total} icon={<Activity weight="duotone" className="h-3.5 w-3.5" />} color="#14b8a6" />
+        <StatTile label="This page" value={items.length} icon={<Shield weight="duotone" className="h-3.5 w-3.5" />} color="#f59e0b" />
+        <StatTile label="Action types" value={Object.keys(actionBreakdown).length} icon={<Filter weight="duotone" className="h-3.5 w-3.5" />} color="#a78bfa" />
+        <StatTile label="Page" value={`${page}/${totalPages}`} icon={<Activity weight="duotone" className="h-3.5 w-3.5" />} color="#06b6d4" />
       </div>
 
       {/* Action type breakdown */}
@@ -270,7 +246,7 @@ export default function AuditPage() {
         <div className="bg-card border border-border rounded-xl p-5 mb-6">
           <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/15 border border-primary/30">
-              <Activity className="h-3.5 w-3.5 text-primary" />
+              <Activity weight="duotone" className="h-3.5 w-3.5 text-primary" />
             </div>
             Action breakdown
           </h3>
@@ -324,7 +300,7 @@ export default function AuditPage() {
       ) : items.length === 0 ? (
         <div className="bg-card border border-border rounded-xl">
           <EmptyState
-            icon={<Activity className="h-6 w-6 text-muted-foreground/50" />}
+            icon={<Activity weight="duotone" className="h-6 w-6 text-muted-foreground/50" />}
             title={activeGroup === 'all' ? 'No audit events yet' : 'No matching events'}
             description={
               activeGroup === 'all'
@@ -393,7 +369,7 @@ export default function AuditPage() {
                         )}
                         {e.user_id && (
                           <span className="inline-flex items-center gap-1 ansein-mono">
-                            <UserIcon className="h-2.5 w-2.5" />
+                            <UserIcon weight="duotone" className="h-2.5 w-2.5" />
                             user #{e.user_id}
                           </span>
                         )}
@@ -422,7 +398,7 @@ export default function AuditPage() {
                             className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded bg-primary/8 border border-primary/25 text-primary ansein-mono"
                             title={`prev: ${e.prev_hash || '(genesis)'}\nhash: ${e.entry_hash}`}
                           >
-                            <Link2 className="h-2 w-2" />
+                            <Link2 weight="duotone" className="h-2 w-2" />
                             {e.prev_hash ? '↳' : '◇'} {e.entry_hash.slice(0, 12)}
                           </span>
                         </div>
@@ -446,7 +422,7 @@ export default function AuditPage() {
                   disabled={page === 1}
                   className="p-1.5 rounded-md border border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
-                  <ChevronLeft className="h-3.5 w-3.5" />
+                  <ChevronLeft weight="duotone" className="h-3.5 w-3.5" />
                 </button>
                 <span className="text-xs text-muted-foreground ansein-mono px-2">
                   {page} / {totalPages}
@@ -456,7 +432,7 @@ export default function AuditPage() {
                   disabled={page === totalPages}
                   className="p-1.5 rounded-md border border-border bg-card text-muted-foreground hover:text-foreground hover:border-primary/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
-                  <ChevronRight className="h-3.5 w-3.5" />
+                  <ChevronRight weight="duotone" className="h-3.5 w-3.5" />
                 </button>
               </div>
             </div>

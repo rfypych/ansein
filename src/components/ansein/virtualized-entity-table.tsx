@@ -21,7 +21,7 @@
  */
 import { useRef, useMemo } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { ShieldAlert } from 'lucide-react'
+import { ShieldWarning as ShieldAlert } from '@phosphor-icons/react'
 import { ENTITY_TYPE_LABELS, ENTITY_TYPE_COLORS } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
@@ -232,7 +232,7 @@ export function VirtualizedEntityTable({ entities, onSelect, height = 560 }: Pro
       {/* Footer hint */}
       <div className="flex items-center justify-between px-3 py-1.5 border-t border-border bg-card/40">
         <span className="flex items-center gap-1 text-[10px] text-muted-foreground/50">
-          <ShieldAlert className="h-2.5 w-2.5 text-rose-400" />
+          <ShieldAlert weight="duotone" className="h-2.5 w-2.5 text-rose-400" />
           Click a row to open entity detail
         </span>
         <span className="text-[10px] text-muted-foreground/50 ansein-mono">

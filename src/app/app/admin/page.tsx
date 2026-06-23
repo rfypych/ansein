@@ -2,33 +2,7 @@
 
 import { useState, type FormEvent } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import {
-  Shield,
-  Users,
-  Crown,
-  Pencil,
-  Activity,
-  Search,
-  UserPlus,
-  UserMinus,
-  Check,
-  Loader2,
-  AlertCircle,
-  Eye,
-  EyeOff,
-  FolderSearch,
-  Bot,
-  Cpu,
-  Workflow,
-  ShieldAlert,
-  Mail,
-  KeyRound,
-  Lock,
-  Settings,
-  ShieldCheck,
-  ChevronDown,
-  X,
-} from 'lucide-react'
+import { Activity, CaretDown as ChevronDown, Check, CircleNotch as Loader2, Cpu, Crown, Envelope as Mail, Eye, EyeClosed as EyeOff, Folder as FolderSearch, Gear as Settings, Key as KeyRound, Lock, MagnifyingGlass as Search, Pencil, Robot as Bot, Shield, ShieldCheck, ShieldWarning as ShieldAlert, TreeStructure as Workflow, UserMinus, UserPlus, Users, WarningCircle as AlertCircle, X } from '@phosphor-icons/react'
 import { http } from '@/lib/http'
 import { useAuthStore, type AuthUser, authUserRole, type Role } from '@/lib/auth-store'
 import { Badge, Spinner, AnimatedNumber, EmptyState, DonutChart } from '@/components/ansein/ui'
@@ -78,7 +52,7 @@ export default function AdminPage() {
       <div className="px-6 py-8 max-w-5xl mx-auto">
         <div className="bg-card border border-border rounded-xl">
           <EmptyState
-            icon={<Shield className="h-6 w-6 text-muted-foreground/50" />}
+            icon={<Shield weight="duotone" className="h-6 w-6 text-muted-foreground/50" />}
             title="Administrator access required"
             description="This page is only visible to workspace administrators."
             className="py-16"
@@ -142,28 +116,28 @@ function SystemOverview() {
     <div className="mb-8">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <StatCard
-          icon={<Users className="h-4 w-4" />}
+          icon={<Users weight="duotone" className="h-4 w-4" />}
           label="Users"
           value={total}
           color="#f43f5e"
           sub={`${active} active · ${inactive} inactive`}
         />
         <StatCard
-          icon={<FolderSearch className="h-4 w-4" />}
+          icon={<FolderSearch weight="duotone" className="h-4 w-4" />}
           label="Investigations"
           value={totalInvestigations}
           color="#14b8a6"
           sub="Across all users"
         />
         <StatCard
-          icon={<Bot className="h-4 w-4" />}
+          icon={<Bot weight="duotone" className="h-4 w-4" />}
           label="Copilot chats"
           value={totalCopilot}
           color="#8b5cf6"
           sub="Total sessions"
         />
         <StatCard
-          icon={<Activity className="h-4 w-4" />}
+          icon={<Activity weight="duotone" className="h-4 w-4" />}
           label="Audit events"
           value={totalAudit}
           color="#f59e0b"
@@ -175,7 +149,7 @@ function SystemOverview() {
       <div className="bg-card border border-border rounded-xl p-6">
         <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-rose-500/15 border border-rose-500/30">
-            <Shield className="h-3.5 w-3.5 text-rose-400" />
+            <Shield weight="duotone" className="h-3.5 w-3.5 text-rose-400" />
           </div>
           Role distribution
         </h3>
@@ -206,7 +180,7 @@ function SystemOverview() {
                       colors.border
                     )}
                   >
-                    {opt.value === 'admin' ? <Crown className="h-3 w-3" /> : <Pencil className="h-3 w-3" />}
+                    {opt.value === 'admin' ? <Crown weight="duotone" className="h-3 w-3" /> : <Pencil weight="duotone" className="h-3 w-3" />}
                     {opt.value}
                   </span>
                   <div className="flex-1 h-2 rounded-full bg-[border]">
@@ -334,7 +308,7 @@ function UserManagementSection() {
       <div className="flex items-start justify-between gap-3 mb-4 flex-wrap">
         <div>
           <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-            <Users className="h-4 w-4 text-primary" />
+            <Users weight="duotone" className="h-4 w-4 text-primary" />
             User Management
           </h3>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -348,14 +322,14 @@ function UserManagementSection() {
           onClick={() => setShowCreateUser(true)}
           className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors whitespace-nowrap"
         >
-          <UserPlus className="h-3.5 w-3.5" />
+          <UserPlus weight="duotone" className="h-3.5 w-3.5" />
           Create user
         </button>
       </div>
 
       {/* Search */}
       <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
+        <Search weight="duotone" className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
         <input
           type="text"
           value={search}
@@ -368,7 +342,7 @@ function UserManagementSection() {
             onClick={() => setSearch('')}
             className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground/50 hover:text-foreground"
           >
-            <X className="h-3.5 w-3.5" />
+            <X weight="duotone" className="h-3.5 w-3.5" />
           </button>
         )}
       </div>
@@ -380,7 +354,7 @@ function UserManagementSection() {
         </div>
       ) : filtered.length === 0 ? (
         <EmptyState
-          icon={<Users className="h-6 w-6 text-muted-foreground/50" />}
+          icon={<Users weight="duotone" className="h-6 w-6 text-muted-foreground/50" />}
           title={search ? 'No users match your search' : 'No users found'}
           description={search ? 'Try a different search term.' : 'Create a user to get started.'}
           className="py-10"
@@ -497,9 +471,9 @@ function UserManagementSection() {
                   {isStatusPending ? (
                     <Spinner className="h-3.5 w-3.5" />
                   ) : u.is_active ? (
-                    <UserMinus className="h-3.5 w-3.5" />
+                    <UserMinus weight="duotone" className="h-3.5 w-3.5" />
                   ) : (
-                    <UserPlus className="h-3.5 w-3.5" />
+                    <UserPlus weight="duotone" className="h-3.5 w-3.5" />
                   )}
                 </button>
               </div>
@@ -510,7 +484,7 @@ function UserManagementSection() {
 
       {/* Footer note */}
       <div className="mt-4 pt-4 border-t border-border flex items-start gap-2.5">
-        <AlertCircle className="h-3.5 w-3.5 text-amber-400 flex-shrink-0 mt-0.5" />
+        <AlertCircle weight="duotone" className="h-3.5 w-3.5 text-amber-400 flex-shrink-0 mt-0.5" />
         <p className="text-[11px] text-muted-foreground leading-relaxed">
           Role changes take effect immediately for new API requests. The user&apos;s current access
           token remains valid until it expires. Deactivated users cannot log in. You cannot deactivate
@@ -590,11 +564,11 @@ function CreateUserModal({ onClose }: { onClose: () => void }) {
           onClick={onClose}
           className="absolute top-4 right-4 p-1 text-muted-foreground/50 hover:text-foreground transition-colors"
         >
-          <X className="h-4 w-4" />
+          <X weight="duotone" className="h-4 w-4" />
         </button>
 
         <h3 className="text-base font-semibold text-foreground mb-1 flex items-center gap-2">
-          <UserPlus className="h-4 w-4 text-primary" />
+          <UserPlus weight="duotone" className="h-4 w-4 text-primary" />
           Create new user
         </h3>
         <p className="text-xs text-muted-foreground mb-5">
@@ -608,7 +582,7 @@ function CreateUserModal({ onClose }: { onClose: () => void }) {
               Email
             </label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
+              <Mail weight="duotone" className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
               <input
                 type="email"
                 value={email}
@@ -627,7 +601,7 @@ function CreateUserModal({ onClose }: { onClose: () => void }) {
               Full name <span className="text-muted-foreground/50 normal-case">(optional)</span>
             </label>
             <div className="relative">
-              <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
+              <Users weight="duotone" className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
               <input
                 type="text"
                 value={fullName}
@@ -645,7 +619,7 @@ function CreateUserModal({ onClose }: { onClose: () => void }) {
               Temporary password
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
+              <Lock weight="duotone" className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
               <input
                 type={showPw ? 'text' : 'password'}
                 value={password}
@@ -661,7 +635,7 @@ function CreateUserModal({ onClose }: { onClose: () => void }) {
                 onClick={() => setShowPw((s) => !s)}
                 className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground/50 hover:text-foreground"
               >
-                {showPw ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                {showPw ? <EyeOff weight="duotone" className="h-3.5 w-3.5" /> : <Eye weight="duotone" className="h-3.5 w-3.5" />}
               </button>
             </div>
             {password && (
@@ -730,9 +704,9 @@ function CreateUserModal({ onClose }: { onClose: () => void }) {
             className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
           >
             {createUserMutation.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 weight="duotone" className="h-4 w-4 animate-spin" />
             ) : (
-              <UserPlus className="h-4 w-4" />
+              <UserPlus weight="duotone" className="h-4 w-4" />
             )}
             Create user
           </button>

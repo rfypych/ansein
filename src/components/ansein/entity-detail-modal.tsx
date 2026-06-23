@@ -2,28 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import {
-  X,
-  Bug,
-  Wrench,
-  Code,
-  ShieldAlert,
-  Globe,
-  Link as LinkIcon,
-  Hash,
-  CreditCard,
-  Crosshair,
-  MapPin,
-  User,
-  Users,
-  Network,
-  Copy,
-  Check,
-  ExternalLink,
-  ShieldCheck,
-  AlertTriangle,
-  Activity,
-} from 'lucide-react'
+import { Activity, ArrowSquareOut as ExternalLink, Bug, Check, Code, Copy, CreditCard, Crosshair, Globe, Graph as Network, Hash, Link as LinkIcon, MapPin, ShieldCheck, ShieldWarning as ShieldAlert, User, Users, Warning as AlertTriangle, Wrench, X } from '@phosphor-icons/react'
 import { http } from '@/lib/http'
 import { Badge, Spinner } from '@/components/ansein/ui'
 import { ENTITY_TYPE_LABELS, ENTITY_TYPE_COLORS, formatRelative } from '@/lib/format'
@@ -206,7 +185,7 @@ export function EntityDetailModal({
                 className="p-1 rounded text-muted-foreground/50 hover:text-foreground transition-colors"
                 title="Copy value"
               >
-                {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                {copied ? <Check weight="duotone" className="h-3.5 w-3.5 text-emerald-400" /> : <Copy weight="duotone" className="h-3.5 w-3.5" />}
               </button>
             </div>
           </div>
@@ -215,7 +194,7 @@ export function EntityDetailModal({
             className="p-1.5 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-card transition-colors flex-shrink-0"
             aria-label="Close"
           >
-            <X className="h-4 w-4" />
+            <X weight="duotone" className="h-4 w-4" />
           </button>
         </div>
 
@@ -224,7 +203,7 @@ export function EntityDetailModal({
           {/* Enrichment */}
           <section>
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/50 mb-2 flex items-center gap-1.5">
-              <ShieldCheck className="h-3.5 w-3.5" />
+              <ShieldCheck weight="duotone" className="h-3.5 w-3.5" />
               Enrichment
               <Badge color="slate">{enrKeys.length} providers</Badge>
             </h3>
@@ -295,7 +274,7 @@ export function EntityDetailModal({
           {/* Relationships */}
           <section>
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/50 mb-2 flex items-center gap-1.5">
-              <Activity className="h-3.5 w-3.5" />
+              <Activity weight="duotone" className="h-3.5 w-3.5" />
               Relationships
               <Badge color="slate">{involved.length}</Badge>
             </h3>
@@ -342,7 +321,7 @@ export function EntityDetailModal({
           {involved.some((r) => r.evidence) && (
             <section>
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/50 mb-2 flex items-center gap-1.5">
-                <ExternalLink className="h-3.5 w-3.5" />
+                <ExternalLink weight="duotone" className="h-3.5 w-3.5" />
                 Evidence snippets
               </h3>
               <div className="space-y-2">

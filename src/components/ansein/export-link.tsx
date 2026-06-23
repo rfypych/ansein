@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, type ReactNode } from 'react'
-import { Download, Loader2, Printer } from 'lucide-react'
+import { CircleNotch as Loader2, Download, Printer } from '@phosphor-icons/react'
 import { getStoredAccessToken } from '@/lib/auth-store'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -105,7 +105,7 @@ export function ExportLink({
         onClick={handleDownload}
         className={cn('inline-flex items-center gap-1.5', className)}
       >
-        {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : icon}
+        {loading ? <Loader2 weight="duotone" className="h-3.5 w-3.5 animate-spin" /> : icon}
         {label}
       </a>
     )
@@ -121,9 +121,9 @@ export function ExportLink({
       )}
     >
       {loading ? (
-        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        <Loader2 weight="duotone" className="h-3.5 w-3.5 animate-spin" />
       ) : (
-        icon || (printMode ? <Printer className="h-3.5 w-3.5" /> : <Download className="h-3.5 w-3.5" />)
+        icon || (printMode ? <Printer weight="duotone" className="h-3.5 w-3.5" /> : <Download weight="duotone" className="h-3.5 w-3.5" />)
       )}
       {label && <span className="hidden sm:inline">{label}</span>}
     </button>

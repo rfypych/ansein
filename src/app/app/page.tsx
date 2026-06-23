@@ -2,29 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
-import {
-  FolderSearch,
-  Activity,
-  Bot,
-  KeyRound,
-  ArrowRight,
-  Plus,
-  TrendingUp,
-  AlertTriangle,
-  CheckCircle2,
-  Clock,
-  ShieldAlert,
-  Eye,
-  FileText,
-  Play,
-  CopyPlus,
-  User,
-  ShieldCheck,
-  Star,
-  Target,
-  Network,
-  BarChart3,
-} from 'lucide-react'
+import { Activity, ArrowRight, ChartBar as BarChart3, CheckCircle as CheckCircle2, Clock, Copy as CopyPlus, Eye, FileText, Folder as FolderSearch, Graph as Network, Key as KeyRound, Play, Plus, Robot as Bot, ShieldCheck, ShieldWarning as ShieldAlert, Star, Target, TrendUp as TrendingUp, User, Warning as AlertTriangle } from '@phosphor-icons/react'
 import { http } from '@/lib/http'
 import { useAuthStore } from '@/lib/auth-store'
 import { Badge, EmptyState, SeverityMeter, Spinner, AnimatedNumber, ProgressRing, Sparkline, DonutChart } from '@/components/ansein/ui'
@@ -222,7 +200,7 @@ export default function DashboardPage() {
         <StatCard
           label="Investigations"
           value={totalInv}
-          icon={<FolderSearch className="h-4 w-4" />}
+          icon={<FolderSearch weight="duotone" className="h-4 w-4" />}
           accent="teal"
           loading={investigations.isLoading}
         />
@@ -230,14 +208,14 @@ export default function DashboardPage() {
           label="Recent activity"
           value={recentActivity}
           sub={recentActivity ? `last update ${recentActivity}` : 'no activity yet'}
-          icon={<Activity className="h-4 w-4" />}
+          icon={<Activity weight="duotone" className="h-4 w-4" />}
           accent="amber"
           loading={investigations.isLoading}
         />
         <StatCard
           label="Copilot chats"
           value={totalSessions}
-          icon={<Bot className="h-4 w-4" />}
+          icon={<Bot weight="duotone" className="h-4 w-4" />}
           accent="violet"
           loading={sessions.isLoading}
         />
@@ -245,7 +223,7 @@ export default function DashboardPage() {
           label="API keys"
           value={`${keysConfigured}/6`}
           sub={keysConfigured === 0 ? 'configure in settings' : 'keys configured'}
-          icon={<KeyRound className="h-4 w-4" />}
+          icon={<KeyRound weight="duotone" className="h-4 w-4" />}
           accent={keysConfigured === 0 ? 'rose' : 'emerald'}
           loading={settings.isLoading}
         />
@@ -269,7 +247,7 @@ export default function DashboardPage() {
               className="text-xs text-primary hover:text-primary/90 inline-flex items-center gap-1"
             >
               View all
-              <ArrowRight className="h-3 w-3" />
+              <ArrowRight weight="duotone" className="h-3 w-3" />
             </Link>
           </div>
 
@@ -279,7 +257,7 @@ export default function DashboardPage() {
             </div>
           ) : recentInv.length === 0 ? (
             <EmptyState
-              icon={<FolderSearch className="h-5 w-5 text-muted-foreground/50" />}
+              icon={<FolderSearch weight="duotone" className="h-5 w-5 text-muted-foreground/50" />}
               title="No investigations yet"
               description="Create your first investigation to start extracting threat intelligence from raw data."
               action={
@@ -287,7 +265,7 @@ export default function DashboardPage() {
                   href="/app/investigations/new"
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
                 >
-                  <Plus className="h-3.5 w-3.5" />
+                  <Plus weight="duotone" className="h-3.5 w-3.5" />
                   New investigation
                 </Link>
               }
@@ -331,7 +309,7 @@ export default function DashboardPage() {
           <div className="bg-card border border-border rounded-xl p-6">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-primary" />
+                <TrendingUp weight="duotone" className="h-4 w-4 text-primary" />
                 Severity trend
               </h3>
               <span className="text-[10px] uppercase tracking-widest text-muted-foreground/50 ansein-mono">
@@ -376,7 +354,7 @@ export default function DashboardPage() {
           {/* Severity distribution */}
           <div className="bg-card border border-border rounded-xl p-6">
             <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
-              <ShieldAlert className="h-4 w-4 text-primary" />
+              <ShieldAlert weight="duotone" className="h-4 w-4 text-primary" />
               Severity distribution
             </h3>
             {allInv.length === 0 ? (
@@ -431,7 +409,7 @@ export default function DashboardPage() {
           {/* Recent activity feed */}
           <div className="bg-card border border-border rounded-xl p-6">
             <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
-              <Clock className="h-4 w-4 text-primary" />
+              <Clock weight="duotone" className="h-4 w-4 text-primary" />
               Activity feed
             </h3>
             {audit.isLoading ? (
@@ -480,7 +458,7 @@ export default function DashboardPage() {
           {/* Quick start */}
           <div className="bg-card border border-border rounded-xl p-6">
             <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-primary" />
+              <TrendingUp weight="duotone" className="h-4 w-4 text-primary" />
               Quick start
             </h3>
             <ol className="space-y-3">
@@ -517,7 +495,7 @@ export default function DashboardPage() {
             return (
               <div className="bg-card border border-border rounded-xl p-6">
                 <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <Target className="h-4 w-4 text-rose-400" />
+                  <Target weight="duotone" className="h-4 w-4 text-rose-400" />
                   Top threats
                 </h3>
                 <div className="space-y-2">
@@ -545,7 +523,7 @@ export default function DashboardPage() {
                           </p>
                         </div>
                         {inv.is_starred && (
-                          <Star className="h-3 w-3 text-amber-400 fill-current flex-shrink-0" />
+                          <Star weight="duotone" className="h-3 w-3 text-amber-400 fill-current flex-shrink-0" />
                         )}
                       </Link>
                     )
@@ -568,7 +546,7 @@ export default function DashboardPage() {
             return (
               <div className="bg-card border border-border rounded-xl p-6">
                 <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <Network className="h-4 w-4 text-primary" />
+                  <Network weight="duotone" className="h-4 w-4 text-primary" />
                   Entity types
                 </h3>
                 <div className="flex items-center gap-4">
@@ -603,7 +581,7 @@ export default function DashboardPage() {
           {/* BYOK status */}
           <div className="bg-card border border-border rounded-xl p-6">
             <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
-              <KeyRound className="h-4 w-4 text-primary" />
+              <KeyRound weight="duotone" className="h-4 w-4 text-primary" />
               BYOK status
             </h3>
             <div className="space-y-2">
@@ -636,7 +614,7 @@ export default function DashboardPage() {
               className="mt-4 inline-flex items-center gap-1 text-xs text-primary hover:text-primary/90"
             >
               Manage keys
-              <ArrowRight className="h-3 w-3" />
+              <ArrowRight weight="duotone" className="h-3 w-3" />
             </Link>
           </div>
         </div>
@@ -745,7 +723,7 @@ function InvestigationActivityCard({
     <div className="bg-card border border-border rounded-xl p-6">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-          <BarChart3 className="h-4 w-4 text-primary" />
+          <BarChart3 weight="duotone" className="h-4 w-4 text-primary" />
           Investigation activity
         </h3>
         <span className="text-[10px] uppercase tracking-widest text-muted-foreground/50 ansein-mono">

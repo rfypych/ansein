@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { Keyboard, X } from 'lucide-react'
+import { Keyboard, X } from '@phosphor-icons/react'
 
 interface ShortcutItem {
   keys: string[]
@@ -59,7 +59,7 @@ export function GlobalShortcutsModal({ open, onClose }: { open: boolean; onClose
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/15 border border-primary/30">
-              <Keyboard className="h-4 w-4 text-primary" />
+              <Keyboard weight="duotone" className="h-4 w-4 text-primary" />
             </div>
             <h2 className="text-base font-semibold text-foreground">Keyboard shortcuts</h2>
           </div>
@@ -67,7 +67,7 @@ export function GlobalShortcutsModal({ open, onClose }: { open: boolean; onClose
             onClick={onClose}
             className="text-muted-foreground/50 hover:text-foreground transition-colors p-1 rounded-md hover:bg-card"
           >
-            <X className="h-4 w-4" />
+            <X weight="duotone" className="h-4 w-4" />
           </button>
         </div>
 

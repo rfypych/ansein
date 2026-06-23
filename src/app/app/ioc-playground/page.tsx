@@ -2,22 +2,7 @@
 
 import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
-import {
-  Zap,
-  Loader2,
-  Globe,
-  Link as LinkIcon,
-  Hash,
-  Shield,
-  Copy,
-  Check,
-  AlertTriangle,
-  CheckCircle2,
-  XCircle,
-  Search,
-  Download,
-  FileText,
-} from 'lucide-react'
+import { Check, CheckCircle as CheckCircle2, CircleNotch as Loader2, Copy, Download, FileText, Globe, Hash, Lightning as Zap, Link as LinkIcon, MagnifyingGlass as Search, Shield, Warning as AlertTriangle, XCircle } from '@phosphor-icons/react'
 import { http } from '@/lib/http'
 import { Badge, Spinner, EmptyState } from '@/components/ansein/ui'
 import { Markdown } from '@/components/ansein/markdown'
@@ -133,7 +118,7 @@ export default function IOCPlaygroundPage() {
           <div className="bg-card border border-border rounded-xl p-5">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                <Search className="h-4 w-4 text-primary" />
+                <Search weight="duotone" className="h-4 w-4 text-primary" />
                 Input text
               </h3>
               <div className="flex items-center gap-1.5">
@@ -169,12 +154,12 @@ export default function IOCPlaygroundPage() {
               >
                 {analyzeMutation.isPending ? (
                   <>
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <Loader2 weight="duotone" className="h-3.5 w-3.5 animate-spin" />
                     Analyzing…
                   </>
                 ) : (
                   <>
-                    <Zap className="h-3.5 w-3.5" />
+                    <Zap weight="duotone" className="h-3.5 w-3.5" />
                     Analyze
                   </>
                 )}
@@ -217,7 +202,7 @@ export default function IOCPlaygroundPage() {
                   onClick={exportResults}
                   className="mt-4 w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md border border-border bg-card text-xs text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
                 >
-                  <Download className="h-3 w-3" />
+                  <Download weight="duotone" className="h-3 w-3" />
                   Export results (JSON)
                 </button>
               )}
@@ -229,7 +214,7 @@ export default function IOCPlaygroundPage() {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <Shield className="h-4 w-4 text-primary" />
+              <Shield weight="duotone" className="h-4 w-4 text-primary" />
               Results
               {results && results.length > 0 && (
                 <Badge color="primary">{results.length}</Badge>
@@ -247,7 +232,7 @@ export default function IOCPlaygroundPage() {
           ) : !results ? (
             <div className="bg-card border border-border rounded-xl">
               <EmptyState
-                icon={<Zap className="h-5 w-5 text-primary" />}
+                icon={<Zap weight="duotone" className="h-5 w-5 text-primary" />}
                 title="No results yet"
                 description="Paste text on the left and click Analyze to extract IOCs."
                 variant="branded"
@@ -257,7 +242,7 @@ export default function IOCPlaygroundPage() {
           ) : results.length === 0 ? (
             <div className="bg-card border border-border rounded-xl">
               <EmptyState
-                icon={<Search className="h-5 w-5 text-muted-foreground/50" />}
+                icon={<Search weight="duotone" className="h-5 w-5 text-muted-foreground/50" />}
                 title="No IOCs detected"
                 description="The provided text doesn't contain any recognizable IOCs (IPs, domains, URLs, hashes, CVEs)."
                 className="py-16"
@@ -353,7 +338,7 @@ function IocCard({
             </span>
             {isMalicious && (
               <span className="inline-flex items-center gap-1 text-[9px] text-rose-400 font-medium">
-                <AlertTriangle className="h-2.5 w-2.5" />
+                <AlertTriangle weight="duotone" className="h-2.5 w-2.5" />
                 Malicious
               </span>
             )}
@@ -418,9 +403,9 @@ function IocCard({
           title="Copy value"
         >
           {copied ? (
-            <Check className="h-3.5 w-3.5 text-emerald-400" />
+            <Check weight="duotone" className="h-3.5 w-3.5 text-emerald-400" />
           ) : (
-            <Copy className="h-3.5 w-3.5" />
+            <Copy weight="duotone" className="h-3.5 w-3.5" />
           )}
         </button>
       </div>

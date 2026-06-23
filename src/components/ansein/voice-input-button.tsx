@@ -15,7 +15,7 @@
  * Sonner toast and reset the listening state.
  */
 import { useEffect, useRef, useState, useCallback, useSyncExternalStore } from 'react'
-import { Mic, MicOff } from 'lucide-react'
+import { Mic, MicOff } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
@@ -245,12 +245,12 @@ export function VoiceInputButton({
         <span className="relative flex h-4 w-4 items-center justify-center">
           {/* Pulsing ring */}
           <span className="absolute inline-flex h-full w-full rounded-full bg-rose-500/60 animate-ping" />
-          <Mic className="relative h-4 w-4" />
+          <Mic weight="duotone" className="relative h-4 w-4" />
         </span>
       ) : supported === false ? (
-        <MicOff className="h-4 w-4" />
+        <MicOff weight="duotone" className="h-4 w-4" />
       ) : (
-        <Mic className="h-4 w-4" />
+        <Mic weight="duotone" className="h-4 w-4" />
       )}
     </button>
   )

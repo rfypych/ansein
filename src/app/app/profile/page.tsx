@@ -3,24 +3,7 @@
 import { useState, type FormEvent } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
-import {
-  User as UserIcon,
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  Check,
-  Loader2,
-  AlertCircle,
-  ShieldCheck,
-  KeyRound,
-  Save,
-  FolderSearch,
-  Bot,
-  Calendar,
-  Crown,
-  Shield,
-} from 'lucide-react'
+import { Calendar, Check, CircleNotch as Loader2, Crown, Envelope as Mail, Eye, EyeClosed as EyeOff, FloppyDisk as Save, Folder as FolderSearch, Key as KeyRound, Lock, Robot as Bot, Shield, ShieldCheck, User as UserIcon, WarningCircle as AlertCircle } from '@phosphor-icons/react'
 import { http } from '@/lib/http'
 import { useAuthStore, type AuthUser, authUserRole, type Role } from '@/lib/auth-store'
 import { Badge, Spinner, AnimatedNumber } from '@/components/ansein/ui'
@@ -214,7 +197,7 @@ export default function ProfilePage() {
                 )}
                 title={ROLE_DESCRIPTIONS[displayRole as RbacRole]}
               >
-                {displayRole === 'admin' ? <Crown className="h-3 w-3" /> : <Shield className="h-3 w-3" />}
+                {displayRole === 'admin' ? <Crown weight="duotone" className="h-3 w-3" /> : <Shield weight="duotone" className="h-3 w-3" />}
                 {displayRole}
               </span>
               {!p.is_active && <Badge color="danger">Inactive</Badge>}
@@ -222,17 +205,17 @@ export default function ProfilePage() {
             <p className="text-sm text-muted-foreground mt-0.5 ansein-mono">{p.email}</p>
             <div className="mt-3 flex flex-wrap gap-4 text-xs text-muted-foreground/50">
               <span className="flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
+                <Calendar weight="duotone" className="h-3 w-3" />
                 Joined {formatDate(p.created_at)}
               </span>
               {p.last_login_at && (
                 <span className="flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
+                  <Calendar weight="duotone" className="h-3 w-3" />
                   Last login {formatDate(p.last_login_at)}
                 </span>
               )}
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-card border border-border text-muted-foreground">
-                <Calendar className="h-2.5 w-2.5" />
+                <Calendar weight="duotone" className="h-2.5 w-2.5" />
                 Member for {accountAge}
               </span>
             </div>
@@ -243,7 +226,7 @@ export default function ProfilePage() {
         <div className="grid grid-cols-2 gap-3 mt-6 pt-6 border-t border-border">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-500/10 border border-teal-500/20 text-primary">
-              <FolderSearch className="h-4 w-4" />
+              <FolderSearch weight="duotone" className="h-4 w-4" />
             </div>
             <div>
               <p className="text-xl font-semibold ansein-mono text-foreground">
@@ -256,7 +239,7 @@ export default function ProfilePage() {
           </div>
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/10 border border-violet-500/20 text-violet-400">
-              <Bot className="h-4 w-4" />
+              <Bot weight="duotone" className="h-4 w-4" />
             </div>
             <div>
               <p className="text-xl font-semibold ansein-mono text-foreground">
@@ -271,7 +254,7 @@ export default function ProfilePage() {
 
         {/* Role description row */}
         <div className="mt-4 pt-4 border-t border-border flex items-start gap-2.5">
-          <ShieldCheck className="h-3.5 w-3.5 text-primary flex-shrink-0 mt-0.5" />
+          <ShieldCheck weight="duotone" className="h-3.5 w-3.5 text-primary flex-shrink-0 mt-0.5" />
           <div className="text-xs text-muted-foreground leading-relaxed">
             <span className="font-medium text-foreground capitalize">{displayRole}</span>
             <span className="text-muted-foreground/50"> · </span>
@@ -291,7 +274,7 @@ export default function ProfilePage() {
       {/* Update profile */}
       <form onSubmit={handleUpdateProfile} className="bg-card border border-border rounded-xl p-6 mb-6">
         <h3 className="text-sm font-semibold text-foreground mb-1 flex items-center gap-2">
-          <UserIcon className="h-4 w-4 text-primary" />
+          <UserIcon weight="duotone" className="h-4 w-4 text-primary" />
           Display name
         </h3>
         <p className="text-xs text-muted-foreground mb-4">
@@ -299,7 +282,7 @@ export default function ProfilePage() {
         </p>
         <div className="flex flex-col sm:flex-row gap-2">
           <div className="relative flex-1">
-            <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
+            <UserIcon weight="duotone" className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
             <input
               type="text"
               value={fullName}
@@ -315,9 +298,9 @@ export default function ProfilePage() {
             className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
           >
             {updateProfileMutation.isPending ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              <Loader2 weight="duotone" className="h-3.5 w-3.5 animate-spin" />
             ) : (
-              <Save className="h-3.5 w-3.5" />
+              <Save weight="duotone" className="h-3.5 w-3.5" />
             )}
             Save
           </button>
@@ -329,7 +312,7 @@ export default function ProfilePage() {
             Email <span className="text-muted-foreground/50 normal-case">(read-only)</span>
           </label>
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
+            <Mail weight="duotone" className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
             <input
               type="email"
               readOnly
@@ -346,7 +329,7 @@ export default function ProfilePage() {
       {/* Change password */}
       <form onSubmit={handleChangePassword} className="bg-card border border-border rounded-xl p-6">
         <h3 className="text-sm font-semibold text-foreground mb-1 flex items-center gap-2">
-          <KeyRound className="h-4 w-4 text-primary" />
+          <KeyRound weight="duotone" className="h-4 w-4 text-primary" />
           Change password
         </h3>
         <p className="text-xs text-muted-foreground mb-4">
@@ -358,7 +341,7 @@ export default function ProfilePage() {
               Current password
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
+              <Lock weight="duotone" className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
               <input
                 type={showCurrent ? 'text' : 'password'}
                 value={currentPw}
@@ -373,7 +356,7 @@ export default function ProfilePage() {
                 onClick={() => setShowCurrent((s) => !s)}
                 className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground/50 hover:text-foreground"
               >
-                {showCurrent ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                {showCurrent ? <EyeOff weight="duotone" className="h-3.5 w-3.5" /> : <Eye weight="duotone" className="h-3.5 w-3.5" />}
               </button>
             </div>
           </div>
@@ -382,7 +365,7 @@ export default function ProfilePage() {
               New password
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
+              <Lock weight="duotone" className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
               <input
                 type={showNew ? 'text' : 'password'}
                 value={newPw}
@@ -398,7 +381,7 @@ export default function ProfilePage() {
                 onClick={() => setShowNew((s) => !s)}
                 className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground/50 hover:text-foreground"
               >
-                {showNew ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                {showNew ? <EyeOff weight="duotone" className="h-3.5 w-3.5" /> : <Eye weight="duotone" className="h-3.5 w-3.5" />}
               </button>
             </div>
             {newPw && (
@@ -437,9 +420,9 @@ export default function ProfilePage() {
           className="mt-4 w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
         >
           {changePwMutation.isPending ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            <Loader2 weight="duotone" className="h-3.5 w-3.5 animate-spin" />
           ) : (
-            <Check className="h-3.5 w-3.5" />
+            <Check weight="duotone" className="h-3.5 w-3.5" />
           )}
           Update password
         </button>
@@ -447,7 +430,7 @@ export default function ProfilePage() {
 
       {/* Security note */}
       <div className="mt-6 p-4 rounded-md bg-card border border-border flex items-start gap-2.5">
-        <AlertCircle className="h-4 w-4 text-amber-400 flex-shrink-0 mt-0.5" />
+        <AlertCircle weight="duotone" className="h-4 w-4 text-amber-400 flex-shrink-0 mt-0.5" />
         <p className="text-xs text-muted-foreground leading-relaxed">
           Passwords are hashed with bcrypt (12 rounds) and never stored in plaintext. After changing
           your password, your other sessions remain valid until their access tokens expire.

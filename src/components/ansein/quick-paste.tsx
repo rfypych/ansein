@@ -3,14 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
-import {
-  Zap,
-  X,
-  Loader2,
-  FileText,
-  ChevronRight,
-  Search,
-} from 'lucide-react'
+import { CaretRight as ChevronRight, CircleNotch as Loader2, FileText, Lightning as Zap, MagnifyingGlass as Search, X } from '@phosphor-icons/react'
 import { http } from '@/lib/http'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -150,7 +143,7 @@ export function QuickPasteModal({ open, onClose }: { open: boolean; onClose: () 
         <div className="flex items-center justify-between px-5 py-3 border-b border-border">
           <div className="flex items-center gap-2.5">
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/15 border border-primary/30">
-              <Zap className="h-3.5 w-3.5 text-primary" />
+              <Zap weight="duotone" className="h-3.5 w-3.5 text-primary" />
             </div>
             <div>
               <h2 className="text-sm font-semibold text-foreground">Quick paste</h2>
@@ -163,7 +156,7 @@ export function QuickPasteModal({ open, onClose }: { open: boolean; onClose: () 
             onClick={handleClose}
             className="text-muted-foreground/50 hover:text-foreground transition-colors p-1 rounded-md hover:bg-card"
           >
-            <X className="h-4 w-4" />
+            <X weight="duotone" className="h-4 w-4" />
           </button>
         </div>
 
@@ -208,7 +201,7 @@ export function QuickPasteModal({ open, onClose }: { open: boolean; onClose: () 
             </label>
             {invQuery.isLoading ? (
               <div className="py-4 flex justify-center">
-                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground/50" />
+                <Loader2 weight="duotone" className="h-4 w-4 animate-spin text-muted-foreground/50" />
               </div>
             ) : investigations.length === 0 ? (
               <p className="text-xs text-muted-foreground/50 py-3 text-center">
@@ -217,7 +210,7 @@ export function QuickPasteModal({ open, onClose }: { open: boolean; onClose: () 
             ) : (
               <>
                 <div className="relative mb-2">
-                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/50" />
+                  <Search weight="duotone" className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/50" />
                   <input
                     type="text"
                     value={search}
@@ -238,13 +231,13 @@ export function QuickPasteModal({ open, onClose }: { open: boolean; onClose: () 
                           : 'hover:bg-card text-muted-foreground'
                       )}
                     >
-                      <FileText className="h-3 w-3 flex-shrink-0 text-muted-foreground/50" />
+                      <FileText weight="duotone" className="h-3 w-3 flex-shrink-0 text-muted-foreground/50" />
                       <span className="text-xs font-medium truncate flex-1">{inv.title}</span>
                       {inv.is_starred && (
                         <span className="text-amber-400 text-[10px]">★</span>
                       )}
                       {selectedInvId === inv.id && (
-                        <ChevronRight className="h-3 w-3 text-primary flex-shrink-0" />
+                        <ChevronRight weight="duotone" className="h-3 w-3 text-primary flex-shrink-0" />
                       )}
                     </button>
                   ))}
@@ -287,9 +280,9 @@ export function QuickPasteModal({ open, onClose }: { open: boolean; onClose: () 
               className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {addMutation.isPending ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
+                <Loader2 weight="duotone" className="h-3 w-3 animate-spin" />
               ) : (
-                <Zap className="h-3 w-3" />
+                <Zap weight="duotone" className="h-3 w-3" />
               )}
               {runPipeline ? 'Add & run' : 'Add source'}
             </button>

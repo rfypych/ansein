@@ -2,27 +2,7 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import {
-  KeyRound,
-  Eye,
-  EyeOff,
-  Check,
-  AlertCircle,
-  Loader2,
-  Lock,
-  Bot,
-  Globe,
-  ShieldAlert,
-  Radar,
-  ExternalLink,
-  ShieldCheck,
-  Info,
-  Webhook,
-  Copy,
-  Terminal,
-  Cpu,
-  Save,
-} from 'lucide-react'
+import { ArrowSquareOut as ExternalLink, Check, CircleNotch as Loader2, Copy, Cpu, Eye, EyeClosed as EyeOff, FloppyDisk as Save, Globe, Info, Key as KeyRound, Lock, Plugs as Webhook, Radar, Robot as Bot, ShieldCheck, ShieldWarning as ShieldAlert, Terminal, WarningCircle as AlertCircle } from '@phosphor-icons/react'
 import { http } from '@/lib/http'
 import { useAuthStore, authUserRole } from '@/lib/auth-store'
 import { Badge, Spinner } from '@/components/ansein/ui'
@@ -160,7 +140,7 @@ export default function SettingsPage() {
           Settings
           {!canEdit && (
             <span className="ml-3 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-card border border-border text-muted-foreground align-middle">
-              <ShieldCheck className="h-3 w-3" />
+              <ShieldCheck weight="duotone" className="h-3 w-3" />
               Read-only · {role}
             </span>
           )}
@@ -174,7 +154,7 @@ export default function SettingsPage() {
       {!canEdit && (
         <div className="mb-6 flex items-start gap-3 p-4 rounded-lg bg-amber-500/[0.04] border border-amber-500/15">
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-amber-500/10 border border-amber-500/20 flex-shrink-0">
-            <Info className="h-3.5 w-3.5 text-amber-400" />
+            <Info weight="duotone" className="h-3.5 w-3.5 text-amber-400" />
           </div>
           <div className="text-xs text-muted-foreground leading-relaxed">
             <strong className="text-foreground">
@@ -191,7 +171,7 @@ export default function SettingsPage() {
       {/* Encryption banner */}
       <div className="mb-6 flex items-start gap-3 p-4 rounded-lg bg-primary/[0.04] border border-primary/15">
         <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 border border-primary/20 flex-shrink-0">
-          <Lock className="h-3.5 w-3.5 text-primary" />
+          <Lock weight="duotone" className="h-3.5 w-3.5 text-primary" />
         </div>
         <div className="text-xs text-muted-foreground leading-relaxed">
           <strong className="text-foreground">Encryption at rest.</strong> All API keys are
@@ -261,7 +241,7 @@ export default function SettingsPage() {
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/15 border border-primary/30">
-                  <Bot className="h-3.5 w-3.5 text-primary" />
+                  <Bot weight="duotone" className="h-3.5 w-3.5 text-primary" />
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-foreground">LLM providers</h3>
@@ -290,7 +270,7 @@ export default function SettingsPage() {
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <div className="flex h-7 w-7 items-center justify-center rounded-md bg-violet-500/15 border border-violet-500/30">
-                  <Cpu className="h-3.5 w-3.5 text-violet-400" />
+                  <Cpu weight="duotone" className="h-3.5 w-3.5 text-violet-400" />
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-foreground">Custom LLM provider</h3>
@@ -315,7 +295,7 @@ export default function SettingsPage() {
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <div className="flex h-7 w-7 items-center justify-center rounded-md bg-amber-500/15 border border-amber-500/30">
-                  <ShieldAlert className="h-3.5 w-3.5 text-amber-400" />
+                  <ShieldAlert weight="duotone" className="h-3.5 w-3.5 text-amber-400" />
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-foreground">Enrichment providers</h3>
@@ -345,7 +325,7 @@ export default function SettingsPage() {
           <div className="mt-6">
             <div className="flex items-center gap-2 mb-3">
               <div className="flex h-7 w-7 items-center justify-center rounded-md bg-violet-500/15 border border-violet-500/30">
-                <Webhook className="h-3.5 w-3.5 text-violet-400" />
+                <Webhook weight="duotone" className="h-3.5 w-3.5 text-violet-400" />
               </div>
               <div>
                 <h3 className="text-sm font-semibold text-foreground">Webhook integration</h3>
@@ -366,7 +346,7 @@ export default function SettingsPage() {
 
           {/* Clear key hint */}
           <div className="mt-6 p-4 rounded-md bg-card border border-border flex items-start gap-2.5">
-            <AlertCircle className="h-4 w-4 text-amber-400 flex-shrink-0 mt-0.5" />
+            <AlertCircle weight="duotone" className="h-4 w-4 text-amber-400 flex-shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground">
               To remove a key, save an empty value. The system will fall back to environment-configured
               keys (if any) for that provider.
@@ -439,7 +419,7 @@ function ProviderCard({
 
           <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative flex-1">
-              <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
+              <KeyRound weight="duotone" className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
               <input
                 type={isVisible ? 'text' : 'password'}
                 value={values[provider.key] || ''}
@@ -455,7 +435,7 @@ function ProviderCard({
                 disabled={readOnly}
                 className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground/50 hover:text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isVisible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                {isVisible ? <EyeOff weight="duotone" className="h-3.5 w-3.5" /> : <Eye weight="duotone" className="h-3.5 w-3.5" />}
               </button>
             </div>
             <button
@@ -464,9 +444,9 @@ function ProviderCard({
               className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
             >
               {isSaving ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                <Loader2 weight="duotone" className="h-3.5 w-3.5 animate-spin" />
               ) : (
-                <Check className="h-3.5 w-3.5" />
+                <Check weight="duotone" className="h-3.5 w-3.5" />
               )}
               Save
             </button>
@@ -479,7 +459,7 @@ function ProviderCard({
             className="mt-2 inline-flex items-center gap-1 text-xs text-primary hover:text-primary/90"
           >
             Get key
-            <ExternalLink className="h-3 w-3" />
+            <ExternalLink weight="duotone" className="h-3 w-3" />
           </a>
         </div>
       </div>
@@ -555,7 +535,7 @@ function WebhookIntegrationCard({
             border: '1px solid #8b5cf630',
           }}
         >
-          <Webhook className="h-5 w-5" />
+          <Webhook weight="duotone" className="h-5 w-5" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
@@ -585,7 +565,7 @@ function WebhookIntegrationCard({
                 className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md bg-card border border-border text-xs text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors whitespace-nowrap"
                 title="Copy webhook URL"
               >
-                <Copy className="h-3.5 w-3.5" />
+                <Copy weight="duotone" className="h-3.5 w-3.5" />
                 Copy
               </button>
             </div>
@@ -594,7 +574,7 @@ function WebhookIntegrationCard({
           {/* Secret input */}
           <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative flex-1">
-              <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
+              <KeyRound weight="duotone" className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
               <input
                 type={isVisible ? 'text' : 'password'}
                 value={values[WEBHOOK_KEY] || ''}
@@ -610,7 +590,7 @@ function WebhookIntegrationCard({
                 disabled={!canEdit}
                 className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground/50 hover:text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isVisible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                {isVisible ? <EyeOff weight="duotone" className="h-3.5 w-3.5" /> : <Eye weight="duotone" className="h-3.5 w-3.5" />}
               </button>
             </div>
             <button
@@ -619,9 +599,9 @@ function WebhookIntegrationCard({
               className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
             >
               {isSaving ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                <Loader2 weight="duotone" className="h-3.5 w-3.5 animate-spin" />
               ) : (
-                <Check className="h-3.5 w-3.5" />
+                <Check weight="duotone" className="h-3.5 w-3.5" />
               )}
               {hasWebhookSecret ? 'Rotate' : 'Save'}
             </button>
@@ -631,7 +611,7 @@ function WebhookIntegrationCard({
           <div className="mt-4 p-3 rounded-md bg-card border border-border">
             <div className="flex items-center justify-between mb-2">
               <p className="text-[10px] uppercase tracking-widest ansein-mono text-muted-foreground/50 flex items-center gap-1.5">
-                <Terminal className="h-3 w-3" />
+                <Terminal weight="duotone" className="h-3 w-3" />
                 Quick start — cURL example
               </p>
               <button
@@ -639,7 +619,7 @@ function WebhookIntegrationCard({
                 type="button"
                 className="text-[10px] text-primary hover:text-primary/90 flex items-center gap-1"
               >
-                <Copy className="h-3 w-3" />
+                <Copy weight="duotone" className="h-3 w-3" />
                 Copy
               </button>
             </div>
@@ -775,7 +755,7 @@ function CustomLlmCard({
         <div>
           <label className="block text-xs font-medium text-foreground mb-1">API Key (Optional)</label>
           <div className="relative">
-            <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
+            <KeyRound weight="duotone" className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
             <input
               type={isVisible ? 'text' : 'password'}
               value={values['custom_llm_api_key'] || ''}
@@ -791,7 +771,7 @@ function CustomLlmCard({
               disabled={!canEdit}
               className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground/50 hover:text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isVisible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+              {isVisible ? <EyeOff weight="duotone" className="h-3.5 w-3.5" /> : <Eye weight="duotone" className="h-3.5 w-3.5" />}
             </button>
           </div>
         </div>
@@ -804,9 +784,9 @@ function CustomLlmCard({
             className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {localSaving ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              <Loader2 weight="duotone" className="h-3.5 w-3.5 animate-spin" />
             ) : (
-              <Save className="h-3.5 w-3.5" />
+              <Save weight="duotone" className="h-3.5 w-3.5" />
             )}
             Save Custom Provider
           </button>

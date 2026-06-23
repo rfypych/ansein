@@ -2,28 +2,7 @@
 
 import { useEffect, useState, useMemo, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import {
-  Search,
-  LayoutDashboard,
-  FolderSearch,
-  Bot,
-  Settings as SettingsIcon,
-  User as UserIcon,
-  Plus,
-  Home,
-  CornerDownLeft,
-  ArrowUp,
-  ArrowDown,
-  ShieldAlert,
-  FlaskConical,
-  Zap,
-  FileJson,
-  FileCode,
-  Printer,
-  Play,
-  Star,
-  CopyPlus,
-} from 'lucide-react'
+import { ArrowDown, ArrowUp, Copy as CopyPlus, CornerDownLeft, FileCode, FileText as FileJson, Flask as FlaskConical, Folder as FolderSearch, Gear as SettingsIcon, Home, Lightning as Zap, MagnifyingGlass as Search, Play, Plus, Printer, Robot as Bot, ShieldWarning as ShieldAlert, SquaresFour as LayoutDashboard, Star, User as UserIcon } from '@phosphor-icons/react'
 import { useAuthStore, getStoredAccessToken } from '@/lib/auth-store'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -413,7 +392,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
       >
         {/* Search input */}
         <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
-          <Search className="h-4 w-4 text-muted-foreground/50" />
+          <Search weight="duotone" className="h-4 w-4 text-muted-foreground/50" />
           <input
             ref={inputRef}
             type="text"
@@ -440,7 +419,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             grouped.map(([group, groupItems]) => (
               <div key={group} className="mb-2 last:mb-0">
                 <div className="flex items-center gap-1.5 px-2 py-1">
-                  {group === 'Actions' && <Zap className="h-2.5 w-2.5 text-amber-400" />}
+                  {group === 'Actions' && <Zap weight="duotone" className="h-2.5 w-2.5 text-amber-400" />}
                   <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50 ansein-mono">
                     {group}
                   </p>
@@ -476,7 +455,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                         <Icon className="h-3.5 w-3.5" />
                         {isAction && (
                           <span className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full bg-amber-500 flex items-center justify-center border border-[background]">
-                            <Zap className="h-2 w-2 text-primary-foreground" />
+                            <Zap weight="duotone" className="h-2 w-2 text-primary-foreground" />
                           </span>
                         )}
                       </div>
@@ -494,7 +473,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                         </span>
                       )}
                       {active && (
-                        <CornerDownLeft className="h-3.5 w-3.5 text-muted-foreground/50 flex-shrink-0" />
+                        <CornerDownLeft weight="duotone" className="h-3.5 w-3.5 text-muted-foreground/50 flex-shrink-0" />
                       )}
                     </button>
                   )
@@ -508,17 +487,17 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
         <div className="px-4 py-2 border-t border-border flex items-center justify-between text-[10px] text-muted-foreground/50">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1">
-              <ArrowUp className="h-2.5 w-2.5" />
-              <ArrowDown className="h-2.5 w-2.5" />
+              <ArrowUp weight="duotone" className="h-2.5 w-2.5" />
+              <ArrowDown weight="duotone" className="h-2.5 w-2.5" />
               navigate
             </span>
             <span className="flex items-center gap-1">
-              <CornerDownLeft className="h-2.5 w-2.5" />
+              <CornerDownLeft weight="duotone" className="h-2.5 w-2.5" />
               select
             </span>
             {currentInvestigationId !== null && (
               <span className="flex items-center gap-1 text-amber-400/80">
-                <Zap className="h-2.5 w-2.5" />
+                <Zap weight="duotone" className="h-2.5 w-2.5" />
                 inv #{currentInvestigationId}
               </span>
             )}
