@@ -84,33 +84,33 @@
 }
 
 .dark {
-  /* Premium Zinc SaaS Palette */
-  --background: #09090b;
-  --foreground: #fafafa;
+  /* Deep Blue/Slate SaaS Palette matching #0055ff */
+  --background: #020817;
+  --foreground: #f8fafc;
 
-  --card: #09090b;
-  --card-foreground: #fafafa;
+  --card: #0f172a;
+  --card-foreground: #f8fafc;
 
-  --popover: #09090b;
-  --popover-foreground: #fafafa;
+  --popover: #0f172a;
+  --popover-foreground: #f8fafc;
 
-  --primary: #3b82f6;
+  --primary: #0055ff;
   --primary-foreground: #ffffff;
 
-  --secondary: #27272a;
-  --secondary-foreground: #fafafa;
+  --secondary: #1e293b;
+  --secondary-foreground: #f8fafc;
 
-  --muted: #27272a;
-  --muted-foreground: #a1a1aa;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
 
-  --accent: #27272a;
-  --accent-foreground: #fafafa;
+  --accent: #1e293b;
+  --accent-foreground: #f8fafc;
 
   --destructive: #ef4444;
 
-  --border: #27272a;
-  --input: #27272a;
-  --ring: #3b82f6;
+  --border: #1e293b;
+  --input: #1e293b;
+  --ring: #0055ff;
 
   color-scheme: dark;
 }
