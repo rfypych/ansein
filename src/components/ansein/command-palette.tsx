@@ -123,7 +123,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 
     // Navigation items — existing palette items, grouped by domain
     const nav: CommandItem[] = [
-      { id: 'home', label: 'Home', icon: Home, action: () => go('/'), group: 'Navigation', type: 'navigation', hint: 'Public landing page' },
+      { id: 'home', label: 'Home', icon: House, action: () => go('/'), group: 'Navigation', type: 'navigation', hint: 'Public landing page' },
       { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, action: () => go('/app'), group: 'Navigation', type: 'navigation', hint: 'Workspace overview' },
       { id: 'investigations', label: 'Investigations', icon: FolderSearch, action: () => go('/app/investigations'), group: 'Investigations', type: 'navigation', hint: 'Browse all cases' },
       { id: 'new-investigation', label: 'New investigation', icon: Plus, action: () => go('/app/investigations/new'), group: 'Investigations', type: 'navigation', hint: 'Create a new case', keywords: 'create add' },

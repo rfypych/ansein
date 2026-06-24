@@ -2897,7 +2897,7 @@ function ActivityTab({ invId }: { invId: number }) {
                       <div className="absolute left-[11px] top-1 bottom-1 w-px bg-[border]" />
                       <div className="space-y-3">
                         {dayItems.map((entry) => {
-                          const Icon = ACTIVITY_ICONS[entry.action] || Activity
+                          const Icon = ACTIVITY_ICONS[entry.action] || Waveform
                           const color = ACTIVITY_COLORS[entry.action] || '#64748b'
                           const meta = entry.extra_metadata || {}
                           return (

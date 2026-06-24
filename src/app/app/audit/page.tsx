@@ -319,7 +319,7 @@ export default function AuditPage() {
 
             <div className="divide-y divide-border">
               {items.map((e) => {
-                const Icon = ACTION_ICONS[e.action] || Activity
+                const Icon = ACTION_ICONS[e.action] || Waveform
                 const color = getActionColor(e.action)
                 const extraKeys = Object.keys(e.extra_metadata || {})
                 return (

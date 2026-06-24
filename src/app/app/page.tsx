@@ -423,7 +423,7 @@ export default function DashboardPage() {
             ) : (
               <div className="space-y-3">
                 {(audit.data?.items || []).map((entry) => {
-                  const Icon = auditIconMap[entry.action] || Activity
+                  const Icon = auditIconMap[entry.action] || Waveform
                   // Better labels: "note.create" → "Note created", "investigation.pipeline.complete" → "Pipeline completed"
                   const parts = entry.action.split('.')
                   const verb = parts[parts.length - 1]

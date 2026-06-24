@@ -55,7 +55,7 @@ const PROVIDERS = [
   {
     key: 'abuseipdb_api_key',
     name: 'AbuseIPDB',
-    icon: Radar,
+    icon: Broadcast,
     color: '#dc2626',
     description: 'IP abuse confidence scoring and report aggregation.',
     url: 'https://www.abuseipdb.com/account/api',
