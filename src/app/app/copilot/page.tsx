@@ -1,6 +1,7 @@
 'use client'
+'use no memo'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ChatCircle as MessageSquare, Check, Clock, PaperPlaneRight as Send, Pencil, Plus, Robot as Bot, Sparkle as Sparkles, Trash as Trash2, User, X, Info } from '@phosphor-icons/react'
 import { http } from '@/lib/http'
@@ -56,17 +57,13 @@ export default function CopilotPage() {
     enabled: selectedId !== null,
   })
 
-  const chatHook = useChat({
+  const { messages, setMessages, input, handleInputChange, handleSubmit, isLoading } = useChat({
     api: '/api/v1/copilot/ask',
     body: { session_id: selectedId || undefined },
     onFinish: () => {
       qc.invalidateQueries({ queryKey: ['copilot-sessions'] })
     }
   })
-
-  const { messages, setMessages, input, handleInputChange, isLoading } = chatHook
-  const submitRef = useRef(chatHook.handleSubmit)
-  submitRef.current = chatHook.handleSubmit
 
   useEffect(() => {
     if (messagesQuery.data) {
@@ -132,14 +129,10 @@ export default function CopilotPage() {
     },
   })
 
-  const doSubmit = useCallback(() => {
-    submitRef.current()
-  }, [])
-
   function handleKey(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      doSubmit()
+      handleSubmit()
     }
   }
 
@@ -531,7 +524,7 @@ export default function CopilotPage() {
                   <div className="p-2 flex items-end">
                     <button
                       type="button"
-                      onClick={() => doSubmit()}
+                      onClick={() => handleSubmit()}
                       disabled={!(input || '').trim() || isLoading}
                       className="inline-flex items-center justify-center h-9 w-9 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_0_10px_rgba(0,85,255,0.2)] hover:shadow-[0_0_15px_rgba(0,85,255,0.4)]"
                     >
