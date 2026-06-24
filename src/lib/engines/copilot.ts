@@ -4,7 +4,7 @@
  */
 import { chatCompletion, isLlmAvailable, type ChatMessage } from '@/lib/llm'
 import type { EntityType, UserKeys } from '@/lib/engines/extraction'
-import { generateText, CoreMessage } from 'ai'
+import { streamText, CoreMessage } from 'ai'
 import { createOpenAI } from '@ai-sdk/openai'
 import { getOsintTools } from '@/lib/osint/tools'
 
