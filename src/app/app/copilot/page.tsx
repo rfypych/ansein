@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ChatCircle as MessageSquare, Check, Clock, PaperPlaneRight as Send, Pencil, Plus, Robot as Bot, Sparkle as Sparkles, Trash as Trash2, User, X, Info } from '@phosphor-icons/react'
 import { http } from '@/lib/http'
@@ -56,13 +56,17 @@ export default function CopilotPage() {
     enabled: selectedId !== null,
   })
 
-  const { messages, setMessages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+  const chatHook = useChat({
     api: '/api/v1/copilot/ask',
     body: { session_id: selectedId || undefined },
     onFinish: () => {
       qc.invalidateQueries({ queryKey: ['copilot-sessions'] })
     }
   })
+
+  const { messages, setMessages, input, handleInputChange, isLoading } = chatHook
+  const submitRef = useRef(chatHook.handleSubmit)
+  submitRef.current = chatHook.handleSubmit
 
   useEffect(() => {
     if (messagesQuery.data) {
@@ -128,10 +132,14 @@ export default function CopilotPage() {
     },
   })
 
+  const doSubmit = useCallback(() => {
+    submitRef.current()
+  }, [])
+
   function handleKey(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      handleSubmit()
+      doSubmit()
     }
   }
 
@@ -508,7 +516,7 @@ export default function CopilotPage() {
             </div>
 
             <div className="p-4 border-t border-border bg-background/80 backdrop-blur-2xl">
-              <form onSubmit={handleSubmit} className="flex items-end gap-3 max-w-4xl mx-auto relative group">
+              <div className="flex items-end gap-3 max-w-4xl mx-auto relative group">
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/0 via-primary/20 to-primary/0 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition duration-500"></div>
                 <div className="relative flex w-full bg-card/80 backdrop-blur-xl border border-border rounded-xl shadow-lg focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/50 transition-all">
                   <textarea
@@ -522,11 +530,8 @@ export default function CopilotPage() {
                   />
                   <div className="p-2 flex items-end">
                     <button
-                      type="submit"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        handleSubmit()
-                      }}
+                      type="button"
+                      onClick={() => doSubmit()}
                       disabled={!(input || '').trim() || isLoading}
                       className="inline-flex items-center justify-center h-9 w-9 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_0_10px_rgba(0,85,255,0.2)] hover:shadow-[0_0_15px_rgba(0,85,255,0.4)]"
                     >
@@ -534,7 +539,7 @@ export default function CopilotPage() {
                     </button>
                   </div>
                 </div>
-              </form>
+              </div>
               <p className="text-[10px] text-muted-foreground/50 mt-3 text-center uppercase tracking-widest font-mono">
                 [ENTER] Transmit · [SHIFT+ENTER] New Line
               </p>
