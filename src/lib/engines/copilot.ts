@@ -7,6 +7,7 @@ import type { EntityType, UserKeys } from '@/lib/engines/extraction'
 import { streamText, CoreMessage } from 'ai'
 import { createOpenAI } from '@ai-sdk/openai'
 import { getOsintTools } from '@/lib/osint/tools'
+import { getAgentTools } from '@/lib/agent/tools'
 
 export interface CopilotContextEntity {
   entity_type: EntityType
@@ -40,7 +41,8 @@ const SYSTEM_PROMPT = `You are the AnseIn Autonomous Agent, a highly capable cyb
 Your capabilities:
 1. You have access to local investigation context (provided below). Use it as your primary source of truth.
 2. You have OSINT tools (e.g., web search, VirusTotal lookup). IF the user asks a question whose answer is not fully covered by the local context, or asks you to "search" or "investigate" something external, YOU MUST proactively use your tools.
-3. You MUST follow the ReAct (Reasoning and Acting) methodology. Before calling any tool, you MUST output a brief text explaining your thought process (e.g., "I need to search for X to find Y."). Gather data via tools, evaluate it, and query again if needed before giving a final answer.
+3. You have Agentic Task tools (e.g., create_task, list_tasks, update_task_status). Use these to create a "todo" list or break down complex investigations into manageable steps when the user asks you to plan or create tasks.
+4. You MUST follow the ReAct (Reasoning and Acting) methodology. Before calling any tool, you MUST output a brief text explaining your thought process (e.g., "I need to search for X to find Y."). Gather data via tools, evaluate it, and query again if needed before giving a final answer.
 
 Formatting: Use **GitHub-flavored Markdown** for your responses.
 - Use **bold** for key entities, threat actors, and important findings.
@@ -98,7 +100,8 @@ export function buildContext(ctx: CopilotContext): string {
 export async function streamCopilot(
   ctx: CopilotContext,
   coreMessages: CoreMessage[],
-  userKeys: UserKeys = {}
+  userKeys: UserKeys = {},
+  sessionId: number
 ) {
   if (!isLlmAvailable(userKeys)) {
     throw new Error('No LLM is configured. Add an API key in Settings.')
@@ -179,7 +182,10 @@ export async function streamCopilot(
   return streamText({
     model: aiProvider.chat(aiModelName),
     messages,
-    tools: getOsintTools(userKeys),
+    tools: {
+      ...getOsintTools(userKeys),
+      ...getAgentTools({ sessionId }),
+    },
     maxSteps: 5,
     temperature: 0.3,
   })

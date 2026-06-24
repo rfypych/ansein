@@ -10,25 +10,16 @@ export function getOsintTools(userKeys: { virustotal_api_key?: string } = {}) {
       }),
       execute: async ({ query }) => {
         try {
-          const res = await fetch(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`, {
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-            }
-          })
+          const res = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&utf8=&format=json&srlimit=3`)
           if (!res.ok) throw new Error(`HTTP ${res.status}`)
-          const html = await res.text()
+          const data = await res.json()
           
-          const snippetRegex = /<a class="result__snippet[^>]*>([\s\S]*?)<\/a>/gi;
-          let matches;
-          const results = [];
-          while ((matches = snippetRegex.exec(html)) !== null) {
-            let text = matches[1].replace(/<\/?[^>]+(>|$)/g, '').trim();
-            text = text.replace(/&quot;/g, '"').replace(/&#x27;/g, "'").replace(/&amp;/g, '&').replace(/<b>/g, '').replace(/<\/b>/g, '');
-            if (text) results.push(text);
-          }
-          
-          if (results.length > 0) {
-            return { result: results.slice(0, 5).join('\n\n') }
+          if (data.query && data.query.search && data.query.search.length > 0) {
+            const results = data.query.search.map((r: any) => {
+              const snippet = r.snippet.replace(/<\/?[^>]+(>|$)/g, '')
+              return `Title: ${r.title}\nSnippet: ${snippet}`
+            })
+            return { result: results.join('\n\n') }
           }
           
           return { result: "No direct search results found. You may need to refine your search or the topic is too obscure." }

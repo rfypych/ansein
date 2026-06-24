@@ -162,7 +162,7 @@ async function handler(req: NextRequest) {
   }
 
   try {
-    const result = await streamCopilot(ctx, finalMessages, userKeys)
+    const result = await streamCopilot(ctx, finalMessages, userKeys, sessionId)
     
     // Bump session.updatedAt
     await db.chatSession.update({ where: { id: sessionId }, data: { updatedAt: new Date() } })
