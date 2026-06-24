@@ -151,6 +151,10 @@ export async function askCopilot(
                 }
               })
             }
+            // Strip temperature for Claude/O1 models that forbid it via strict proxies
+            if (payload.model && (payload.model.toLowerCase().includes('claude') || payload.model.toLowerCase().includes('o1-'))) {
+              delete payload.temperature
+            }
             options.body = JSON.stringify(payload)
           }
         } catch (e) {
