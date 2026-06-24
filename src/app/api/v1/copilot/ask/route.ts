@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 import { db } from '@/lib/db'
+import { convertToModelMessages } from 'ai'
 import {
   ok,
   jsonError,
@@ -155,13 +156,7 @@ async function handler(req: NextRequest) {
   // Use useChat's incoming messages if present, otherwise fallback to DB history + text
   let finalMessages = []
   if (incomingMessages.length > 0) {
-    finalMessages = incomingMessages.map((m: any) => {
-      let content = m.content
-      if (!content && m.parts && Array.isArray(m.parts)) {
-        content = m.parts.map((p: any) => p.text || '').join('')
-      }
-      return { role: m.role, content: content || '' }
-    })
+    finalMessages = convertToModelMessages(incomingMessages)
   } else {
     finalMessages = session.messages.map(m => ({ role: m.role, content: m.content }))
   }
