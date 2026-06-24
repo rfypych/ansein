@@ -6,7 +6,7 @@
  * pending → extracting → enriching → analyzing → completed (or failed)
  */
 import { db } from '@/lib/db'
-import { extractEntities, inferRelationships, type UserKeys } from '@/lib/engines/extraction'
+import { extractEntities, llmInferRelationships, type UserKeys } from '@/lib/engines/extraction'
 import { enrichEntity, type EnrichmentData } from '@/lib/engines/enrichment'
 import { analyze, type EntityForAnalysis } from '@/lib/engines/analysis'
 import { decrypt } from '@/lib/crypto'
@@ -15,7 +15,7 @@ import { appendAuditLog } from '@/lib/audit-chain'
 
 /** Write an audit log entry (best-effort — never throws). */
 function audit(userId: number, action: string, targetType: string, targetId: number, extra: Record<string, unknown> = {}) {
-  // Hash-chained audit append — best-effort, never blocks the request.
+// Hash-chained audit append — best-effort, never blocks the request.
   appendAuditLog(db, {
     userId,
     action,
@@ -278,7 +278,7 @@ export async function runPipeline(investigationId: number, userId: number): Prom
     }
 
     // Persist relationships
-    const rels = inferRelationships(extracted, text)
+    const rels = await llmInferRelationships(extracted, text, userKeys)
     for (const r of rels) {
       const srcId = valueToId.get(r.source)
       const tgtId = valueToId.get(r.target)

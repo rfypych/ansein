@@ -308,3 +308,96 @@ export function inferRelationships(
 
   return out
 }
+
+// ---------------------------------------------------------------- Relationships Pass
+const LLM_RELATIONSHIPS_PROMPT = `You are a cyber threat intelligence extractor.
+Given the text below and a list of extracted entities, identify relationships between these exact entities based ONLY on the text.
+Return a JSON array of objects. Each object MUST have:
+- "source": the exact 'normalized' value of the source entity
+- "target": the exact 'normalized' value of the target entity
+- "relation_type": a snake_case string (e.g. communicates_with, targets, located_in, uses, owns, drops, resolves_to)
+- "weight": float between 0.0 and 1.0
+- "evidence": a short quote from the text
+Only use entities from the provided list. If no relationships exist, return [].
+
+TEXT:
+`
+
+export async function llmInferRelationships(
+  entities: ExtractedEntity[],
+  text: string,
+  userKeys: UserKeys = {}
+): Promise<ExtractedRelationship[]> {
+  if (entities.length < 2 || text.length < 50) return []
+  const truncated = text.slice(0, 8000)
+  
+  const entitiesList = JSON.stringify(
+    entities.map(e => ({ type: e.entity_type, normalized: e.normalized })),
+    null, 2
+  )
+
+  let content: string | null = null
+  try {
+    const { chatCompletion } = await import('@/lib/llm')
+    const resp = await chatCompletion({
+      messages: [
+        { role: 'system', content: 'You output strict JSON, no prose.' },
+        { role: 'user', content: LLM_RELATIONSHIPS_PROMPT + '\\n```\\n' + truncated + '\\n```\\n\\nENTITIES:\\n```json\\n' + entitiesList + '\\n```\\n' },
+      ],
+      temperature: 0.1,
+      maxTokens: 2048,
+      userKeys,
+    })
+    content = resp.content
+  } catch (e) {
+    console.warn('[extraction] LLM relationships failed:', e)
+    return inferRelationships(entities, text) // fallback to heuristic
+  }
+  
+  if (!content) return inferRelationships(entities, text)
+  
+  const cleaned = content
+    .replace(/^```(?:json)?\\s*/i, '')
+    .replace(/\\s*```\\s*$/i, '')
+    .trim()
+    
+  try {
+    const arr = JSON.parse(cleaned) as any[]
+    if (!Array.isArray(arr)) return inferRelationships(entities, text)
+    
+    const out: ExtractedRelationship[] = []
+    const validNormalized = new Set(entities.map(e => e.normalized.toLowerCase()))
+    const seen = new Set<string>()
+    
+    for (const item of arr) {
+      if (!item || typeof item !== 'object') continue
+      const source = String(item.source || '').trim().toLowerCase()
+      const target = String(item.target || '').trim().toLowerCase()
+      const rel = String(item.relation_type || '').trim().toLowerCase()
+      if (!source || !target || !rel) continue
+      if (!validNormalized.has(source) || !validNormalized.has(target)) continue
+      if (source === target) continue
+      
+      const key = \`\${source}|\${target}|\${rel}\`
+      if (seen.has(key)) continue
+      seen.add(key)
+      
+      out.push({
+        source,
+        target,
+        relation_type: rel,
+        weight: Math.min(1, Math.max(0, Number(item.weight) || 0.5)),
+        evidence: String(item.evidence || '').slice(0, 200)
+      })
+    }
+    
+    // If LLM returned nothing valid but heuristic does, fallback
+    if (out.length === 0) return inferRelationships(entities, text)
+    
+    return out
+  } catch (e) {
+    console.warn('[extraction] LLM relationships parse failed:', e)
+    return inferRelationships(entities, text)
+  }
+}
+
