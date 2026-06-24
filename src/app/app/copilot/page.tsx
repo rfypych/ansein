@@ -477,7 +477,7 @@ export default function CopilotPage() {
                       >
                         {m.role === 'assistant' ? (
                           <>
-                            <Markdown content={m.content} />
+                            <Markdown content={m.content || (m as any).parts?.map((p: any) => p.text || '').join('') || ''} />
                             
                             {m.toolInvocations && m.toolInvocations.length > 0 && (
                               <div className="mt-4 space-y-2">
@@ -505,7 +505,7 @@ export default function CopilotPage() {
                             )}
                           </>
                         ) : (
-                          <p className="whitespace-pre-wrap">{m.content}</p>
+                          <p className="whitespace-pre-wrap">{m.content || (m as any).parts?.map((p: any) => p.text || '').join('') || ''}</p>
                         )}
                       </div>
                     </div>

@@ -2327,9 +2327,9 @@ function CopilotInline({
                   )}
                 >
                   {m.role === 'assistant' ? (
-                    <Markdown content={m.content} />
+                    <Markdown content={m.content || (m as any).parts?.map((p: any) => p.text || '').join('') || ''} />
                   ) : (
-                    <p className="whitespace-pre-wrap">{m.content}</p>
+                    <p className="whitespace-pre-wrap">{m.content || (m as any).parts?.map((p: any) => p.text || '').join('') || ''}</p>
                   )}
                   {m.citations && m.citations.length > 0 && (
                     <div className="mt-2 pt-2 border-t border-border flex flex-wrap gap-1">

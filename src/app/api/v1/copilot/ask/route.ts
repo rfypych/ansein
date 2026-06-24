@@ -54,7 +54,12 @@ async function handler(req: NextRequest) {
   if (typeof parsed.data.message === 'string') {
     userMessageText = parsed.data.message
   } else if (incomingMessages.length > 0) {
-    userMessageText = incomingMessages[incomingMessages.length - 1].content || ''
+    const lastMsg = incomingMessages[incomingMessages.length - 1]
+    let content = lastMsg.content
+    if (!content && lastMsg.parts && Array.isArray(lastMsg.parts)) {
+      content = lastMsg.parts.map((p: any) => p.text || '').join('')
+    }
+    userMessageText = content || ''
   }
 
   // Resolve or create session
