@@ -1,30 +1,53 @@
-import { streamText, tool } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
-import { z } from 'zod';
-import dotenv from 'dotenv';
-dotenv.config({ path: '.env' });
+import { convertToModelMessages } from 'ai';
 
 async function test() {
-  const result = await streamText({
-    model: createOpenAI({ apiKey: process.env.OPENAI_API_KEY }).chat('gpt-4o-mini'),
-    messages: [
-      { role: 'user', content: 'Coba web search info publik tentang WormGPT' }
-    ],
-    tools: {
-      search_web: tool({
-        description: 'Search the web using Wikipedia',
-        parameters: z.object({ query: z.string() }),
-        execute: async ({ query }) => {
-          console.log('[EXECUTING TOOL] search_web', query);
-          return { result: 'WormGPT is an AI.' };
+  const incomingMessages = [
+    { role: 'user', content: 'test web search' },
+    {
+      role: 'assistant',
+      content: 'I will run it',
+      toolInvocations: [
+        {
+          toolCallId: '1',
+          toolName: 'search_web',
+          args: { query: 'WormGPT' },
+          state: 'result',
+          result: 'WormGPT is an AI'
         }
-      })
-    },
-    maxSteps: 5,
+      ]
+    }
+  ];
+
+  const normalized = incomingMessages.map(m => {
+    if (m.role === 'user' || m.role === 'system') {
+      return { ...m, parts: [{ type: 'text', text: m.content }] };
+    } else if (m.role === 'assistant') {
+      const parts = [];
+      if (m.content) parts.push({ type: 'text', text: m.content });
+      if (m.toolInvocations) {
+        for (const t of m.toolInvocations) {
+          parts.push({
+            type: `tool-${t.toolName}`,
+            toolCallId: t.toolCallId,
+            toolName: t.toolName,
+            state: t.state === 'result' ? 'output-available' : 'input-available',
+            input: t.args,
+            output: t.result,
+            providerExecuted: false
+          });
+        }
+      }
+      return { ...m, parts };
+    }
+    return m;
   });
 
-  for await (const text of result.textStream) {
-    process.stdout.write(text);
+  try {
+    const modelMessages = await convertToModelMessages(normalized);
+    console.log(JSON.stringify(modelMessages, null, 2));
+  } catch (err) {
+    console.error('ERROR:', err.message);
   }
 }
-test().catch(console.error);
+
+test();

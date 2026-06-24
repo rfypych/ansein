@@ -155,8 +155,32 @@ async function handler(req: NextRequest) {
   
   // Use useChat's incoming messages if present, otherwise fallback to DB history + text
   let finalMessages = []
-  if (incomingMessages.length > 0) {
-    finalMessages = convertToModelMessages(incomingMessages)
+  if (incomingMessages && incomingMessages.length > 0) {
+    // Normalize incoming UIMessages (v4 format with toolInvocations) to v6 format (with parts)
+    const normalizedMessages = incomingMessages.map((m: any) => {
+      if (!m.parts) {
+        const parts: any[] = []
+        if (m.content) {
+          parts.push({ type: 'text', text: m.content })
+        }
+        if (m.toolInvocations) {
+          for (const t of m.toolInvocations) {
+            parts.push({
+              type: `tool-${t.toolName}`,
+              toolCallId: t.toolCallId,
+              toolName: t.toolName,
+              state: t.state === 'result' ? 'output-available' : 'input-available',
+              input: t.args,
+              output: t.result,
+              providerExecuted: false
+            })
+          }
+        }
+        return { ...m, parts }
+      }
+      return m
+    })
+    finalMessages = await convertToModelMessages(normalizedMessages)
   } else {
     finalMessages = session.messages.map(m => ({ role: m.role, content: m.content }))
   }
