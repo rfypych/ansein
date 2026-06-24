@@ -150,7 +150,13 @@ async function handler(req: NextRequest) {
   // Use useChat's incoming messages if present, otherwise fallback to DB history + text
   let finalMessages = []
   if (incomingMessages.length > 0) {
-    finalMessages = incomingMessages
+    finalMessages = incomingMessages.map((m: any) => {
+      let content = m.content
+      if (!content && m.parts && Array.isArray(m.parts)) {
+        content = m.parts.map((p: any) => p.text || '').join('')
+      }
+      return { role: m.role, content: content || '' }
+    })
   } else {
     finalMessages = session.messages.map(m => ({ role: m.role, content: m.content }))
   }
