@@ -69,14 +69,15 @@ export default function CopilotPage() {
       setMessages(
         messagesQuery.data.map((m) => ({
           id: m.id.toString(),
-          role: m.role,
+          role: m.role as any,
           content: m.content,
         }))
       )
     } else {
       setMessages([])
     }
-  }, [messagesQuery.data, setMessages])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messagesQuery.data])
 
   useEffect(() => {
     if (scrollRef.current) {
