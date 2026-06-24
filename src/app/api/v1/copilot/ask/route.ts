@@ -218,14 +218,14 @@ async function handler(req: NextRequest) {
           // If there are tool invocations, we should persist them or at least save the fact that a tool was called
           // For now we persist the text content, and stringify tool calls into the text so it isn't completely empty
           if (!content && responseMessage.parts) {
-            content = responseMessage.parts.map((p: any) => p.text || (p.type === 'tool-invocation' ? `[Tool Call: ${p.toolInvocation.toolName}]` : '')).join('')
+            content = responseMessage.parts.map((p: any) => p.text || (p.type === 'tool-call' ? `> 🛠️ **Tool Executed:** \`${p.toolName}\`` : '')).join('\n')
           }
 
           await db.chatMessage.create({
             data: {
               sessionId,
               role: 'assistant',
-              content: content || '[No text content]',
+              content: content || '',
               citations: '[]',
               tokensUsed: 0,
             },
