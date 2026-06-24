@@ -58,7 +58,7 @@ export default function CopilotPage() {
     enabled: selectedId !== null,
   })
 
-  const { messages, setMessages, sendMessage, status } = useChat({
+  const { messages, setMessages, append, status } = useChat({
     api: '/api/v1/copilot/ask',
     body: { session_id: selectedId || undefined },
     onFinish: () => {
@@ -135,7 +135,7 @@ export default function CopilotPage() {
   function handleSubmit() {
     const trimmed = chatInput.trim()
     if (!trimmed || isLoading) return
-    sendMessage({ text: trimmed })
+    append({ role: 'user', content: trimmed })
     setChatInput('')
   }
 
