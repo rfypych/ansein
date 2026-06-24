@@ -10,7 +10,7 @@ import {
   safeParseJson,
 } from '@/lib/api'
 import { decrypt } from '@/lib/crypto'
-import { askCopilot, type CopilotContext } from '@/lib/engines/copilot'
+import { streamCopilot, type CopilotContext } from '@/lib/engines/copilot'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 120
@@ -58,9 +58,9 @@ async function handler(req: NextRequest) {
   }
 
   // Resolve or create session
-  let sessionId = session_id
+  let sessionId = parsed.data.session_id
   if (!sessionId) {
-    if (!investigation_id) {
+    if (!parsed.data.investigation_id) {
       try {
         const session = await db.chatSession.create({
           data: {
@@ -76,13 +76,13 @@ async function handler(req: NextRequest) {
       }
     } else {
       const inv = await db.investigation.findFirst({
-        where: { id: investigation_id, userId: user.id },
+        where: { id: parsed.data.investigation_id, userId: user.id },
       })
       if (!inv) return jsonError(404, 'not_found', 'Investigation not found')
       const session = await db.chatSession.create({
         data: {
           userId: user.id,
-          investigationId: investigation_id,
+          investigationId: parsed.data.investigation_id,
           title: inv.title,
         },
       })

@@ -43,6 +43,7 @@ export default function CopilotPage() {
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editTitle, setEditTitle] = useState('')
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
+  const [chatInput, setChatInput] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
   const editInputRef = useRef<HTMLInputElement>(null)
 
@@ -57,13 +58,15 @@ export default function CopilotPage() {
     enabled: selectedId !== null,
   })
 
-  const { messages, setMessages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+  const { messages, setMessages, sendMessage, status } = useChat({
     api: '/api/v1/copilot/ask',
     body: { session_id: selectedId || undefined },
     onFinish: () => {
       qc.invalidateQueries({ queryKey: ['copilot-sessions'] })
     }
   })
+
+  const isLoading = status === 'submitted' || status === 'streaming'
 
   useEffect(() => {
     if (messagesQuery.data) {
@@ -128,6 +131,13 @@ export default function CopilotPage() {
       toast.error(e.message || 'Failed to rename')
     },
   })
+
+  function handleSubmit() {
+    const trimmed = chatInput.trim()
+    if (!trimmed || isLoading) return
+    sendMessage({ text: trimmed })
+    setChatInput('')
+  }
 
   function handleKey(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -422,7 +432,7 @@ export default function CopilotPage() {
                     {SUGGESTED_PROMPTS.map((p, i) => (
                       <button
                         key={i}
-                        onClick={() => handleInputChange({ target: { value: p.text } } as any)}
+                        onClick={() => setChatInput(p.text)}
                         className="text-left px-4 py-3 rounded-lg bg-card/40 backdrop-blur-md border border-border hover:border-primary/50 hover:bg-card/60 hover:shadow-[0_0_15px_rgba(0,85,255,0.1)] transition-all duration-300 group"
                       >
                         <span className="text-sm text-muted-foreground group-hover:text-foreground flex items-center gap-3">
@@ -514,8 +524,8 @@ export default function CopilotPage() {
                 <div className="relative flex w-full bg-card/80 backdrop-blur-xl border border-border rounded-xl shadow-lg focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/50 transition-all">
                   <textarea
                     rows={1}
-                    value={input}
-                    onChange={handleInputChange}
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
                     onKeyDown={handleKey}
                     placeholder="Provide intel or instructions..."
                     className="flex-1 px-4 py-3.5 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none resize-none max-h-32 leading-relaxed"
@@ -525,7 +535,7 @@ export default function CopilotPage() {
                     <button
                       type="button"
                       onClick={() => handleSubmit()}
-                      disabled={!(input || '').trim() || isLoading}
+                      disabled={!chatInput.trim() || isLoading}
                       className="inline-flex items-center justify-center h-9 w-9 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_0_10px_rgba(0,85,255,0.2)] hover:shadow-[0_0_15px_rgba(0,85,255,0.4)]"
                     >
                       <Send weight="duotone" className="h-4 w-4" />
