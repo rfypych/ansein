@@ -76,7 +76,7 @@ export default function CopilotPage() {
     } else {
       setMessages([])
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [messagesQuery.data])
 
   useEffect(() => {
@@ -143,7 +143,7 @@ export default function CopilotPage() {
 
   function saveRename() {
     if (editingId === null) return
-    const trimmed = editTitle.trim()
+    const trimmed = (editTitle || '').trim()
     if (!trimmed) return
     renameMutation.mutate({ id: editingId, title: trimmed })
   }
@@ -257,7 +257,7 @@ export default function CopilotPage() {
                           e.stopPropagation()
                           saveRename()
                         }}
-                        disabled={renameMutation.isPending || !editTitle.trim()}
+                        disabled={renameMutation.isPending || !(editTitle || '').trim()}
                         className="p-1 text-emerald-400 hover:bg-emerald-500/10 transition-colors disabled:opacity-50"
                         title="Save name"
                       >
@@ -524,7 +524,7 @@ export default function CopilotPage() {
                   <div className="p-2 flex items-end">
                     <button
                       type="submit"
-                      disabled={!input.trim() || isLoading}
+                      disabled={!(input || '').trim() || isLoading}
                       className="inline-flex items-center justify-center h-9 w-9 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_0_10px_rgba(0,85,255,0.2)] hover:shadow-[0_0_15px_rgba(0,85,255,0.4)]"
                     >
                       <Send weight="duotone" className="h-4 w-4" />
