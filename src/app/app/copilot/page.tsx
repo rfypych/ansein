@@ -436,7 +436,8 @@ export default function CopilotPage() {
           </div>
         ) : (
           <>
-            <div className="flex-1 overflow-y-auto p-6 space-y-4" ref              {messages.length === 0 ? (
+            <div className="flex-1 overflow-y-auto p-6 space-y-4" ref={scrollRef}>
+              {messages.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center">
                   <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 border border-primary/30 mb-4 shadow-[0_0_30px_rgba(0,85,255,0.15)] relative">
                     <div className="absolute inset-0 rounded-full border border-primary/20 animate-ping opacity-20"></div>
