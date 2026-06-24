@@ -18,7 +18,8 @@ export const maxDuration = 120
 const AskSchema = z.object({
   session_id: z.number().int().positive().optional(),
   investigation_id: z.number().int().positive().optional(),
-  message: z.string().min(1).max(8000),
+  message: z.any().optional(), // Can be string or array from useChat
+  messages: z.array(z.any()).optional(), // Native useChat payload
 })
 
 async function getUserKeys(userId: number) {
@@ -47,19 +48,25 @@ async function handler(req: NextRequest) {
   if (!parsed.success) {
     return jsonError(422, 'validation_error', parsed.error.issues[0]?.message || 'Invalid input')
   }
-  const { session_id, investigation_id, message } = parsed.data
+  // Build history from standard useChat payload
+  const incomingMessages = parsed.data.messages || (Array.isArray(parsed.data.message) ? parsed.data.message : [])
+  let userMessageText = ''
+  if (typeof parsed.data.message === 'string') {
+    userMessageText = parsed.data.message
+  } else if (incomingMessages.length > 0) {
+    userMessageText = incomingMessages[incomingMessages.length - 1].content || ''
+  }
 
   // Resolve or create session
   let sessionId = session_id
   if (!sessionId) {
     if (!investigation_id) {
-      // Create unbound session titled after first 60 chars of message
       try {
         const session = await db.chatSession.create({
           data: {
             userId: user.id,
             investigationId: null,
-            title: message.slice(0, 60) + (message.length > 60 ? '…' : ''),
+            title: userMessageText.slice(0, 60) + (userMessageText.length > 60 ? '…' : ''),
           },
         })
         sessionId = session.id
@@ -68,7 +75,6 @@ async function handler(req: NextRequest) {
         return jsonError(err.status, err.code, err.message)
       }
     } else {
-      // Verify investigation ownership
       const inv = await db.investigation.findFirst({
         where: { id: investigation_id, userId: user.id },
       })
@@ -83,7 +89,6 @@ async function handler(req: NextRequest) {
       sessionId = session.id
     }
   } else {
-    // Verify session ownership
     const session = await db.chatSession.findFirst({
       where: { id: sessionId, userId: user.id },
     })
@@ -91,13 +96,15 @@ async function handler(req: NextRequest) {
   }
 
   // Persist the user message
-  await db.chatMessage.create({
-    data: {
-      sessionId,
-      role: 'user',
-      content: message,
-    },
-  })
+  if (userMessageText) {
+    await db.chatMessage.create({
+      data: {
+        sessionId,
+        role: 'user',
+        content: userMessageText,
+      },
+    })
+  }
 
   // Build context for the copilot
   const session = await db.chatSession.findUnique({
@@ -138,46 +145,42 @@ async function handler(req: NextRequest) {
     }
   }
 
-  // Build history (exclude the message we just persisted, since askCopilot
-  // also gets userMessage separately)
-  const history = session.messages
-    .filter((m) => m.role === 'user' || m.role === 'assistant')
-    .slice(0, -1) // exclude the user message we just persisted
-    .map((m) => ({
-      role: m.role as 'user' | 'assistant',
-      content: m.content,
-    }))
-
   const userKeys = await getUserKeys(user.id)
-  const result = await askCopilot(ctx, history, message, userKeys)
+  
+  // Use useChat's incoming messages if present, otherwise fallback to DB history + text
+  let finalMessages = []
+  if (incomingMessages.length > 0) {
+    finalMessages = incomingMessages
+  } else {
+    finalMessages = session.messages.map(m => ({ role: m.role, content: m.content }))
+  }
 
-  // Persist assistant response
-  const assistantMsg = await db.chatMessage.create({
-    data: {
-      sessionId,
-      role: 'assistant',
-      content: result.content,
-      citations: JSON.stringify(result.citations),
-      tokensUsed: result.tokens_used,
-    },
-  })
-
-  // Bump session.updatedAt
-  await db.chatSession.update({ where: { id: sessionId }, data: { updatedAt: new Date() } })
-
-  return ok({
-    session_id: sessionId,
-    message: {
-      id: assistantMsg.id,
-      session_id: sessionId,
-      role: 'assistant',
-      content: result.content,
-      citations: result.citations,
-      tokens_used: result.tokens_used,
-      created_at: assistantMsg.createdAt.toISOString(),
-    },
-    tokens_used: result.tokens_used,
-  })
+  try {
+    const result = await streamCopilot(ctx, finalMessages, userKeys)
+    
+    // Bump session.updatedAt
+    await db.chatSession.update({ where: { id: sessionId }, data: { updatedAt: new Date() } })
+    
+    return result.toDataStreamResponse({
+      async onFinish({ text, usage }) {
+        try {
+          await db.chatMessage.create({
+            data: {
+              sessionId,
+              role: 'assistant',
+              content: text,
+              citations: '[]',
+              tokensUsed: usage.totalTokens || 0,
+            },
+          })
+        } catch (err) {
+          console.error('Failed to persist assistant message:', err)
+        }
+      }
+    })
+  } catch (err: any) {
+    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json' } })
+  }
 }
 
 export const POST = withErrorHandler(handler)

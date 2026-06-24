@@ -95,175 +95,92 @@ export function buildContext(ctx: CopilotContext): string {
   ].join('\n')
 }
 
-export async function askCopilot(
+export async function streamCopilot(
   ctx: CopilotContext,
-  history: CopilotHistoryMessage[],
-  userMessage: string,
+  coreMessages: CoreMessage[],
   userKeys: UserKeys = {}
-): Promise<CopilotResult> {
+) {
   if (!isLlmAvailable(userKeys)) {
-    return {
-      content:
-        'No LLM is configured. Add an OpenAI or Groq API key in Settings to enable the Copilot.',
-      tokens_used: 0,
-      model: 'none',
-      citations: [],
-    }
+    throw new Error('No LLM is configured. Add an API key in Settings.')
   }
 
   const context = buildContext(ctx)
+  const systemMessage: CoreMessage = { role: 'system', content: SYSTEM_PROMPT + '\n\nCONTEXT:\n' + context }
+  
+  // Only keep user/assistant messages, ignoring any tool calls in history for now to simplify
   const messages: CoreMessage[] = [
-    { role: 'system', content: SYSTEM_PROMPT },
-    { role: 'system', content: 'CONTEXT:\n' + context },
-    ...history.slice(-10).map((m) => ({
-      role: m.role,
-      content: m.content,
-    })) as CoreMessage[],
-    { role: 'user', content: userMessage },
+    systemMessage,
+    ...coreMessages.filter(m => m.role === 'user' || m.role === 'assistant')
   ]
 
-  try {
-    const preferred = userKeys.preferred_llm || 'auto'
-    
-    // Helper to strip /chat/completions or /responses from baseURLs for Vercel AI SDK
-    const cleanBaseUrl = (url: string) => url.replace(/\/chat\/completions\/?$/, '').replace(/\/responses\/?$/, '').replace(/\/$/, '')
-    
-    // Custom fetch wrapper to fix Vercel AI SDK omitting type: "object" in tool parameters.
-    // In Next.js environments, options.body may be a string, Buffer, or Uint8Array.
-    const customFetch = async (url: RequestInfo | URL, options?: RequestInit) => {
-      if (options?.body) {
-        try {
-          let bodyString = ''
-          if (typeof options.body === 'string') {
-            bodyString = options.body
-          } else if (options.body instanceof Uint8Array) {
-            bodyString = new TextDecoder().decode(options.body)
-          } else if (typeof Buffer !== 'undefined' && Buffer.isBuffer(options.body)) {
-            bodyString = options.body.toString('utf-8')
-          }
-          
-          if (bodyString) {
-            const payload = JSON.parse(bodyString)
-            if (payload.tools && Array.isArray(payload.tools)) {
-              payload.tools.forEach((t: any) => {
-                if (t.function && t.function.parameters && !t.function.parameters.type) {
-                  t.function.parameters.type = 'object'
-                }
-              })
-            }
-            // Strip temperature for Claude/O1 models that forbid it via strict proxies
-            if (payload.model && (payload.model.toLowerCase().includes('claude') || payload.model.toLowerCase().includes('o1-'))) {
-              delete payload.temperature
-            }
-            options.body = JSON.stringify(payload)
-          }
-        } catch (e) {
-          console.warn('Failed to intercept payload:', e)
+  const preferred = userKeys.preferred_llm || 'auto'
+  const cleanBaseUrl = (url: string) => url.replace(/\/chat\/completions\/?$/, '').replace(/\/responses\/?$/, '').replace(/\/$/, '')
+  
+  const customFetch = async (url: RequestInfo | URL, options?: RequestInit) => {
+    if (options?.body) {
+      try {
+        let bodyString = ''
+        if (typeof options.body === 'string') {
+          bodyString = options.body
+        } else if (options.body instanceof Uint8Array) {
+          bodyString = new TextDecoder().decode(options.body)
+        } else if (typeof Buffer !== 'undefined' && Buffer.isBuffer(options.body)) {
+          bodyString = options.body.toString('utf-8')
         }
-      }
-      return fetch(url, options)
-    }
-    
-    // Attempt to use Vercel AI SDK for providers that support tools (OpenAI compatible)
-    let aiProvider = null;
-    let aiModelName = '';
-    
-    if (preferred === 'openai' && userKeys.openai_api_key) {
-      aiProvider = createOpenAI({ apiKey: userKeys.openai_api_key, baseURL: cleanBaseUrl(process.env.OPENAI_API_BASE || 'https://api.openai.com/v1'), fetch: customFetch })
-      aiModelName = process.env.OPENAI_MODEL || 'gpt-4o-mini'
-    } else if (preferred === 'groq' && userKeys.groq_api_key) {
-      aiProvider = createOpenAI({ apiKey: userKeys.groq_api_key, baseURL: cleanBaseUrl(process.env.GROQ_API_BASE || 'https://api.groq.com/openai/v1'), fetch: customFetch })
-      aiModelName = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile'
-    } else if (preferred === 'custom' && userKeys.custom_llm_base_url && userKeys.custom_llm_model) {
-      aiProvider = createOpenAI({ apiKey: userKeys.custom_llm_api_key || '', baseURL: cleanBaseUrl(userKeys.custom_llm_base_url), fetch: customFetch })
-      aiModelName = userKeys.custom_llm_model
-    } else if (userKeys.groq_api_key) {
-      aiProvider = createOpenAI({ apiKey: userKeys.groq_api_key, baseURL: cleanBaseUrl(process.env.GROQ_API_BASE || 'https://api.groq.com/openai/v1'), fetch: customFetch })
-      aiModelName = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile'
-    } else if (userKeys.openai_api_key) {
-      aiProvider = createOpenAI({ apiKey: userKeys.openai_api_key, baseURL: cleanBaseUrl(process.env.OPENAI_API_BASE || 'https://api.openai.com/v1'), fetch: customFetch })
-      aiModelName = process.env.OPENAI_MODEL || 'gpt-4o-mini'
-    } else if (userKeys.custom_llm_base_url && userKeys.custom_llm_model) {
-      aiProvider = createOpenAI({ apiKey: userKeys.custom_llm_api_key || '', baseURL: cleanBaseUrl(userKeys.custom_llm_base_url), fetch: customFetch })
-      aiModelName = userKeys.custom_llm_model
-    }
-
-    let finalContent = ''
-    let totalTokens = 0
-    let modelUsed = ''
-
-    if (aiProvider) {
-      // Extract system messages for the 'system' property to avoid warnings
-      const systemMessages = messages.filter(m => m.role === 'system').map(m => m.content).join('\n\n')
-      const userAndAssistantMessages = messages.filter(m => m.role !== 'system')
-
-      // Use Vercel AI SDK for tool calling support!
-      const model = aiProvider.chat(aiModelName)
-      const result = await generateText({
-        model,
-        system: systemMessages,
-        messages: userAndAssistantMessages,
-        tools: getOsintTools(userKeys),
-        maxSteps: 5, // Allow multi-step reasoning!
-        temperature: 0.3,
-        maxTokens: 1500,
-      })
-      
-      let reasoningLog = ''
-      if (result.steps && result.steps.length > 1) {
-        reasoningLog += '> [!NOTE]\n> **Agentic Reasoning Trace:**\n'
-        result.steps.forEach((step, idx) => {
-          if (step.toolCalls && step.toolCalls.length > 0) {
-            const thought = step.text ? step.text.trim().replace(/\n/g, ' ') : 'Decided to use a tool.'
-            reasoningLog += `> - **Thought:** ${thought}\n`
-            step.toolCalls.forEach(tc => {
-              reasoningLog += `> - **Action:** Called \`${tc.toolName}\`\n`
+        
+        if (bodyString) {
+          const payload = JSON.parse(bodyString)
+          if (payload.tools && Array.isArray(payload.tools)) {
+            payload.tools.forEach((t: any) => {
+              if (t.function && t.function.parameters && !t.function.parameters.type) {
+                t.function.parameters.type = 'object'
+              }
             })
           }
-        })
-        reasoningLog += '\n\n'
-      }
-      
-      finalContent = reasoningLog + result.text
-      totalTokens = (result.usage?.promptTokens || 0) + (result.usage?.completionTokens || 0)
-      modelUsed = aiModelName
-    } else {
-      // Fallback to basic chat (z-ai)
-      const resp = await chatCompletion({
-        messages: messages as ChatMessage[],
-        temperature: 0.3,
-        maxTokens: 1500,
-        userKeys,
-      })
-      finalContent = resp.content
-      totalTokens = resp.tokensIn + resp.tokensOut
-      modelUsed = resp.model
-    }
-
-    // Basic citation: match entity values mentioned in response
-    const citations: string[] = []
-    const lower = finalContent.toLowerCase()
-    for (const e of ctx.entities.slice(0, 60)) {
-      if (lower.includes(e.value.toLowerCase())) {
-        citations.push(e.value)
+          if (payload.model && (payload.model.toLowerCase().includes('claude') || payload.model.toLowerCase().includes('o1-'))) {
+            delete payload.temperature
+          }
+          options.body = JSON.stringify(payload)
+        }
+      } catch (e) {
+        console.warn('Failed to intercept payload:', e)
       }
     }
-    return {
-      content: finalContent,
-      tokens_used: totalTokens,
-      model: modelUsed,
-      citations: Array.from(new Set(citations)).slice(0, 10),
-    }
-  } catch (e: any) {
-    let errorDetails = e.message || 'unknown error'
-    if (e.url) errorDetails += ` (URL: ${e.url})`
-    if (e.statusCode) errorDetails += ` (Status: ${e.statusCode})`
-    
-    return {
-      content: `Sorry — I hit an error talking to the LLM: **${errorDetails}**. \n\n*Diagnostic info: Make sure your API Base URL (in Settings or .env) is correct. If using a custom OpenAI proxy, ensure the URL ends with \`/v1\` (not \`/chat/completions\`) and that the specified model exists on that proxy.*`,
-      tokens_used: 0,
-      model: 'error',
-      citations: [],
-    }
+    return fetch(url, options)
   }
+  
+  let aiProvider = null;
+  let aiModelName = '';
+  
+  if (preferred === 'openai' && userKeys.openai_api_key) {
+    aiProvider = createOpenAI({ apiKey: userKeys.openai_api_key, baseURL: cleanBaseUrl(process.env.OPENAI_API_BASE || 'https://api.openai.com/v1'), fetch: customFetch })
+    aiModelName = process.env.OPENAI_MODEL || 'gpt-4o-mini'
+  } else if (preferred === 'groq' && userKeys.groq_api_key) {
+    aiProvider = createOpenAI({ apiKey: userKeys.groq_api_key, baseURL: cleanBaseUrl(process.env.GROQ_API_BASE || 'https://api.groq.com/openai/v1'), fetch: customFetch })
+    aiModelName = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile'
+  } else if (preferred === 'custom' && userKeys.custom_llm_base_url && userKeys.custom_llm_model) {
+    aiProvider = createOpenAI({ apiKey: userKeys.custom_llm_api_key || '', baseURL: cleanBaseUrl(userKeys.custom_llm_base_url), fetch: customFetch })
+    aiModelName = userKeys.custom_llm_model
+  } else if (userKeys.groq_api_key) {
+    aiProvider = createOpenAI({ apiKey: userKeys.groq_api_key, baseURL: cleanBaseUrl(process.env.GROQ_API_BASE || 'https://api.groq.com/openai/v1'), fetch: customFetch })
+    aiModelName = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile'
+  } else if (userKeys.openai_api_key) {
+    aiProvider = createOpenAI({ apiKey: userKeys.openai_api_key, baseURL: cleanBaseUrl(process.env.OPENAI_API_BASE || 'https://api.openai.com/v1'), fetch: customFetch })
+    aiModelName = process.env.OPENAI_MODEL || 'gpt-4o-mini'
+  } else if (userKeys.custom_llm_base_url && userKeys.custom_llm_model) {
+    aiProvider = createOpenAI({ apiKey: userKeys.custom_llm_api_key || '', baseURL: cleanBaseUrl(userKeys.custom_llm_base_url), fetch: customFetch })
+    aiModelName = userKeys.custom_llm_model
+  }
+
+  if (!aiProvider) {
+    throw new Error('Streaming chat is only supported with standard AI providers. Please configure OpenAI or Groq.')
+  }
+
+  return streamText({
+    model: aiProvider.chat(aiModelName),
+    messages,
+    tools: getOsintTools(userKeys),
+    maxSteps: 5,
+    temperature: 0.3,
+  })
 }

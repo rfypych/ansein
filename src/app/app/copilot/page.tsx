@@ -2,13 +2,14 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { ChatCircle as MessageSquare, Check, Clock, PaperPlaneRight as Send, Pencil, Plus, Robot as Bot, Sparkle as Sparkles, Trash as Trash2, User, X } from '@phosphor-icons/react'
+import { ChatCircle as MessageSquare, Check, Clock, PaperPlaneRight as Send, Pencil, Plus, Robot as Bot, Sparkle as Sparkles, Trash as Trash2, User, X, Info } from '@phosphor-icons/react'
 import { http } from '@/lib/http'
 import { EmptyState, Spinner, Badge } from '@/components/ansein/ui'
 import { Markdown } from '@/components/ansein/markdown'
 import { formatRelative } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
+import { useChat } from '@ai-sdk/react'
 
 interface ChatSession {
   id: number
@@ -18,7 +19,7 @@ interface ChatSession {
   updated_at: string
 }
 
-interface ChatMessage {
+interface DbMessage {
   id: number
   role: 'user' | 'assistant' | 'system'
   content: string
@@ -37,9 +38,7 @@ const SUGGESTED_PROMPTS = [
 export default function CopilotPage() {
   const qc = useQueryClient()
   const [selectedId, setSelectedId] = useState<number | null>(null)
-  const [messages, setMessages] = useState<ChatMessage[]>([])
-  const [input, setInput] = useState('')
-  const [sending, setSending] = useState(false)
+  
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editTitle, setEditTitle] = useState('')
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
@@ -53,14 +52,31 @@ export default function CopilotPage() {
 
   const messagesQuery = useQuery({
     queryKey: ['copilot-messages', selectedId],
-    queryFn: () => http.get<ChatMessage[]>(`/copilot/sessions/${selectedId}/messages`),
+    queryFn: () => http.get<DbMessage[]>(`/copilot/sessions/${selectedId}/messages`),
     enabled: selectedId !== null,
   })
 
-  useEffect(() => {
+  const { messages, setMessages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+    api: '/api/v1/copilot/ask',
+    body: { session_id: selectedId || undefined },
+    onFinish: () => {
+      qc.invalidateQueries({ queryKey: ['copilot-sessions'] })
+    }
+  })
 
-    if (messagesQuery.data) setMessages(messagesQuery.data)
-  }, [messagesQuery.data])
+  useEffect(() => {
+    if (messagesQuery.data) {
+      setMessages(
+        messagesQuery.data.map((m) => ({
+          id: m.id.toString(),
+          role: m.role,
+          content: m.content,
+        }))
+      )
+    } else {
+      setMessages([])
+    }
+  }, [messagesQuery.data, setMessages])
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -111,57 +127,11 @@ export default function CopilotPage() {
     },
   })
 
-  async function handleSend() {
-    if (!input.trim() || sending) return
-    const userMsg = input.trim()
-    setInput('')
-    setSending(true)
-
-    // Optimistic add
-    setMessages((m) => [
-      ...m,
-      {
-        id: Date.now(),
-        role: 'user',
-        content: userMsg,
-        citations: [],
-        tokens_used: 0,
-        created_at: new Date().toISOString(),
-      },
-    ])
-
-    try {
-      const resp = await http.post<{ session_id: number; message: ChatMessage }>('/copilot/ask', {
-        session_id: selectedId || undefined,
-        message: userMsg,
-      })
-      if (!selectedId) {
-        setSelectedId(resp.session_id)
-        qc.invalidateQueries({ queryKey: ['copilot-sessions'] })
-      }
-      setMessages((m) => [...m, resp.message])
-    } catch (err) {
-      const e = err as Error
-      setMessages((m) => [
-        ...m,
-        {
-          id: Date.now(),
-          role: 'assistant',
-          content: `Sorry, I hit an error: ${e.message}`,
-          citations: [],
-          tokens_used: 0,
-          created_at: new Date().toISOString(),
-        },
-      ])
-    } finally {
-      setSending(false)
-    }
-  }
-
   function handleKey(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      handleSend()
+      const form = e.currentTarget.closest('form')
+      if (form) form.requestSubmit()
     }
   }
 
@@ -233,7 +203,6 @@ export default function CopilotPage() {
                   onClick={() => {
                     if (!isEditing) {
                       setSelectedId(s.id)
-                      setMessages([])
                       setConfirmDeleteId(null)
                     }
                   }}
@@ -452,7 +421,7 @@ export default function CopilotPage() {
                     {SUGGESTED_PROMPTS.map((p, i) => (
                       <button
                         key={i}
-                        onClick={() => setInput(p.text)}
+                        onClick={() => handleInputChange({ target: { value: p.text } } as any)}
                         className="text-left px-4 py-3 rounded-lg bg-card/40 backdrop-blur-md border border-border hover:border-primary/50 hover:bg-card/60 hover:shadow-[0_0_15px_rgba(0,85,255,0.1)] transition-all duration-300 group"
                       >
                         <span className="text-sm text-muted-foreground group-hover:text-foreground flex items-center gap-3">
@@ -467,46 +436,65 @@ export default function CopilotPage() {
                 messages.map((m) => (
                   <div
                     key={m.id}
-                    className={cn('flex gap-4 w-full max-w-4xl mx-auto', m.role === 'user' && 'flex-row-reverse')}
+                    className={cn('flex gap-4 w-full max-w-4xl mx-auto flex-col', m.role === 'user' ? 'items-end' : 'items-start')}
                   >
-                    <div
-                      className={cn(
-                        'flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full shadow-md',
-                        m.role === 'user'
-                          ? 'bg-primary text-primary-foreground shadow-[0_0_15px_rgba(0,85,255,0.3)]'
-                          : 'bg-card/80 border border-border text-primary backdrop-blur-md'
-                      )}
-                    >
-                      {m.role === 'user' ? <User weight="duotone" className="h-4 w-4" /> : <Bot weight="duotone" className="h-4 w-4" />}
-                    </div>
-                    <div
-                      className={cn(
-                        'px-4 py-3 rounded-xl text-sm leading-relaxed transition-all',
-                        m.role === 'user'
-                          ? 'bg-primary/10 border border-primary/20 text-foreground shadow-[0_0_15px_rgba(0,85,255,0.05)] max-w-[80%]'
-                          : 'bg-card/60 backdrop-blur-lg border border-border text-foreground shadow-lg max-w-[85%]'
-                      )}
-                    >
-                      {m.role === 'assistant' ? (
-                        <Markdown content={m.content} />
-                      ) : (
-                        <p className="whitespace-pre-wrap">{m.content}</p>
-                      )}
-                      {m.citations && m.citations.length > 0 && (
-                        <div className="mt-3 pt-2 border-t border-border flex flex-wrap gap-1.5">
-                          <span className="text-[10px] uppercase tracking-widest text-primary/70">Sources:</span>
-                          {m.citations.slice(0, 5).map((c, i) => (
-                            <span key={i} className="text-[10px] px-2 py-0.5 rounded bg-black/40 border border-border text-muted-foreground ansein-mono hover:text-primary transition-colors cursor-default">
-                              {c.length > 24 ? c.slice(0, 22) + '…' : c}
-                            </span>
-                          ))}
-                        </div>
-                      )}
+                    <div className={cn('flex gap-4 w-full', m.role === 'user' && 'flex-row-reverse')}>
+                      <div
+                        className={cn(
+                          'flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full shadow-md',
+                          m.role === 'user'
+                            ? 'bg-primary text-primary-foreground shadow-[0_0_15px_rgba(0,85,255,0.3)]'
+                            : 'bg-card/80 border border-border text-primary backdrop-blur-md'
+                        )}
+                      >
+                        {m.role === 'user' ? <User weight="duotone" className="h-4 w-4" /> : <Bot weight="duotone" className="h-4 w-4" />}
+                      </div>
+                      <div
+                        className={cn(
+                          'px-4 py-3 rounded-xl text-sm leading-relaxed transition-all',
+                          m.role === 'user'
+                            ? 'bg-primary/10 border border-primary/20 text-foreground shadow-[0_0_15px_rgba(0,85,255,0.05)] max-w-[80%]'
+                            : 'bg-card/60 backdrop-blur-lg border border-border text-foreground shadow-lg max-w-[85%]'
+                        )}
+                      >
+                        {m.role === 'assistant' ? (
+                          <>
+                            <Markdown content={m.content} />
+                            
+                            {m.toolInvocations && m.toolInvocations.length > 0 && (
+                              <div className="mt-4 space-y-2">
+                                {m.toolInvocations.map((toolInvocation: any) => {
+                                  const { toolCallId, toolName, state, args } = toolInvocation
+                                  return (
+                                    <div key={toolCallId} className="p-3 rounded-lg bg-black/40 border border-border/60">
+                                      <div className="flex items-center gap-2 mb-1">
+                                        {state === 'result' ? (
+                                          <Check weight="bold" className="h-3.5 w-3.5 text-emerald-500" />
+                                        ) : (
+                                          <Spinner className="h-3.5 w-3.5 text-amber-500" />
+                                        )}
+                                        <span className="text-xs font-semibold uppercase tracking-wider text-primary/80 ansein-mono">
+                                          Action: {toolName}
+                                        </span>
+                                      </div>
+                                      <p className="text-[10px] text-muted-foreground font-mono truncate max-w-full">
+                                        {JSON.stringify(args)}
+                                      </p>
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <p className="whitespace-pre-wrap">{m.content}</p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))
               )}
-              {sending && (
+              {isLoading && messages[messages.length - 1]?.role === 'user' && (
                 <div className="flex gap-4 w-full max-w-4xl mx-auto">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-card/80 backdrop-blur-md border border-border text-primary">
                     <Bot weight="duotone" className="h-4 w-4" />
@@ -520,13 +508,13 @@ export default function CopilotPage() {
             </div>
 
             <div className="p-4 border-t border-border bg-background/80 backdrop-blur-2xl">
-              <div className="flex items-end gap-3 max-w-4xl mx-auto relative group">
+              <form onSubmit={handleSubmit} className="flex items-end gap-3 max-w-4xl mx-auto relative group">
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/0 via-primary/20 to-primary/0 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition duration-500"></div>
                 <div className="relative flex w-full bg-card/80 backdrop-blur-xl border border-border rounded-xl shadow-lg focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/50 transition-all">
                   <textarea
                     rows={1}
                     value={input}
-                    onChange={(e) => setInput(e.target.value)}
+                    onChange={handleInputChange}
                     onKeyDown={handleKey}
                     placeholder="Provide intel or instructions..."
                     className="flex-1 px-4 py-3.5 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none resize-none max-h-32 leading-relaxed"
@@ -534,15 +522,15 @@ export default function CopilotPage() {
                   />
                   <div className="p-2 flex items-end">
                     <button
-                      onClick={handleSend}
-                      disabled={!input.trim() || sending}
+                      type="submit"
+                      disabled={!input.trim() || isLoading}
                       className="inline-flex items-center justify-center h-9 w-9 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_0_10px_rgba(0,85,255,0.2)] hover:shadow-[0_0_15px_rgba(0,85,255,0.4)]"
                     >
                       <Send weight="duotone" className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
-              </div>
+              </form>
               <p className="text-[10px] text-muted-foreground/50 mt-3 text-center uppercase tracking-widest font-mono">
                 [ENTER] Transmit · [SHIFT+ENTER] New Line
               </p>
