@@ -201,9 +201,13 @@ export async function askCopilot(
       model: modelUsed,
       citations: Array.from(new Set(citations)).slice(0, 10),
     }
-  } catch (e) {
+  } catch (e: any) {
+    let errorDetails = e.message || 'unknown error'
+    if (e.url) errorDetails += ` (URL: ${e.url})`
+    if (e.statusCode) errorDetails += ` (Status: ${e.statusCode})`
+    
     return {
-      content: `Sorry — I hit an error talking to the LLM: ${e instanceof Error ? e.message : 'unknown error'}`,
+      content: `Sorry — I hit an error talking to the LLM: **${errorDetails}**. \n\n*Diagnostic info: Make sure your API Base URL (in Settings or .env) is correct. If using a custom OpenAI proxy, ensure the URL ends with \`/v1\` (not \`/chat/completions\`) and that the specified model exists on that proxy.*`,
       tokens_used: 0,
       model: 'error',
       citations: [],
