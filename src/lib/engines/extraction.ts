@@ -342,7 +342,7 @@ export async function llmInferRelationships(
     const resp = await chatCompletion({
       messages: [
         { role: 'system', content: 'You output strict JSON, no prose.' },
-        { role: 'user', content: LLM_RELATIONSHIPS_PROMPT + '\\n```\\n' + truncated + '\\n```\\n\\nENTITIES:\\n```json\\n' + entitiesList + '\\n```\\n' },
+        { role: 'user', content: LLM_RELATIONSHIPS_PROMPT + '\n```\n' + truncated + '\n```\n\nENTITIES:\n```json\n' + entitiesList + '\n```\n' },
       ],
       temperature: 0.1,
       maxTokens: 2048,
@@ -378,7 +378,7 @@ export async function llmInferRelationships(
       if (!validNormalized.has(source) || !validNormalized.has(target)) continue
       if (source === target) continue
       
-      const key = \`\${source}|\${target}|\${rel}\`
+      const key = `${source}|${target}|${rel}`
       if (seen.has(key)) continue
       seen.add(key)
       
