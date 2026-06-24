@@ -164,7 +164,7 @@ export async function askCopilot(
       const userAndAssistantMessages = messages.filter(m => m.role !== 'system')
 
       // Use Vercel AI SDK for tool calling support!
-      const model = aiProvider(aiModelName)
+      const model = aiProvider.chat(aiModelName)
       const result = await generateText({
         model,
         system: systemMessages,
