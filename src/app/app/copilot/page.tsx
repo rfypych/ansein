@@ -131,7 +131,7 @@ export default function CopilotPage() {
   function handleKey(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      handleSubmit(e as any)
+      handleSubmit()
     }
   }
 
@@ -525,7 +525,7 @@ export default function CopilotPage() {
                       type="submit"
                       onClick={(e) => {
                         e.preventDefault()
-                        handleSubmit(e as any)
+                        handleSubmit()
                       }}
                       disabled={!(input || '').trim() || isLoading}
                       className="inline-flex items-center justify-center h-9 w-9 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_0_10px_rgba(0,85,255,0.2)] hover:shadow-[0_0_15px_rgba(0,85,255,0.4)]"
