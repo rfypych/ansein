@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Activity, ArrowSquareOut as ExternalLink, Bug, Check, Code, Copy, CreditCard, Crosshair, Globe, Graph as Network, Hash, Link as LinkIcon, MapPin, ShieldCheck, ShieldWarning as ShieldAlert, User, Users, Warning as AlertTriangle, Wrench, X } from '@phosphor-icons/react'
+import { ArrowSquareOut as ExternalLink, Bug, Check, Code, Copy, CreditCard, Crosshair, Globe, Graph as Network, Hash, Link as LinkIcon, MapPin, ShieldCheck, ShieldWarning as ShieldAlert, User, Users, Warning as AlertTriangle, Waveform, Wrench, X } from '@phosphor-icons/react'
 import { http } from '@/lib/http'
 import { Badge, Spinner } from '@/components/ansein/ui'
 import { ENTITY_TYPE_LABELS, ENTITY_TYPE_COLORS, formatRelative } from '@/lib/format'
@@ -274,7 +274,7 @@ export function EntityDetailModal({
           {/* Relationships */}
           <section>
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/50 mb-2 flex items-center gap-1.5">
-              <Activity weight="duotone" className="h-3.5 w-3.5" />
+              <Waveform weight="duotone" className="h-3.5 w-3.5" />
               Relationships
               <Badge color="slate">{involved.length}</Badge>
             </h3>

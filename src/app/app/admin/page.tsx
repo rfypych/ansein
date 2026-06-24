@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Activity, CaretDown as ChevronDown, Check, CircleNotch as Loader2, Cpu, Crown, Envelope as Mail, Eye, EyeClosed as EyeOff, Folder as FolderSearch, Gear as Settings, Key as KeyRound, Lock, MagnifyingGlass as Search, Pencil, Robot as Bot, Shield, ShieldCheck, ShieldWarning as ShieldAlert, TreeStructure as Workflow, UserMinus, UserPlus, Users, WarningCircle as AlertCircle, X } from '@phosphor-icons/react'
+import { CaretDown as ChevronDown, Check, CircleNotch as Loader2, Cpu, Crown, Envelope as Mail, Eye, EyeClosed as EyeOff, Folder as FolderSearch, Gear as Settings, Key as KeyRound, Lock, MagnifyingGlass as Search, Pencil, Robot as Bot, Shield, ShieldCheck, ShieldWarning as ShieldAlert, TreeStructure as Workflow, UserMinus, UserPlus, Users, WarningCircle as AlertCircle, Waveform, X } from '@phosphor-icons/react'
 import { http } from '@/lib/http'
 import { useAuthStore, type AuthUser, authUserRole, type Role } from '@/lib/auth-store'
 import { Badge, Spinner, AnimatedNumber, EmptyState, DonutChart } from '@/components/ansein/ui'
@@ -137,7 +137,7 @@ function SystemOverview() {
           sub="Total sessions"
         />
         <StatCard
-          icon={<Activity weight="duotone" className="h-4 w-4" />}
+          icon={<Waveform weight="duotone" className="h-4 w-4" />}
           label="Audit events"
           value={totalAudit}
           color="#f59e0b"

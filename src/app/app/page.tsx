@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
-import { Activity, ArrowRight, ChartBar as BarChart3, CheckCircle as CheckCircle2, Clock, Copy as CopyPlus, Eye, FileText, Folder as FolderSearch, Graph as Network, Key as KeyRound, Play, Plus, Robot as Bot, ShieldCheck, ShieldWarning as ShieldAlert, Star, Target, TrendUp as TrendingUp, User, Warning as AlertTriangle } from '@phosphor-icons/react'
+import { ArrowRight, ChartBar as BarChart3, CheckCircle as CheckCircle2, Clock, Copy as CopyPlus, Eye, FileText, Folder as FolderSearch, Graph as Network, Key as KeyRound, Play, Plus, Robot as Bot, ShieldCheck, ShieldWarning as ShieldAlert, Star, Target, TrendUp as TrendingUp, User, Warning as AlertTriangle, Waveform } from '@phosphor-icons/react'
 import { http } from '@/lib/http'
 import { useAuthStore } from '@/lib/auth-store'
 import { Badge, EmptyState, SeverityMeter, Spinner, AnimatedNumber, ProgressRing, Sparkline, DonutChart } from '@/components/ansein/ui'
@@ -208,7 +208,7 @@ export default function DashboardPage() {
           label="Recent activity"
           value={recentActivity}
           sub={recentActivity ? `last update ${recentActivity}` : 'no activity yet'}
-          icon={<Activity weight="duotone" className="h-4 w-4" />}
+          icon={<Waveform weight="duotone" className="h-4 w-4" />}
           accent="amber"
           loading={investigations.isLoading}
         />

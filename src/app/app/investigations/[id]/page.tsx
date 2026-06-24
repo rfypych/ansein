@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Activity, ArrowLeft, Bug, CaretRight as ChevronRight, Check, CheckCircle as CheckCircle2, Circle, CircleNotch as Loader2, ClipboardText as ClipboardList, ClockCounterClockwise as History, Code, Copy, Copy as CopyPlus, CornersOut as Maximize2, Cpu, CreditCard, Crosshair, Download, DownloadSimple as ArrowDownToLine, Eye, FileCode, FileSearch, FileText, FileText as FileJson, Globe, Graph as Network, GridFour as LayoutGrid, Hash, Key as KeyRound, Keyboard, Lightbulb, Link as LinkIcon, Lock, MagnifyingGlass as Search, MapPin, Note as StickyNote, PaperPlaneRight as Send, Pencil, Play, Plus, PushPin as Pin, PushPinSlash as PinOff, Robot as Bot, ShieldWarning as ShieldAlert, Sparkle as Sparkles, Star, Table as TableIcon, Tag, Trash as Trash2, Upload, User, Users, Warning as AlertTriangle, Wrench, X as XIcon, XCircle } from '@phosphor-icons/react'
+import { ArrowLeft, Bug, CaretRight as ChevronRight, Check, CheckCircle as CheckCircle2, Circle, CircleNotch as Loader2, ClipboardText as ClipboardList, ClockCounterClockwise as History, Code, Copy, Copy as CopyPlus, CornersOut as Maximize2, Cpu, CreditCard, Crosshair, Download, DownloadSimple as ArrowDownToLine, Eye, FileCode, FileSearch, FileText, FileText as FileJson, Globe, Graph as Network, GridFour as LayoutGrid, Hash, Key as KeyRound, Keyboard, Lightbulb, Link as LinkIcon, Lock, MagnifyingGlass as Search, MapPin, Note as StickyNote, PaperPlaneRight as Send, Pencil, Play, Plus, PushPin as Pin, PushPinSlash as PinOff, Robot as Bot, ShieldWarning as ShieldAlert, Sparkle as Sparkles, Star, Table as TableIcon, Tag, Trash as Trash2, Upload, User, Users, Warning as AlertTriangle, Waveform, Wrench, X as XIcon, XCircle } from '@phosphor-icons/react'
 import { http } from '@/lib/http'
 import { Badge, SeverityMeter, EmptyState, Spinner } from '@/components/ansein/ui'
 import { EntityDetailModal } from '@/components/ansein/entity-detail-modal'
@@ -451,7 +451,7 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
             <StatTile label="Sources" value={inv.source_count} icon={<FileText weight="duotone" className="h-3.5 w-3.5" />} />
             <StatTile label="Entities" value={inv.entity_count} icon={<Network weight="duotone" className="h-3.5 w-3.5" />} />
-            <StatTile label="Relationships" value={inv.relationship_count} icon={<Activity weight="duotone" className="h-3.5 w-3.5" />} />
+            <StatTile label="Relationships" value={inv.relationship_count} icon={<Waveform weight="duotone" className="h-3.5 w-3.5" />} />
             <div className="bg-card border border-border rounded-lg p-3">
               <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50 mb-1">Severity</p>
               <SeverityMeter score={inv.severity_score} size="sm" />
@@ -692,7 +692,7 @@ function OverviewTab({ inv, onSwitchTab }: { inv: Investigation; onSwitchTab: (t
         {/* Pipeline timeline */}
         <div className="bg-card border border-border rounded-xl p-6">
           <h3 className="text-sm font-semibold text-foreground mb-5 flex items-center gap-2">
-            <Activity weight="duotone" className="h-4 w-4 text-primary" />
+            <Waveform weight="duotone" className="h-4 w-4 text-primary" />
             Pipeline progress
           </h3>
           <PipelineTimeline status={inv.status} />
@@ -1845,7 +1845,7 @@ function EntitiesTab({ invId }: { invId: number }) {
       {rels.length > 0 && (
         <div className="bg-card border border-border rounded-xl p-5">
           <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-            <Activity weight="duotone" className="h-4 w-4 text-primary" />
+            <Waveform weight="duotone" className="h-4 w-4 text-primary" />
             Relationships
             <Badge color="slate">{rels.length}</Badge>
           </h3>

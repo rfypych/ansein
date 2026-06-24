@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { Activity, CaretLeft as ChevronLeft, CaretRight as ChevronRight, Copy as CopyPlus, Cpu, Crown, FileText, Folder as FolderSearch, Funnel as Filter, Key as KeyRound, LinkSimple as Link2, Lock, Note as StickyNote, Play, Robot as Bot, Shield, ShieldCheck, Sparkle as Sparkles, Star, User as UserIcon, UserMinus, UserPlus, Warning as AlertTriangle } from '@phosphor-icons/react'
+import { CaretLeft as ChevronLeft, CaretRight as ChevronRight, Copy as CopyPlus, Cpu, Crown, FileText, Folder as FolderSearch, Funnel as Filter, Key as KeyRound, LinkSimple as Link2, Lock, Note as StickyNote, Play, Robot as Bot, Shield, ShieldCheck, Sparkle as Sparkles, Star, User as UserIcon, UserMinus, UserPlus, Warning as AlertTriangle, Waveform } from '@phosphor-icons/react'
 import { http } from '@/lib/http'
 import { useAuthStore, authUserRole } from '@/lib/auth-store'
 import { Badge, EmptyState, Spinner } from '@/components/ansein/ui'
@@ -235,10 +235,10 @@ export default function AuditPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <StatTile label="Total events" value={total} icon={<Activity weight="duotone" className="h-3.5 w-3.5" />} color="#14b8a6" />
+        <StatTile label="Total events" value={total} icon={<Waveform weight="duotone" className="h-3.5 w-3.5" />} color="#14b8a6" />
         <StatTile label="This page" value={items.length} icon={<Shield weight="duotone" className="h-3.5 w-3.5" />} color="#f59e0b" />
         <StatTile label="Action types" value={Object.keys(actionBreakdown).length} icon={<Filter weight="duotone" className="h-3.5 w-3.5" />} color="#a78bfa" />
-        <StatTile label="Page" value={`${page}/${totalPages}`} icon={<Activity weight="duotone" className="h-3.5 w-3.5" />} color="#06b6d4" />
+        <StatTile label="Page" value={`${page}/${totalPages}`} icon={<Waveform weight="duotone" className="h-3.5 w-3.5" />} color="#06b6d4" />
       </div>
 
       {/* Action type breakdown */}
@@ -246,7 +246,7 @@ export default function AuditPage() {
         <div className="bg-card border border-border rounded-xl p-5 mb-6">
           <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/15 border border-primary/30">
-              <Activity weight="duotone" className="h-3.5 w-3.5 text-primary" />
+              <Waveform weight="duotone" className="h-3.5 w-3.5 text-primary" />
             </div>
             Action breakdown
           </h3>
@@ -300,7 +300,7 @@ export default function AuditPage() {
       ) : items.length === 0 ? (
         <div className="bg-card border border-border rounded-xl">
           <EmptyState
-            icon={<Activity weight="duotone" className="h-6 w-6 text-muted-foreground/50" />}
+            icon={<Waveform weight="duotone" className="h-6 w-6 text-muted-foreground/50" />}
             title={activeGroup === 'all' ? 'No audit events yet' : 'No matching events'}
             description={
               activeGroup === 'all'

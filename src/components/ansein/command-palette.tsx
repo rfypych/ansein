@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { ArrowDown, ArrowUp, Copy as CopyPlus, CornerDownLeft, FileCode, FileText as FileJson, Flask as FlaskConical, Folder as FolderSearch, Gear as SettingsIcon, Home, Lightning as Zap, MagnifyingGlass as Search, Play, Plus, Printer, Robot as Bot, ShieldWarning as ShieldAlert, SquaresFour as LayoutDashboard, Star, User as UserIcon } from '@phosphor-icons/react'
+import { ArrowBendDownLeft, ArrowDown, ArrowUp, Copy as CopyPlus, FileCode, FileText as FileJson, Flask as FlaskConical, Folder as FolderSearch, Gear as SettingsIcon, House, Lightning as Zap, MagnifyingGlass as Search, Play, Plus, Printer, Robot as Bot, ShieldWarning as ShieldAlert, SquaresFour as LayoutDashboard, Star, User as UserIcon } from '@phosphor-icons/react'
 import { useAuthStore, getStoredAccessToken } from '@/lib/auth-store'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -473,7 +473,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                         </span>
                       )}
                       {active && (
-                        <CornerDownLeft weight="duotone" className="h-3.5 w-3.5 text-muted-foreground/50 flex-shrink-0" />
+                        <ArrowBendDownLeft weight="duotone" className="h-3.5 w-3.5 text-muted-foreground/50 flex-shrink-0" />
                       )}
                     </button>
                   )
@@ -492,7 +492,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
               navigate
             </span>
             <span className="flex items-center gap-1">
-              <CornerDownLeft weight="duotone" className="h-2.5 w-2.5" />
+              <ArrowBendDownLeft weight="duotone" className="h-2.5 w-2.5" />
               select
             </span>
             {currentInvestigationId !== null && (

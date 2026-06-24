@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { ArrowSquareOut as ExternalLink, Check, CircleNotch as Loader2, Copy, Cpu, Eye, EyeClosed as EyeOff, FloppyDisk as Save, Globe, Info, Key as KeyRound, Lock, Plugs as Webhook, Radar, Robot as Bot, ShieldCheck, ShieldWarning as ShieldAlert, Terminal, WarningCircle as AlertCircle } from '@phosphor-icons/react'
+import { ArrowSquareOut as ExternalLink, Broadcast, Check, CircleNotch as Loader2, Copy, Cpu, Eye, EyeClosed as EyeOff, FloppyDisk as Save, Globe, Info, Key as KeyRound, Lock, Plugs as Webhook, Robot as Bot, ShieldCheck, ShieldWarning as ShieldAlert, Terminal, WarningCircle as AlertCircle } from '@phosphor-icons/react'
 import { http } from '@/lib/http'
 import { useAuthStore, authUserRole } from '@/lib/auth-store'
 import { Badge, Spinner } from '@/components/ansein/ui'

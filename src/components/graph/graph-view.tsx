@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import * as d3 from 'd3'
-import { Clock, CornersOut as Maximize2, Graph as Network, Grid3x3, Pause, Play, Rewind, ZoomIn, ZoomOut } from '@phosphor-icons/react'
+import { Clock, CornersOut as Maximize2, Graph as Network, GridNine, MagnifyingGlassMinus, MagnifyingGlassPlus, Pause, Play, Rewind } from '@phosphor-icons/react'
 
 /**
  * Community color palette — 8 distinct hues. Must stay in sync with
@@ -746,7 +746,7 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
         {data.nodes.length === 0 ? (
           <div className="flex items-center justify-center h-full text-center px-6">
             <div>
-              <Grid3x3 weight="duotone" className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
+              <GridNine weight="duotone" className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
               <p className="text-sm text-muted-foreground">
                 No graph data yet. Run the extraction pipeline to populate the knowledge graph.
               </p>
@@ -765,14 +765,14 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
             className="p-1.5 rounded-md bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
             title="Zoom in"
           >
-            <ZoomIn weight="duotone" className="h-3.5 w-3.5" />
+            <MagnifyingGlassPlus weight="duotone" className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={() => zoomBy(1 / 1.3)}
             className="p-1.5 rounded-md bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
             title="Zoom out"
           >
-            <ZoomOut weight="duotone" className="h-3.5 w-3.5" />
+            <MagnifyingGlassMinus weight="duotone" className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={resetZoom}
@@ -803,7 +803,7 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
             }
             title="Toggle grid"
           >
-            <Grid3x3 weight="duotone" className="h-3.5 w-3.5" />
+            <GridNine weight="duotone" className="h-3.5 w-3.5" />
           </button>
           {hasCommunities && (
             <button
