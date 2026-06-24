@@ -45,9 +45,9 @@
 }
 
 
-/* AnseIn — "Intelligence Terminal" palette
-   Light mode: Crisp corporate aesthetics
-   Dark mode: Hermes Agent deep green/beige aesthetic */
+/* AnseIn — Modern Premium SaaS Palette
+   Light mode: Crisp, clean corporate
+   Dark mode: Sleek, deep zinc/slate */
 
 :root {
   --radius: 0.625rem;
@@ -84,33 +84,33 @@
 }
 
 .dark {
-  /* Hermes Agent Palette */
-  --background: #041c1c;
-  --foreground: #ffe6cb;
+  /* Premium Zinc SaaS Palette */
+  --background: #09090b;
+  --foreground: #fafafa;
 
-  --card: #0b211f;
-  --card-foreground: #ffe6cb;
+  --card: #09090b;
+  --card-foreground: #fafafa;
 
-  --popover: #0b211f;
-  --popover-foreground: #ffe6cb;
+  --popover: #09090b;
+  --popover-foreground: #fafafa;
 
-  --primary: #c4da7d;
-  --primary-foreground: #041c1c;
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
 
-  --secondary: #3a4740;
-  --secondary-foreground: #ffe6cb;
+  --secondary: #27272a;
+  --secondary-foreground: #fafafa;
 
-  --muted: #0b211f;
-  --muted-foreground: #e3d3be;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
 
-  --accent: #bcd184;
-  --accent-foreground: #041c1c;
+  --accent: #27272a;
+  --accent-foreground: #fafafa;
 
-  --destructive: #f43f5e;
+  --destructive: #ef4444;
 
-  --border: #3a4740;
-  --input: #3a4740;
-  --ring: #c4da7d;
+  --border: #27272a;
+  --input: #27272a;
+  --ring: #3b82f6;
 
   color-scheme: dark;
 }
@@ -124,9 +124,6 @@
   }
   body {
     background-color: var(--background); color: var(--foreground); transition-property: color, background-color, border-color, text-decoration-color, fill, stroke; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 300ms;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
-    background-attachment: fixed;
-    background-size: 120px 120px;
     font-feature-settings: "ss01", "cv11";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
