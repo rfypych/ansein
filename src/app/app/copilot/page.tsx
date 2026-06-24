@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
+import { getStoredAccessToken } from '@/lib/auth-store'
 
 interface ChatSession {
   id: number
@@ -62,6 +63,10 @@ export default function CopilotPage() {
   const { messages, setMessages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({
       api: '/api/v1/copilot/ask',
+      headers: () => {
+        const token = getStoredAccessToken()
+        return token ? { Authorization: `Bearer ${token}` } : {}
+      }
     }),
     onFinish: () => {
       qc.invalidateQueries({ queryKey: ['copilot-sessions'] })
