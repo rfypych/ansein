@@ -4,7 +4,7 @@
  */
 import { chatCompletion, isLlmAvailable, type ChatMessage } from '@/lib/llm'
 import type { EntityType, UserKeys } from '@/lib/engines/extraction'
-import { streamText, CoreMessage } from 'ai'
+import { streamText, stepCountIs, CoreMessage } from 'ai'
 import { createOpenAI } from '@ai-sdk/openai'
 import { getOsintTools } from '@/lib/osint/tools'
 import { getAgentTools } from '@/lib/agent/tools'
@@ -140,7 +140,9 @@ export async function streamCopilot(
               }
             })
           }
-          if (payload.model && (payload.model.toLowerCase().includes('claude') || payload.model.toLowerCase().includes('o1-'))) {
+          if (payload.model) {
+            // Some wrapper proxies crash if temperature is sent to certain models.
+            // Just delete it to be safe, since default is fine.
             delete payload.temperature
           }
           options.body = JSON.stringify(payload)
@@ -186,7 +188,12 @@ export async function streamCopilot(
       ...getOsintTools(userKeys),
       ...getAgentTools({ sessionId }),
     },
-    maxSteps: 5,
+    stopWhen: stepCountIs(5),
     temperature: 0.3,
+    providerOptions: {
+      openai: { strictJsonSchema: false },
+      groq: { strictJsonSchema: false },
+      custom: { strictJsonSchema: false },
+    } as any
   })
 }
