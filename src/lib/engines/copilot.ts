@@ -40,7 +40,7 @@ const SYSTEM_PROMPT = `You are the AnseIn Autonomous Agent, a highly capable cyb
 Your capabilities:
 1. You have access to local investigation context (provided below). Use it as your primary source of truth.
 2. You have OSINT tools (e.g., web search, VirusTotal lookup). IF the user asks a question whose answer is not fully covered by the local context, or asks you to "search" or "investigate" something external, YOU MUST proactively use your tools.
-3. You can execute multiple steps of reasoning. Gather data via tools, evaluate it, and query again if needed before giving a final answer.
+3. You MUST follow the ReAct (Reasoning and Acting) methodology. Before calling any tool, you MUST output a brief text explaining your thought process (e.g., "I need to search for X to find Y."). Gather data via tools, evaluate it, and query again if needed before giving a final answer.
 
 Formatting: Use **GitHub-flavored Markdown** for your responses.
 - Use **bold** for key entities, threat actors, and important findings.
@@ -208,7 +208,23 @@ export async function askCopilot(
         temperature: 0.3,
         maxTokens: 1500,
       })
-      finalContent = result.text
+      
+      let reasoningLog = ''
+      if (result.steps && result.steps.length > 1) {
+        reasoningLog += '> [!NOTE]\n> **Agentic Reasoning Trace:**\n'
+        result.steps.forEach((step, idx) => {
+          if (step.toolCalls && step.toolCalls.length > 0) {
+            const thought = step.text ? step.text.trim().replace(/\n/g, ' ') : 'Decided to use a tool.'
+            reasoningLog += `> - **Thought:** ${thought}\n`
+            step.toolCalls.forEach(tc => {
+              reasoningLog += `> - **Action:** Called \`${tc.toolName}\`\n`
+            })
+          }
+        })
+        reasoningLog += '\n\n'
+      }
+      
+      finalContent = reasoningLog + result.text
       totalTokens = (result.usage?.promptTokens || 0) + (result.usage?.completionTokens || 0)
       modelUsed = aiModelName
     } else {
