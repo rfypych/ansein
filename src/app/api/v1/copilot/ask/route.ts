@@ -173,15 +173,28 @@ async function handler(req: NextRequest) {
     await db.chatSession.update({ where: { id: sessionId }, data: { updatedAt: new Date() } })
     
     return result.toUIMessageStreamResponse({
-      async onFinish({ text, usage }) {
+      async onFinish({ responseMessage }) {
         try {
+          let content = ''
+          if (Array.isArray(responseMessage.content)) {
+            content = responseMessage.content.map(p => p.type === 'text' ? p.text : '').join('')
+          } else if (typeof responseMessage.content === 'string') {
+            content = responseMessage.content
+          }
+
+          // If there are tool invocations, we should persist them or at least save the fact that a tool was called
+          // For now we persist the text content, and stringify tool calls into the text so it isn't completely empty
+          if (!content && responseMessage.parts) {
+            content = responseMessage.parts.map((p: any) => p.text || (p.type === 'tool-invocation' ? `[Tool Call: ${p.toolInvocation.toolName}]` : '')).join('')
+          }
+
           await db.chatMessage.create({
             data: {
               sessionId,
               role: 'assistant',
-              content: text,
+              content: content || '[No text content]',
               citations: '[]',
-              tokensUsed: usage.totalTokens || 0,
+              tokensUsed: 0,
             },
           })
         } catch (err) {
