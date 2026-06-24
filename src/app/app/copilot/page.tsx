@@ -11,6 +11,7 @@ import { formatRelative } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { useChat } from '@ai-sdk/react'
+import { DefaultChatTransport } from 'ai'
 
 interface ChatSession {
   id: number
@@ -58,9 +59,10 @@ export default function CopilotPage() {
     enabled: selectedId !== null,
   })
 
-  const { messages, setMessages, append, status } = useChat({
-    api: '/api/v1/copilot/ask',
-    body: { session_id: selectedId || undefined },
+  const { messages, setMessages, sendMessage, status } = useChat({
+    transport: new DefaultChatTransport({
+      api: '/api/v1/copilot/ask',
+    }),
     onFinish: () => {
       qc.invalidateQueries({ queryKey: ['copilot-sessions'] })
     }
@@ -135,7 +137,7 @@ export default function CopilotPage() {
   function handleSubmit() {
     const trimmed = chatInput.trim()
     if (!trimmed || isLoading) return
-    append({ role: 'user', content: trimmed })
+    sendMessage({ text: trimmed }, { body: { session_id: selectedId || undefined } })
     setChatInput('')
   }
 
