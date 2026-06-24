@@ -436,26 +436,26 @@ export default function CopilotPage() {
           </div>
         ) : (
           <>
-            <div className="flex-1 overflow-y-auto p-6 space-y-4" ref={scrollRef}>
-              {messages.length === 0 ? (
+            <div className="flex-1 overflow-y-auto p-6 space-y-4" ref              {messages.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[primary]/15 to-transparent border border-primary/30 mb-3">
-                    <Bot weight="duotone" className="h-5 w-5 text-primary" />
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 border border-primary/30 mb-4 shadow-[0_0_30px_rgba(0,85,255,0.15)] relative">
+                    <div className="absolute inset-0 rounded-full border border-primary/20 animate-ping opacity-20"></div>
+                    <Bot weight="duotone" className="h-8 w-8 text-primary" />
                   </div>
-                  <p className="text-sm font-medium text-foreground">How can I help?</p>
-                  <p className="text-xs text-muted-foreground mt-1 max-w-sm">
-                    I'm AnseIn Copilot. Ask me anything — for investigation-bound context, use the Copilot tab inside an investigation.
+                  <p className="text-lg font-semibold text-foreground tracking-wide">AnseIn Autonomous Agent</p>
+                  <p className="text-sm text-muted-foreground mt-2 max-w-md leading-relaxed">
+                    Awaiting instructions. Ask me to perform web searches, analyze IOCs, or summarize investigations.
                   </p>
                   {/* Suggested prompts */}
-                  <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-lg w-full">
+                  <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl w-full">
                     {SUGGESTED_PROMPTS.map((p, i) => (
                       <button
                         key={i}
                         onClick={() => setInput(p.text)}
-                        className="text-left px-3 py-2 rounded-md bg-card border border-border hover:border-primary/40 hover:bg-card/80 transition-colors group"
+                        className="text-left px-4 py-3 rounded-lg bg-card/40 backdrop-blur-md border border-border hover:border-primary/50 hover:bg-card/60 hover:shadow-[0_0_15px_rgba(0,85,255,0.1)] transition-all duration-300 group"
                       >
-                        <span className="text-xs text-muted-foreground group-hover:text-foreground flex items-center gap-2">
-                          <span>{p.icon}</span>
+                        <span className="text-sm text-muted-foreground group-hover:text-foreground flex items-center gap-3">
+                          <span className="text-base">{p.icon}</span>
                           {p.text}
                         </span>
                       </button>
@@ -466,24 +466,24 @@ export default function CopilotPage() {
                 messages.map((m) => (
                   <div
                     key={m.id}
-                    className={cn('flex gap-3', m.role === 'user' && 'flex-row-reverse')}
+                    className={cn('flex gap-4 w-full max-w-4xl mx-auto', m.role === 'user' && 'flex-row-reverse')}
                   >
                     <div
                       className={cn(
-                        'flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full',
+                        'flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full shadow-md',
                         m.role === 'user'
-                          ? 'bg-gradient-to-br from-[primary] to-[primary/90] text-primary-foreground'
-                          : 'bg-card border border-border text-primary'
+                          ? 'bg-primary text-primary-foreground shadow-[0_0_15px_rgba(0,85,255,0.3)]'
+                          : 'bg-card/80 border border-border text-primary backdrop-blur-md'
                       )}
                     >
-                      {m.role === 'user' ? <User weight="duotone" className="h-3.5 w-3.5" /> : <Bot weight="duotone" className="h-3.5 w-3.5" />}
+                      {m.role === 'user' ? <User weight="duotone" className="h-4 w-4" /> : <Bot weight="duotone" className="h-4 w-4" />}
                     </div>
                     <div
                       className={cn(
-                        'max-w-[75%] px-3.5 py-2.5 rounded-lg text-sm leading-relaxed',
+                        'px-4 py-3 rounded-xl text-sm leading-relaxed transition-all',
                         m.role === 'user'
-                          ? 'bg-primary/10 border border-primary/20 text-foreground'
-                          : 'bg-card border border-border text-foreground'
+                          ? 'bg-primary/10 border border-primary/20 text-foreground shadow-[0_0_15px_rgba(0,85,255,0.05)] max-w-[80%]'
+                          : 'bg-card/60 backdrop-blur-lg border border-border text-foreground shadow-lg max-w-[85%]'
                       )}
                     >
                       {m.role === 'assistant' ? (
@@ -492,10 +492,10 @@ export default function CopilotPage() {
                         <p className="whitespace-pre-wrap">{m.content}</p>
                       )}
                       {m.citations && m.citations.length > 0 && (
-                        <div className="mt-2 pt-2 border-t border-border flex flex-wrap gap-1">
-                          <span className="text-[10px] text-muted-foreground/50">Cites:</span>
+                        <div className="mt-3 pt-2 border-t border-border flex flex-wrap gap-1.5">
+                          <span className="text-[10px] uppercase tracking-widest text-primary/70">Sources:</span>
                           {m.citations.slice(0, 5).map((c, i) => (
-                            <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-background border border-border text-muted-foreground ansein-mono">
+                            <span key={i} className="text-[10px] px-2 py-0.5 rounded bg-black/40 border border-border text-muted-foreground ansein-mono hover:text-primary transition-colors cursor-default">
                               {c.length > 24 ? c.slice(0, 22) + '…' : c}
                             </span>
                           ))}
@@ -506,39 +506,44 @@ export default function CopilotPage() {
                 ))
               )}
               {sending && (
-                <div className="flex gap-3">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-card border border-border text-primary">
-                    <Bot weight="duotone" className="h-3.5 w-3.5" />
+                <div className="flex gap-4 w-full max-w-4xl mx-auto">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-card/80 backdrop-blur-md border border-border text-primary">
+                    <Bot weight="duotone" className="h-4 w-4" />
                   </div>
-                  <div className="bg-card border border-border rounded-lg px-3.5 py-2.5 text-sm text-muted-foreground">
-                    <Spinner className="h-3.5 w-3.5 inline mr-2" />
-                    Thinking…
+                  <div className="bg-card/60 backdrop-blur-lg border border-border rounded-xl px-4 py-3 text-sm text-muted-foreground flex items-center shadow-lg">
+                    <Spinner className="h-4 w-4 mr-3 text-primary" />
+                    Processing intelligence...
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="p-3 border-t border-border bg-card/30">
-              <div className="flex items-end gap-2 max-w-4xl mx-auto">
-                <textarea
-                  rows={1}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKey}
-                  placeholder="Type your message…"
-                  className="flex-1 px-3 py-2 rounded-md bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-none max-h-32"
-                  style={{ minHeight: '38px' }}
-                />
-                <button
-                  onClick={handleSend}
-                  disabled={!input.trim() || sending}
-                  className="inline-flex items-center justify-center h-9 w-9 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  <Send weight="duotone" className="h-4 w-4" />
-                </button>
+            <div className="p-4 border-t border-border bg-background/80 backdrop-blur-2xl">
+              <div className="flex items-end gap-3 max-w-4xl mx-auto relative group">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/0 via-primary/20 to-primary/0 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition duration-500"></div>
+                <div className="relative flex w-full bg-card/80 backdrop-blur-xl border border-border rounded-xl shadow-lg focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/50 transition-all">
+                  <textarea
+                    rows={1}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKey}
+                    placeholder="Provide intel or instructions..."
+                    className="flex-1 px-4 py-3.5 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none resize-none max-h-32 leading-relaxed"
+                    style={{ minHeight: '48px' }}
+                  />
+                  <div className="p-2 flex items-end">
+                    <button
+                      onClick={handleSend}
+                      disabled={!input.trim() || sending}
+                      className="inline-flex items-center justify-center h-9 w-9 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_0_10px_rgba(0,85,255,0.2)] hover:shadow-[0_0_15px_rgba(0,85,255,0.4)]"
+                    >
+                      <Send weight="duotone" className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
               </div>
-              <p className="text-[10px] text-muted-foreground/50 mt-1.5 text-center">
-                Enter to send · Shift+Enter for new line
+              <p className="text-[10px] text-muted-foreground/50 mt-3 text-center uppercase tracking-widest font-mono">
+                [ENTER] Transmit · [SHIFT+ENTER] New Line
               </p>
             </div>
           </>

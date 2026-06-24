@@ -311,14 +311,14 @@ export function inferRelationships(
 
 // ---------------------------------------------------------------- Relationships Pass
 const LLM_RELATIONSHIPS_PROMPT = `You are a cyber threat intelligence extractor.
-Given the text below and a list of extracted entities, identify relationships between these exact entities based ONLY on the text.
+Given the text below and a list of extracted entities (each with an 'id'), identify relationships between these entities based ONLY on the text. Look deeply for implicit relationships (e.g. communicating, ownership, targeting).
 Return a JSON array of objects. Each object MUST have:
-- "source": the exact 'normalized' value of the source entity
-- "target": the exact 'normalized' value of the target entity
-- "relation_type": a snake_case string (e.g. communicates_with, targets, located_in, uses, owns, drops, resolves_to)
-- "weight": float between 0.0 and 1.0
+- "source_id": the integer 'id' of the source entity
+- "target_id": the integer 'id' of the target entity
+- "relation_type": a snake_case string (e.g. communicates_with, targets, located_in, uses, owns, drops, resolves_to, related_to)
+- "weight": float between 0.0 and 1.0 (use higher weights for explicit links)
 - "evidence": a short quote from the text
-Only use entities from the provided list. If no relationships exist, return [].
+Only use 'id's from the provided list. Return [] if no relationships exist.
 
 TEXT:
 `
@@ -331,10 +331,14 @@ export async function llmInferRelationships(
   if (entities.length < 2 || text.length < 50) return []
   const truncated = text.slice(0, 8000)
   
-  const entitiesList = JSON.stringify(
-    entities.map(e => ({ type: e.entity_type, normalized: e.normalized })),
-    null, 2
-  )
+  // Assign IDs to entities for the LLM prompt
+  const idMap = new Map<number, ExtractedEntity>()
+  const entitiesListForPrompt = entities.map((e, idx) => {
+    idMap.set(idx + 1, e)
+    return { id: idx + 1, type: e.entity_type, value: e.normalized }
+  })
+
+  const entitiesListJson = JSON.stringify(entitiesListForPrompt, null, 2)
 
   let content: string | null = null
   try {
@@ -342,7 +346,7 @@ export async function llmInferRelationships(
     const resp = await chatCompletion({
       messages: [
         { role: 'system', content: 'You output strict JSON, no prose.' },
-        { role: 'user', content: LLM_RELATIONSHIPS_PROMPT + '\n```\n' + truncated + '\n```\n\nENTITIES:\n```json\n' + entitiesList + '\n```\n' },
+        { role: 'user', content: LLM_RELATIONSHIPS_PROMPT + '\n```\n' + truncated + '\n```\n\nENTITIES:\n```json\n' + entitiesListJson + '\n```\n' },
       ],
       temperature: 0.1,
       maxTokens: 2048,
@@ -357,8 +361,8 @@ export async function llmInferRelationships(
   if (!content) return inferRelationships(entities, text)
   
   const cleaned = content
-    .replace(/^```(?:json)?\\s*/i, '')
-    .replace(/\\s*```\\s*$/i, '')
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```\s*$/i, '')
     .trim()
     
   try {
@@ -366,16 +370,25 @@ export async function llmInferRelationships(
     if (!Array.isArray(arr)) return inferRelationships(entities, text)
     
     const out: ExtractedRelationship[] = []
-    const validNormalized = new Set(entities.map(e => e.normalized.toLowerCase()))
     const seen = new Set<string>()
     
     for (const item of arr) {
       if (!item || typeof item !== 'object') continue
-      const source = String(item.source || '').trim().toLowerCase()
-      const target = String(item.target || '').trim().toLowerCase()
+      
+      const sourceId = parseInt(item.source_id, 10)
+      const targetId = parseInt(item.target_id, 10)
       const rel = String(item.relation_type || '').trim().toLowerCase()
-      if (!source || !target || !rel) continue
-      if (!validNormalized.has(source) || !validNormalized.has(target)) continue
+      
+      if (isNaN(sourceId) || isNaN(targetId) || !rel) continue
+      
+      const srcEntity = idMap.get(sourceId)
+      const tgtEntity = idMap.get(targetId)
+      
+      if (!srcEntity || !tgtEntity) continue
+      
+      const source = srcEntity.normalized.toLowerCase()
+      const target = tgtEntity.normalized.toLowerCase()
+      
       if (source === target) continue
       
       const key = `${source}|${target}|${rel}`
@@ -400,4 +413,3 @@ export async function llmInferRelationships(
     return inferRelationships(entities, text)
   }
 }
-

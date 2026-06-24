@@ -84,32 +84,32 @@
 }
 
 .dark {
-  /* Deep Blue/Slate SaaS Palette matching #0055ff */
-  --background: #020817;
-  --foreground: #f8fafc;
+  /* Ultra-Deep HUD Palette matching #0055ff */
+  --background: #01030B; /* Deepest space blue/black */
+  --foreground: #eef2ff;
 
-  --card: #0f172a;
-  --card-foreground: #f8fafc;
+  --card: rgba(4, 11, 28, 0.6); /* Glassy deep blue */
+  --card-foreground: #eef2ff;
 
-  --popover: #0f172a;
-  --popover-foreground: #f8fafc;
+  --popover: #040b1c;
+  --popover-foreground: #eef2ff;
 
   --primary: #0055ff;
   --primary-foreground: #ffffff;
 
-  --secondary: #1e293b;
-  --secondary-foreground: #f8fafc;
+  --secondary: rgba(0, 85, 255, 0.1);
+  --secondary-foreground: #a5c0ff;
 
-  --muted: #1e293b;
-  --muted-foreground: #94a3b8;
+  --muted: rgba(4, 11, 28, 0.8);
+  --muted-foreground: #7084a3;
 
-  --accent: #1e293b;
-  --accent-foreground: #f8fafc;
+  --accent: rgba(0, 85, 255, 0.15);
+  --accent-foreground: #ffffff;
 
-  --destructive: #ef4444;
+  --destructive: #ff3366;
 
-  --border: #1e293b;
-  --input: #1e293b;
+  --border: rgba(0, 85, 255, 0.2); /* Thin blue glowing borders */
+  --input: rgba(0, 85, 255, 0.1);
   --ring: #0055ff;
 
   color-scheme: dark;
