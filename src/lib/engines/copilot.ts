@@ -127,8 +127,8 @@ export async function askCopilot(
   try {
     const preferred = userKeys.preferred_llm || 'auto'
     
-    // Helper to strip /chat/completions from baseURLs for Vercel AI SDK
-    const cleanBaseUrl = (url: string) => url.replace(/\/chat\/completions\/?$/, '')
+    // Helper to strip /chat/completions or /responses from baseURLs for Vercel AI SDK
+    const cleanBaseUrl = (url: string) => url.replace(/\/chat\/completions\/?$/, '').replace(/\/responses\/?$/, '').replace(/\/$/, '')
     
     // Attempt to use Vercel AI SDK for providers that support tools (OpenAI compatible)
     let aiProvider = null;
@@ -149,6 +149,9 @@ export async function askCopilot(
     } else if (userKeys.openai_api_key) {
       aiProvider = createOpenAI({ apiKey: userKeys.openai_api_key, baseURL: cleanBaseUrl(process.env.OPENAI_API_BASE || 'https://api.openai.com/v1') })
       aiModelName = process.env.OPENAI_MODEL || 'gpt-4o-mini'
+    } else if (userKeys.custom_llm_base_url && userKeys.custom_llm_model) {
+      aiProvider = createOpenAI({ apiKey: userKeys.custom_llm_api_key || '', baseURL: cleanBaseUrl(userKeys.custom_llm_base_url) })
+      aiModelName = userKeys.custom_llm_model
     }
 
     let finalContent = ''
