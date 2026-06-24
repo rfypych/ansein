@@ -167,7 +167,7 @@ async function handler(req: NextRequest) {
     // Bump session.updatedAt
     await db.chatSession.update({ where: { id: sessionId }, data: { updatedAt: new Date() } })
     
-    return result.toTextStreamResponse({
+    return result.toUIMessageStreamResponse({
       async onFinish({ text, usage }) {
         try {
           await db.chatMessage.create({
