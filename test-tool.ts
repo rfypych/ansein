@@ -1,53 +1,41 @@
-import { convertToModelMessages } from 'ai';
+import { streamText, tool } from 'ai';
+import { createOpenAI } from '@ai-sdk/openai';
+import { z } from 'zod';
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env' });
 
 async function test() {
-  const incomingMessages = [
-    { role: 'user', content: 'test web search' },
-    {
-      role: 'assistant',
-      content: 'I will run it',
-      toolInvocations: [
-        {
-          toolCallId: '1',
-          toolName: 'search_web',
-          args: { query: 'WormGPT' },
-          state: 'result',
-          result: 'WormGPT is an AI'
-        }
-      ]
-    }
+  const modelMessages = [
+    { role: 'user', content: 'Coba web search info publik tentang WormGPT' }
   ];
 
-  const normalized = incomingMessages.map(m => {
-    if (m.role === 'user' || m.role === 'system') {
-      return { ...m, parts: [{ type: 'text', text: m.content }] };
-    } else if (m.role === 'assistant') {
-      const parts = [];
-      if (m.content) parts.push({ type: 'text', text: m.content });
-      if (m.toolInvocations) {
-        for (const t of m.toolInvocations) {
-          parts.push({
-            type: `tool-${t.toolName}`,
-            toolCallId: t.toolCallId,
-            toolName: t.toolName,
-            state: t.state === 'result' ? 'output-available' : 'input-available',
-            input: t.args,
-            output: t.result,
-            providerExecuted: false
-          });
-        }
-      }
-      return { ...m, parts };
-    }
-    return m;
-  });
-
   try {
-    const modelMessages = await convertToModelMessages(normalized);
-    console.log(JSON.stringify(modelMessages, null, 2));
+    const result = await streamText({
+      model: createOpenAI({ apiKey: process.env.OPENAI_API_KEY }).chat('gpt-4o-mini'),
+      messages: modelMessages as any,
+      tools: {
+        search_web: tool({
+          description: 'Search the web using Wikipedia',
+          parameters: z.object({ query: z.string() }),
+          execute: async ({ query }) => {
+            console.log('\n[EXECUTING TOOL] search_web', query);
+            return { result: 'WormGPT is an AI.' };
+          }
+        })
+      },
+      maxSteps: 5,
+    });
+
+    const response = result.toUIMessageStreamResponse();
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      process.stdout.write(decoder.decode(value));
+    }
   } catch (err) {
-    console.error('ERROR:', err.message);
+    console.error(err.message);
   }
 }
-
 test();

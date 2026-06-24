@@ -165,15 +165,29 @@ async function handler(req: NextRequest) {
         }
         if (m.toolInvocations) {
           for (const t of m.toolInvocations) {
-            parts.push({
-              type: `tool-${t.toolName}`,
-              toolCallId: t.toolCallId,
-              toolName: t.toolName,
-              state: t.state === 'result' ? 'output-available' : 'input-available',
-              input: t.args,
-              output: t.result,
-              providerExecuted: false
-            })
+            if (t.state === 'result') {
+              parts.push({
+                type: `tool-${t.toolName}`,
+                toolCallId: t.toolCallId,
+                toolName: t.toolName,
+                state: 'output-available',
+                input: t.args,
+                output: t.result,
+                providerExecuted: false
+              })
+            } else {
+              // Fix for AI_MissingToolResultsError: if a tool call was interrupted or failed on the client/stream,
+              // it stays in 'call' state. We must provide a mock error result so streamText doesn't crash.
+              parts.push({
+                type: `tool-${t.toolName}`,
+                toolCallId: t.toolCallId,
+                toolName: t.toolName,
+                state: 'output-available',
+                input: t.args,
+                output: { error: 'Tool execution was interrupted or failed to complete.' },
+                providerExecuted: false
+              })
+            }
           }
         }
         return { ...m, parts }
