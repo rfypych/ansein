@@ -127,24 +127,27 @@ export async function askCopilot(
   try {
     const preferred = userKeys.preferred_llm || 'auto'
     
+    // Helper to strip /chat/completions from baseURLs for Vercel AI SDK
+    const cleanBaseUrl = (url: string) => url.replace(/\/chat\/completions\/?$/, '')
+    
     // Attempt to use Vercel AI SDK for providers that support tools (OpenAI compatible)
     let aiProvider = null;
     let aiModelName = '';
     
     if (preferred === 'openai' && userKeys.openai_api_key) {
-      aiProvider = createOpenAI({ apiKey: userKeys.openai_api_key, baseURL: process.env.OPENAI_API_BASE || 'https://api.openai.com/v1' })
+      aiProvider = createOpenAI({ apiKey: userKeys.openai_api_key, baseURL: cleanBaseUrl(process.env.OPENAI_API_BASE || 'https://api.openai.com/v1') })
       aiModelName = process.env.OPENAI_MODEL || 'gpt-4o-mini'
     } else if (preferred === 'groq' && userKeys.groq_api_key) {
-      aiProvider = createOpenAI({ apiKey: userKeys.groq_api_key, baseURL: process.env.GROQ_API_BASE || 'https://api.groq.com/openai/v1' })
+      aiProvider = createOpenAI({ apiKey: userKeys.groq_api_key, baseURL: cleanBaseUrl(process.env.GROQ_API_BASE || 'https://api.groq.com/openai/v1') })
       aiModelName = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile'
     } else if (preferred === 'custom' && userKeys.custom_llm_base_url && userKeys.custom_llm_model) {
-      aiProvider = createOpenAI({ apiKey: userKeys.custom_llm_api_key || '', baseURL: userKeys.custom_llm_base_url })
+      aiProvider = createOpenAI({ apiKey: userKeys.custom_llm_api_key || '', baseURL: cleanBaseUrl(userKeys.custom_llm_base_url) })
       aiModelName = userKeys.custom_llm_model
     } else if (userKeys.groq_api_key) {
-      aiProvider = createOpenAI({ apiKey: userKeys.groq_api_key, baseURL: process.env.GROQ_API_BASE || 'https://api.groq.com/openai/v1' })
+      aiProvider = createOpenAI({ apiKey: userKeys.groq_api_key, baseURL: cleanBaseUrl(process.env.GROQ_API_BASE || 'https://api.groq.com/openai/v1') })
       aiModelName = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile'
     } else if (userKeys.openai_api_key) {
-      aiProvider = createOpenAI({ apiKey: userKeys.openai_api_key, baseURL: process.env.OPENAI_API_BASE || 'https://api.openai.com/v1' })
+      aiProvider = createOpenAI({ apiKey: userKeys.openai_api_key, baseURL: cleanBaseUrl(process.env.OPENAI_API_BASE || 'https://api.openai.com/v1') })
       aiModelName = process.env.OPENAI_MODEL || 'gpt-4o-mini'
     }
 
@@ -153,11 +156,16 @@ export async function askCopilot(
     let modelUsed = ''
 
     if (aiProvider) {
+      // Extract system messages for the 'system' property to avoid warnings
+      const systemMessages = messages.filter(m => m.role === 'system').map(m => m.content).join('\n\n')
+      const userAndAssistantMessages = messages.filter(m => m.role !== 'system')
+
       // Use Vercel AI SDK for tool calling support!
       const model = aiProvider(aiModelName)
       const result = await generateText({
         model,
-        messages,
+        system: systemMessages,
+        messages: userAndAssistantMessages,
         tools: getOsintTools(userKeys),
         maxSteps: 5, // Allow multi-step reasoning!
         temperature: 0.3,
