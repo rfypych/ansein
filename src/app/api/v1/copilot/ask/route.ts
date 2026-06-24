@@ -31,6 +31,7 @@ async function getUserKeys(userId: number) {
     custom_llm_api_key: s.customLlmApiKey ? decrypt(s.customLlmApiKey) : '',
     custom_llm_base_url: s.customLlmBaseUrl || '',
     custom_llm_model: s.customLlmModel || '',
+    virustotal_api_key: s.virustotalApiKey ? decrypt(s.virustotalApiKey) : '',
   }
 }
 
