@@ -13,6 +13,7 @@ import { toast } from 'sonner'
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
 import { getStoredAccessToken } from '@/lib/auth-store'
+import { TodoWidget } from '@/components/copilot/TodoWidget'
 
 interface ChatSession {
   id: number
@@ -78,11 +79,23 @@ export default function CopilotPage() {
   useEffect(() => {
     if (messagesQuery.data) {
       setMessages(
-        messagesQuery.data.map((m) => ({
-          id: m.id.toString(),
-          role: m.role as any,
-          content: m.content,
-        }))
+        messagesQuery.data.map((m) => {
+          // Attempt to map our hijacked citations field back to toolInvocations
+          let toolInvocations = undefined
+          if (m.citations && Array.isArray(m.citations) && m.citations.length > 0) {
+            // Check if the first citation is an object (toolInvocation), not a standard string citation
+            if (typeof m.citations[0] === 'object' && m.citations[0] !== null) {
+              toolInvocations = m.citations as any[]
+            }
+          }
+
+          return {
+            id: m.id.toString(),
+            role: m.role as any,
+            content: m.content,
+            toolInvocations
+          }
+        })
       )
     } else {
       setMessages([])
@@ -477,12 +490,15 @@ export default function CopilotPage() {
                       >
                         {m.role === 'assistant' ? (
                           <>
-                            <Markdown content={m.content || (m as any).parts?.map((p: any) => p.text || '').join('') || ''} />
+                            <Markdown content={(m as any).content || (m as any).parts?.map((p: any) => p.text || '').join('') || ''} />
                             
-                            {m.toolInvocations && m.toolInvocations.length > 0 && (
+                            {(m as any).toolInvocations && (m as any).toolInvocations.length > 0 && (
                               <div className="mt-4 space-y-2">
-                                {m.toolInvocations.map((toolInvocation: any) => {
+                                {(m as any).toolInvocations.map((toolInvocation: any) => {
                                   const { toolCallId, toolName, state, args } = toolInvocation
+                                  if (toolName === 'manage_plan') {
+                                    return <TodoWidget key={toolCallId} tasks={args?.tasks || []} isStreaming={state !== 'result'} />
+                                  }
                                   return (
                                     <div key={toolCallId} className="p-3 rounded-lg bg-black/40 border border-border/60">
                                       <div className="flex items-center gap-2 mb-1">
@@ -534,8 +550,9 @@ export default function CopilotPage() {
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
                     onKeyDown={handleKey}
-                    placeholder="Provide intel or instructions..."
-                    className="flex-1 px-4 py-3.5 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none resize-none max-h-32 leading-relaxed"
+                    disabled={isLoading}
+                    placeholder={isLoading ? "Agent is processing..." : "Provide intel or instructions..."}
+                    className="flex-1 px-4 py-3.5 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none resize-none max-h-32 leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{ minHeight: '48px' }}
                   />
                   <div className="p-2 flex items-end">
