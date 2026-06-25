@@ -12,11 +12,13 @@ export function getAgentTools({ sessionId }: { sessionId: number }) {
       }),
       execute: async ({ title, description }) => {
         try {
+          const safeTitle = title || 'Untitled Task'
+          const safeDesc = description || ''
           const task = await db.agentTask.create({
             data: {
               sessionId,
-              title,
-              description,
+              title: safeTitle,
+              description: safeDesc,
               status: 'todo',
             }
           })
@@ -52,12 +54,14 @@ export function getAgentTools({ sessionId }: { sessionId: number }) {
       }),
       execute: async ({ task_id, status }) => {
         try {
+          if (!task_id) return { error: 'task_id is required' }
+          const safeStatus = status || 'todo'
           const existing = await db.agentTask.findFirst({ where: { id: task_id, sessionId } })
           if (!existing) return { error: `Task ID ${task_id} not found in this session.` }
 
           const updated = await db.agentTask.update({
             where: { id: task_id },
-            data: { status }
+            data: { status: safeStatus }
           })
           return { success: true, task: { id: updated.id, title: updated.title, status: updated.status } }
         } catch (e) {
@@ -77,6 +81,9 @@ export function getAgentTools({ sessionId }: { sessionId: number }) {
       }),
       execute: async ({ tasks }) => {
         try {
+          if (!tasks || !Array.isArray(tasks)) {
+            tasks = []
+          }
           const results = []
           for (const t of tasks) {
             if (t.id) {
