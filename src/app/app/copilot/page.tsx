@@ -66,7 +66,7 @@ export default function CopilotPage() {
       api: '/api/v1/copilot/ask',
       headers: () => {
         const token = getStoredAccessToken()
-        return token ? { Authorization: `Bearer ${token}` } : {}
+        return token ? { Authorization: `Bearer ${token}` } : ({} as Record<string, string>)
       }
     }),
     onFinish: () => {
@@ -81,7 +81,7 @@ export default function CopilotPage() {
       setMessages(
         messagesQuery.data.map((m) => {
           // Attempt to map our hijacked citations field back to toolInvocations
-          let toolInvocations = undefined
+          let toolInvocations = undefined as any
           if (m.citations && Array.isArray(m.citations) && m.citations.length > 0) {
             // Check if the first citation is an object (toolInvocation), not a standard string citation
             if (typeof m.citations[0] === 'object' && m.citations[0] !== null) {
@@ -93,8 +93,9 @@ export default function CopilotPage() {
             id: m.id.toString(),
             role: m.role as any,
             content: m.content,
-            toolInvocations
-          }
+            parts: [{ type: 'text', text: m.content }],
+            toolInvocations,
+          } as any
         })
       )
     } else {
@@ -521,7 +522,7 @@ export default function CopilotPage() {
                             )}
                           </>
                         ) : (
-                          <p className="whitespace-pre-wrap">{m.content || (m as any).parts?.map((p: any) => p.text || '').join('') || ''}</p>
+                          <p className="whitespace-pre-wrap">{(m as any).content || (m as any).parts?.map((p: any) => p.text || '').join('') || ''}</p>
                         )}
                       </div>
                     </div>

@@ -154,7 +154,7 @@ async function handler(req: NextRequest) {
   const userKeys = await getUserKeys(user.id)
   
   // Use useChat's incoming messages if present, otherwise fallback to DB history + text
-  let finalMessages = []
+  let finalMessages: any[] = []
   if (incomingMessages && incomingMessages.length > 0) {
     // Normalize incoming UIMessages (v4 format with toolInvocations) to v6 format (with parts)
     const normalizedMessages = incomingMessages.map((m: any) => {
@@ -209,16 +209,32 @@ async function handler(req: NextRequest) {
       async onFinish({ responseMessage }) {
         try {
           let content = ''
-          if (Array.isArray(responseMessage.content)) {
-            content = responseMessage.content.map(p => p.type === 'text' ? p.text : '').join('')
-          } else if (typeof responseMessage.content === 'string') {
-            content = responseMessage.content
+          const rm = responseMessage as any
+          if (Array.isArray(rm.content)) {
+            content = rm.content.map((p: any) => p.type === 'text' ? p.text : '').join('')
+          } else if (typeof rm.content === 'string') {
+            content = rm.content
           }
 
-          // If there are tool invocations, we should persist them or at least save the fact that a tool was called
-          // For now we persist the text content, and stringify tool calls into the text so it isn't completely empty
+          // If there are tool invocations, persist them into citations as JSON so they can be restored on reload
+          let citationsStr = '[]'
+          if (responseMessage.parts) {
+            const toolInvocations = responseMessage.parts
+              .filter((p: any) => p.type === 'tool-call')
+              .map((p: any) => ({
+                toolCallId: p.toolCallId,
+                toolName: p.toolName,
+                args: p.args,
+                state: 'result'
+              }))
+            if (toolInvocations.length > 0) {
+              citationsStr = JSON.stringify(toolInvocations)
+            }
+          }
+
+          // Fallback text if no text content was generated (e.g., only tool calls)
           if (!content && responseMessage.parts) {
-            content = responseMessage.parts.map((p: any) => p.text || (p.type === 'tool-call' ? `> 🛠️ **Tool Executed:** \`${p.toolName}\`` : '')).join('\n')
+            content = responseMessage.parts.map((p: any) => p.text || '').join('\n').trim()
           }
 
           await db.chatMessage.create({
@@ -226,7 +242,7 @@ async function handler(req: NextRequest) {
               sessionId,
               role: 'assistant',
               content: content || '',
-              citations: '[]',
+              citations: citationsStr,
               tokensUsed: 0,
             },
           })
