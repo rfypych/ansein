@@ -3,7 +3,7 @@
 import { type ReactNode, useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Command as CommandIcon, Flask as FlaskConical, Folder as FolderSearch, Gear as SettingsIcon, Keyboard as KeyboardIcon, Lightning as Zap, List as Menu, Plus, Robot as Bot, Shield, ShieldCheck, ShieldWarning as ShieldAlert, SignOut as LogOut, SquaresFour as LayoutDashboard, TreeStructure as Workflow, User as UserIcon, X } from '@phosphor-icons/react'
+import { Broadcast, Command as CommandIcon, Flask as FlaskConical, Folder as FolderSearch, Gear as SettingsIcon, Keyboard as KeyboardIcon, Lightning as Zap, List as Menu, Plus, Shield, ShieldCheck, ShieldWarning as ShieldAlert, SignOut as LogOut, SquaresFour as LayoutDashboard, TreeStructure as Workflow, User as UserIcon, X } from '@phosphor-icons/react'
 import { Brand, BrandMark } from '@/components/ansein/brand'
 import { useAuthStore, authUserRole, type AuthUser } from '@/lib/auth-store'
 import { ROLE_COLORS } from '@/lib/rbac'
@@ -17,8 +17,8 @@ import { toast } from 'sonner'
 const NAV_ITEMS = [
   { href: '/app', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/app/investigations', label: 'Investigations', icon: FolderSearch },
+  { href: '/app/feeds', label: 'Threat Feeds', icon: Broadcast },
   { href: '/app/ioc-playground', label: 'IOC Playground', icon: FlaskConical },
-  { href: '/app/copilot', label: 'Copilot', icon: Bot },
   { href: '/app/settings', label: 'Settings', icon: SettingsIcon },
   { href: '/app/profile', label: 'Profile', icon: UserIcon },
 ]

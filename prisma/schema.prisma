@@ -1,8 +1,5 @@
-// AnseIn v3 — Prisma schema
-// Designed to be MySQL-compatible for cPanel deployment.
-// For local dev we use SQLite (per environment constraint).
-// When deploying to cPanel/MySQL: change `provider = "postgresql"` to `"mysql"`
-// and set DATABASE_URL to: mysql://USER:PASS@HOST:3306/DB?charset=utf8mb4
+// AnseIn — Prisma schema
+// Database: PostgreSQL (Neon Serverless Postgres)
 
 generator client {
   provider = "prisma-client-js"
@@ -16,19 +13,16 @@ datasource db {
 
 // ----------------------------------------------------------------- users
 model User {
-  id            Int       @id @default(autoincrement())
-  email         String    @unique
-  hashedPassword String   @map("hashed_password")
-  fullName      String    @default("") @map("full_name")
-  isActive      Boolean   @default(true) @map("is_active")
+  id             Int       @id @default(autoincrement())
+  email          String    @unique
+  hashedPassword String    @map("hashed_password")
+  fullName       String    @default("") @map("full_name")
+  isActive       Boolean   @default(true) @map("is_active")
   // Role-based access control: "analyst" | "editor" | "admin"
-  role          String    @default("analyst")
-  // Backward-compat: derived from role === "admin". Kept for legacy callers
-  // and prisma queries that still reference isSuperuser. New code should
-  // prefer the role field and the helpers in @/lib/rbac.
-  isSuperuser   Boolean   @default(false) @map("is_superuser")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  lastLoginAt   DateTime? @map("last_login_at")
+  role           String    @default("analyst")
+  isSuperuser    Boolean   @default(false) @map("is_superuser")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  lastLoginAt    DateTime? @map("last_login_at")
 
   settings        UserSettings?
   investigations  Investigation[]
@@ -37,7 +31,7 @@ model User {
   notes           InvestigationNote[]
   playbooks       Playbook[]
 
-  @@index([email, isActive])
+  @@index([isActive])
   @@map("users")
 }
 
@@ -51,7 +45,6 @@ model UserSettings {
   abuseipdbApiKey    String   @default("") @map("abuseipdb_api_key")
   shodanApiKey       String   @default("") @map("shodan_api_key")
   preferredLlm       String   @default("auto") @map("preferred_llm")
-  // Custom OpenAI-compatible LLM provider (Ollama, LM Studio, vLLM, OpenRouter, etc.)
   customLlmApiKey    String   @default("") @map("custom_llm_api_key")
   customLlmBaseUrl   String   @default("") @map("custom_llm_base_url")
   customLlmModel     String   @default("") @map("custom_llm_model")
@@ -69,7 +62,7 @@ model Investigation {
   description    String    @default("")
   status         String    @default("pending") // pending | extracting | enriching | analyzing | completed | failed
   severityScore  Float     @default(0) @map("severity_score")
-  tags           String    @default("[]") // JSON-encoded array (SQLite-compatible)
+  tags           String    @default("[]")
   isStarred      Boolean   @default(false) @map("is_starred")
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at")
@@ -83,6 +76,7 @@ model Investigation {
 
   @@index([userId, status])
   @@index([userId, isStarred])
+  @@index([createdAt])
   @@map("investigations")
 }
 
@@ -122,12 +116,12 @@ model Source {
 model Entity {
   id              Int      @id @default(autoincrement())
   investigationId Int      @map("investigation_id")
-  entityType      String   @map("entity_type") // threat_actor | malware | tool | technique | vulnerability | ioc_ip | ioc_domain | ioc_url | ioc_hash | ioc_wallet | target | location | identity
+  entityType      String   @map("entity_type")
   value           String
   normalized      String   @default("")
   confidence      Float    @default(0.5)
-  enrichment      String   @default("{}") // JSON-encoded dict
-  sourceMethod    String   @default("regex") @map("source_method") // regex | gliner | llm
+  enrichment      String   @default("{}")
+  sourceMethod    String   @default("regex") @map("source_method")
   createdAt       DateTime @default(now()) @map("created_at")
 
   investigation       Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
@@ -136,6 +130,7 @@ model Entity {
 
   @@index([investigationId, entityType])
   @@index([value])
+  @@index([normalized])
   @@map("entities")
 }
 
@@ -164,10 +159,10 @@ model AnalysisRun {
   investigationId Int      @map("investigation_id")
   investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
   narrative       String   @default("")
-  actorHypothesis String   @default("{}") @map("actor_hypothesis") // JSON
+  actorHypothesis String   @default("{}") @map("actor_hypothesis")
   severityScore   Float    @default(0) @map("severity_score")
-  recommendations String   @default("[]") // JSON array
-  hypotheses      String   @default("[]") // JSON array of ThreatHypothesis
+  recommendations String   @default("[]")
+  hypotheses      String   @default("[]")
   admiraltyCode   String   @default("C2") @map("admiralty_code")
   confidence      Float    @default(0.5)
   modelUsed       String   @default("") @map("model_used")
@@ -201,9 +196,9 @@ model ChatMessage {
   id         Int      @id @default(autoincrement())
   sessionId  Int      @map("session_id")
   session    ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  role       String   // user | assistant | system
+  role       String
   content    String
-  citations  String   @default("[]") // JSON array
+  citations  String   @default("[]")
   tokensUsed Int      @default(0) @map("tokens_used")
   createdAt  DateTime @default(now()) @map("created_at")
 
@@ -217,7 +212,7 @@ model AgentTask {
   session     ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   title       String
   description String   @default("")
-  status      String   @default("todo") // todo | in_progress | done
+  status      String   @default("todo")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
 
@@ -234,22 +229,19 @@ model AuditLog {
   targetType    String   @default("") @map("target_type")
   targetId      Int?     @map("target_id")
   ipAddress     String   @default("") @map("ip_address")
-  extraMetadata String   @default("{}") @map("extra_metadata") // JSON
-  // Hash-chained audit log (tamper-evident):
-  //   prevHash  = SHA-256 of the previous entry's entryHash (or "" for the genesis entry)
-  //   entryHash = SHA-256(allFields + prevHash)
+  extraMetadata String   @default("{}") @map("extra_metadata")
   prevHash      String   @default("") @map("prev_hash")
   entryHash     String   @default("") @map("entry_hash")
   createdAt     DateTime @default(now()) @map("created_at")
 
   @@index([action, createdAt])
+  @@index([userId, createdAt])
   @@map("audit_logs")
 }
 
 // ----------------------------------------------------- app config (setup)
 model AppConfig {
-  id        Int      @id @default(1)
-  key       String   @unique
+  key       String   @id
   value     String   @default("")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
@@ -257,18 +249,14 @@ model AppConfig {
 }
 
 // -------------------------------------------------------------- playbooks
-// SOAR (Security Orchestration, Automation, and Response) playbooks.
-// Each playbook defines a trigger (severity threshold, entity type present,
-// etc.) and a list of actions to execute when the trigger matches a pipeline
-// result. Trigger and actions are stored as JSON strings (SQLite-compatible).
 model Playbook {
   id          Int      @id @default(autoincrement())
   userId      Int      @map("user_id")
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   name        String
   description String   @default("")
-  trigger     String   @default("") @map("trigger") // JSON: { type: "severity_threshold", value: 70 } or { type: "entity_type", value: "ioc_ip" }
-  actions     String   @default("[]") // JSON array of action objects
+  trigger     String   @default("") @map("trigger")
+  actions     String   @default("[]")
   enabled     Boolean  @default(true)
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")

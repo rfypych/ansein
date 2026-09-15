@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { CaretLeft as ChevronLeft, CaretRight as ChevronRight, Copy as CopyPlus, Cpu, Crown, FileText, Folder as FolderSearch, Funnel as Filter, Key as KeyRound, LinkSimple as Link2, Lock, Note as StickyNote, Play, Robot as Bot, Shield, ShieldCheck, Sparkle as Sparkles, Star, User as UserIcon, UserMinus, UserPlus, Warning as AlertTriangle, Waveform } from '@phosphor-icons/react'
+import { CaretLeft as ChevronLeft, CaretRight as ChevronRight, Copy as CopyPlus, Cpu, Crown, FileText, Folder as FolderSearch, Funnel as Filter, Key as KeyRound, LinkSimple as Link2, Lock, Note as StickyNote, Play, Shield, ShieldCheck, Sparkle as Sparkles, Star, User as UserIcon, UserMinus, UserPlus, Warning as AlertTriangle, Waveform } from '@phosphor-icons/react'
 import { http } from '@/lib/http'
 import { useAuthStore, authUserRole } from '@/lib/auth-store'
 import { Badge, EmptyState, Spinner } from '@/components/ansein/ui'
@@ -50,7 +50,6 @@ const ACTION_ICONS: Record<string, React.ComponentType<{ className?: string }>> 
   'investigation.unstar': Star,
   'auth.login': KeyRound,
   'auth.register': KeyRound,
-  'copilot.ask': Bot,
   'source.add': FileText,
   'source.upload': FileText,
   'source.delete': FileText,
@@ -78,7 +77,6 @@ const ACTION_COLORS: Record<string, string> = {
   'investigation.unstar': '#64748b',
   'auth.login': '#f59e0b',
   'auth.register': '#f59e0b',
-  'copilot.ask': '#8b5cf6',
   'source.add': '#0d9488',
   'source.upload': '#0d9488',
   'source.delete': '#f43f5e',
@@ -94,7 +92,6 @@ const ACTION_GROUPS = [
   { key: 'user', label: 'Account & Admin', match: /user\.|profile\./ },
   { key: 'investigation', label: 'Investigations', match: /investigation\.|source\.|analysis\./ },
   { key: 'note', label: 'Notes', match: /note\./ },
-  { key: 'copilot', label: 'Copilot', match: /copilot\./ },
 ]
 
 function getActionColor(action: string): string {

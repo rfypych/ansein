@@ -96,7 +96,10 @@ export function handlePrismaError(e: unknown): ApiError {
     return new ApiError(404, 'not_found', 'Resource not found')
   }
   console.error('[prisma] error:', err)
-  return new ApiError(500, 'internal', `Prisma Error: ${err?.message || String(err)}`)
+  const msg = process.env.NODE_ENV === 'production' 
+    ? 'A database error occurred' 
+    : `Prisma Error: ${err?.message || String(err)}`
+  return new ApiError(500, 'internal', msg)
 }
 
 /** Wrap a route handler with structured error handling + audit logging hooks. */
@@ -111,7 +114,10 @@ export function withErrorHandler<TArgs extends unknown[]>(
         return jsonError(e.status, e.code, e.message)
       }
       console.error('[api] unhandled error:', e)
-      return jsonError(500, 'internal', `Unhandled Error: ${e instanceof Error ? e.stack : String(e)}`)
+      const msg = process.env.NODE_ENV === 'production'
+        ? 'Internal server error'
+        : `Unhandled Error: ${e instanceof Error ? e.message : String(e)}`
+      return jsonError(500, 'internal', msg)
     }
   }
 }

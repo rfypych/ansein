@@ -12,6 +12,7 @@ import {
   safeParseJson,
   safeStringifyJson,
 } from '@/lib/api'
+import { canEditAnyInvestigation } from '@/lib/rbac'
 
 export const dynamic = 'force-dynamic'
 
@@ -56,13 +57,22 @@ async function list(req: NextRequest) {
   const status = url.searchParams.get('status') || undefined
   const starred = url.searchParams.get('starred')
   const search = url.searchParams.get('q') || undefined
-  const where: { userId: number; status?: string; isStarred?: boolean; OR?: Array<{ title?: { contains: string }; description?: { contains: string } }> } = { userId: user.id }
+  const scope = url.searchParams.get('scope') // 'own' | 'all'
+  
+  // By default: analysts see own investigations. Editors and Admins see workspace-wide unless scope='own' requested.
+  const isPrivileged = canEditAnyInvestigation(user)
+  const filterOwn = scope === 'own' || (!isPrivileged && scope !== 'all')
+
+  const where: { userId?: number; status?: string; isStarred?: boolean; OR?: Array<{ title?: { contains: string; mode?: 'insensitive' }; description?: { contains: string; mode?: 'insensitive' } }> } = {}
+  if (filterOwn) {
+    where.userId = user.id
+  }
   if (status) where.status = status
   if (starred === '1' || starred === 'true') where.isStarred = true
   if (search) {
     where.OR = [
-      { title: { contains: search } },
-      { description: { contains: search } },
+      { title: { contains: search, mode: 'insensitive' } },
+      { description: { contains: search, mode: 'insensitive' } },
     ]
   }
 

@@ -4,8 +4,9 @@
  */
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import type { Role } from '@/lib/rbac'
 
-export type Role = 'analyst' | 'editor' | 'admin'
+export type { Role }
 
 export interface AuthUser {
   id: number

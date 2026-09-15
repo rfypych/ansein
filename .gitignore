@@ -46,4 +46,5 @@ next-env.d.ts
 # IDE and local AI logs
 .codeflicker/
 worklog.md
+session-*.md
 platform_mega_improvements.md

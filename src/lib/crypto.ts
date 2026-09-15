@@ -5,10 +5,12 @@
  */
 import crypto from 'node:crypto'
 
-const SECRET_KEY = process.env.SECRET_KEY || 'dev-insecure-secret-change-me'
+function getSecretKey(): string {
+  return process.env.SECRET_KEY || 'dev-insecure-secret-change-me'
+}
 
 function deriveKey(): Buffer {
-  return crypto.createHash('sha256').update(SECRET_KEY).digest() // 32 bytes
+  return crypto.createHash('sha256').update(getSecretKey()).digest() // 32 bytes
 }
 
 export function encrypt(plain: string): string {
