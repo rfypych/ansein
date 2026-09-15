@@ -316,7 +316,78 @@ export function generateHypotheses(
   ]
 }
 
-/** Normalise raw hypothesis objects coming back from the LLM. */
+function robustParseLlmAnalysis(cleaned: string): {
+  narrative?: string
+  actor_hypothesis?: ActorHypothesis
+  severity_score?: number
+  recommendations?: string[]
+  hypotheses?: unknown
+} {
+  try {
+    return JSON.parse(cleaned)
+  } catch {
+    // Regex-based partial extraction for truncated or unescaped JSON
+    const parsed: any = {}
+
+    // Extract narrative
+    const narrativeMatch = cleaned.match(/"narrative"\s*:\s*"([\s\S]*?)(?="\s*,\s*"[a-zA-Z0-9_]+"\s*:|\s*"\s*\}|$)/)
+    if (narrativeMatch) {
+      parsed.narrative = narrativeMatch[1]
+        .replace(/\\n/g, '\n')
+        .replace(/\\"/g, '"')
+        .replace(/\\t/g, '\t')
+        .trim()
+    }
+
+    // Extract severity_score
+    const sevMatch = cleaned.match(/"severity_score"\s*:\s*(\d+)/)
+    if (sevMatch) {
+      parsed.severity_score = Number(sevMatch[1])
+    }
+
+    // Extract actor_hypothesis
+    const actorMatch = cleaned.match(/"actor_hypothesis"\s*:\s*(\{[\s\S]*?\})/)
+    if (actorMatch) {
+      try {
+        parsed.actor_hypothesis = JSON.parse(actorMatch[1])
+      } catch {
+        // partial parse failed
+      }
+    }
+
+    // Extract recommendations
+    const recsMatch = cleaned.match(/"recommendations"\s*:\s*(\[[\s\S]*?\])/)
+    if (recsMatch) {
+      try {
+        parsed.recommendations = JSON.parse(recsMatch[1])
+      } catch {
+        // partial parse failed
+      }
+    }
+
+    // Extract hypotheses
+    const hypMatch = cleaned.match(/"hypotheses"\s*:\s*(\[[\s\S]*?\])/)
+    if (hypMatch) {
+      try {
+        parsed.hypotheses = JSON.parse(hypMatch[1])
+      } catch {
+        // partial parse failed
+      }
+    }
+
+    // If even narrative regex couldn't find "narrative": "...", strip leading/trailing braces
+    if (!parsed.narrative) {
+      parsed.narrative = cleaned
+        .replace(/^\{[\s\S]*?"narrative"\s*:\s*"/i, '')
+        .replace(/"\s*,?\s*"[a-zA-Z0-9_]+"\s*:[\s\S]*$/i, '')
+        .replace(/\\n/g, '\n')
+        .replace(/\\"/g, '"')
+        .trim()
+    }
+
+    return parsed
+  }
+}
 function normaliseHypotheses(raw: unknown, fallback: ThreatHypothesis[]): ThreatHypothesis[] {
   if (!Array.isArray(raw) || raw.length === 0) return fallback
   const out: ThreatHypothesis[] = []
@@ -378,19 +449,7 @@ export async function analyze(
         .replace(/^```(?:json)?\s*/i, '')
         .replace(/\s*```\s*$/i, '')
         .trim()
-      let parsed: {
-        narrative?: string
-        actor_hypothesis?: ActorHypothesis
-        severity_score?: number
-        recommendations?: string[]
-        hypotheses?: unknown
-      } = {}
-      try {
-        parsed = JSON.parse(cleaned)
-      } catch {
-        // Fallback: keep raw text as narrative
-        parsed = { narrative: resp.content }
-      }
+      const parsed = robustParseLlmAnalysis(cleaned)
 
       const severity = Math.min(100, Math.max(0, Number(parsed.severity_score) || heuristicSeverity(entities, enrichmentByEntity)))
       const [admiraltyCode, confidence] = computeAdmiralty(mergedEnrichment, 0.7)
