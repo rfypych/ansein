@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Bug, CaretRight as ChevronRight, Check, CheckCircle as CheckCircle2, Circle, CircleNotch as Loader2, ClipboardText as ClipboardList, ClockCounterClockwise as History, Code, Copy, Copy as CopyPlus, CornersOut as Maximize2, Cpu, CreditCard, Crosshair, Download, DownloadSimple as ArrowDownToLine, Eye, FileCode, FileSearch, FileText, FileText as FileJson, Globe, Graph as Network, GridFour as LayoutGrid, Hash, Key as KeyRound, Keyboard, Lightbulb, Link as LinkIcon, Lock, MagnifyingGlass as Search, MapPin, Note as StickyNote, PaperPlaneRight as Send, Pencil, Play, Plus, PushPin as Pin, PushPinSlash as PinOff, Robot as Bot, ShieldWarning as ShieldAlert, Sparkle as Sparkles, Star, Table as TableIcon, Tag, Trash as Trash2, Upload, User, Users, Warning as AlertTriangle, Waveform, Wrench, X as XIcon, XCircle } from '@phosphor-icons/react'
+import { ArrowLeft, Bug, CaretRight as ChevronRight, Check, CheckCircle as CheckCircle2, Circle, CircleNotch as Loader2, ClipboardText as ClipboardList, ClockCounterClockwise as History, Code, Copy, Copy as CopyPlus, CornersOut as Maximize2, Cpu, CreditCard, Crosshair, Download, DownloadSimple as ArrowDownToLine, Eye, FileCode, FileMagnifyingGlass as FileSearch, FileText, FileText as FileJson, Globe, Graph as Network, GridFour as LayoutGrid, Hash, Key as KeyRound, Keyboard, Lightbulb, Link as LinkIcon, Lock, MagnifyingGlass as Search, MapPin, Note as StickyNote, Pencil, Play, Plus, PushPin as Pin, PushPinSlash as PinOff, Robot as Bot, ShieldWarning as ShieldAlert, Sparkle as Sparkles, Star, Table as TableIcon, Tag, Trash as Trash2, Upload, User, Users, Warning as AlertTriangle, Waveform, Wrench, X as XIcon, XCircle } from '@phosphor-icons/react'
 import { http } from '@/lib/http'
 import { Badge, SeverityMeter, EmptyState, Spinner } from '@/components/ansein/ui'
 import { EntityDetailModal } from '@/components/ansein/entity-detail-modal'
@@ -12,7 +12,6 @@ import { ExportLink } from '@/components/ansein/export-link'
 import { Markdown } from '@/components/ansein/markdown'
 import { GraphView } from '@/components/graph/graph-view'
 import { VirtualizedEntityTable } from '@/components/ansein/virtualized-entity-table'
-import { VoiceInputButton } from '@/components/ansein/voice-input-button'
 import {
   statusColor,
   formatRelative,
@@ -40,7 +39,7 @@ const ENTITY_ICONS: Record<string, React.ComponentType<{ className?: string }>> 
   identity: User,
 }
 
-type Tab = 'overview' | 'sources' | 'graph' | 'entities' | 'analysis' | 'copilot' | 'notes' | 'activity'
+type Tab = 'overview' | 'sources' | 'graph' | 'entities' | 'analysis' | 'rules' | 'notes' | 'activity'
 
 interface Investigation {
   id: number
@@ -131,21 +130,11 @@ interface Analysis {
   hypotheses?: ThreatHypothesis[]
 }
 
-interface ChatMessage {
-  id: number
-  role: 'user' | 'assistant' | 'system'
-  content: string
-  citations: string[]
-  tokens_used: number
-  created_at: string
-}
-
 export default function InvestigationDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
   const qc = useQueryClient()
   const [id, setId] = useState<number | null>(null)
   const [tab, setTab] = useState<Tab>('overview')
-  const [activeSessionId, setActiveSessionId] = useState<number | null>(null)
   const [showShortcuts, setShowShortcuts] = useState(false)
 
   useEffect(() => {
@@ -166,7 +155,7 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
         '3': 'graph',
         '4': 'entities',
         '5': 'analysis',
-        '6': 'copilot',
+        '6': 'rules',
         '7': 'notes',
         '8': 'activity',
       }
@@ -467,7 +456,7 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
                 ['graph', 'Graph', '3'],
                 ['entities', 'Entities', '4'],
                 ['analysis', 'Analysis', '5'],
-                ['copilot', 'Copilot', '6'],
+                ['rules', 'Detection Rules', '6'],
                 ['notes', 'Notes', '7'],
                 ['activity', 'Activity', '8'],
               ] as [Tab, string, string][]).map(([t, label, shortcut]) => (
@@ -503,14 +492,7 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
           {tab === 'graph' && <GraphTab invId={inv.id} />}
           {tab === 'entities' && <EntitiesTab invId={inv.id} />}
           {tab === 'analysis' && <AnalysisTab invId={inv.id} />}
-          {tab === 'copilot' && (
-            <CopilotInline
-              invId={inv.id}
-              invTitle={inv.title}
-              sessionId={activeSessionId}
-              onSessionCreated={setActiveSessionId}
-            />
-          )}
+          {tab === 'rules' && <RulesTab invId={inv.id} />}
           {tab === 'notes' && <NotesTab invId={inv.id} />}
           {tab === 'activity' && <ActivityTab invId={inv.id} />}
         </>
@@ -562,9 +544,8 @@ function ShortcutsHelpModal({ onClose }: { onClose: () => void }) {
     { keys: ['3'], desc: 'Switch to Graph tab' },
     { keys: ['4'], desc: 'Switch to Entities tab' },
     { keys: ['5'], desc: 'Switch to Analysis tab' },
-    { keys: ['6'], desc: 'Switch to Copilot tab' },
-    { keys: ['7'], desc: 'Switch to Notes tab' },
-    { keys: ['8'], desc: 'Switch to Activity tab' },
+    { keys: ['6'], desc: 'Switch to Notes tab' },
+    { keys: ['7'], desc: 'Switch to Activity tab' },
     { keys: ['?'], desc: 'Toggle this shortcuts panel' },
     { keys: ['Esc'], desc: 'Close modals / panels' },
     { keys: ['⌘', 'K'], desc: 'Open command palette (anywhere)' },
@@ -784,7 +765,6 @@ function OverviewTab({ inv, onSwitchTab }: { inv: Investigation; onSwitchTab: (t
             <Step n={2} title="Run the pipeline" desc="Click 'Run pipeline' above. Extraction → enrichment → analysis runs in one click." />
             <Step n={3} title="Explore the graph" desc="Visualise entities and relationships in the Graph tab." action={() => onSwitchTab('graph')} />
             <Step n={4} title="Review analysis" desc="Read the AI-generated narrative, severity, and recommendations." action={() => onSwitchTab('analysis')} />
-            <Step n={5} title="Ask the Copilot" desc="Query your investigation data with grounded RAG chat." action={() => onSwitchTab('copilot')} />
           </ol>
         </div>
       </div>
@@ -856,7 +836,6 @@ function OverviewTab({ inv, onSwitchTab }: { inv: Investigation; onSwitchTab: (t
           <div className="space-y-2">
             <QuickAction icon={<FileText weight="duotone" className="h-3.5 w-3.5" />} label="Add a source" onClick={() => onSwitchTab('sources')} />
             <QuickAction icon={<Network weight="duotone" className="h-3.5 w-3.5" />} label="View graph" onClick={() => onSwitchTab('graph')} />
-            <QuickAction icon={<Bot weight="duotone" className="h-3.5 w-3.5" />} label="Ask Copilot" onClick={() => onSwitchTab('copilot')} />
             <ExportLink
               path={`/export/${inv.id}/json`}
               filename={`ansein-investigation-${inv.id}.json`}
@@ -987,6 +966,114 @@ function Step({ n, title, desc, action }: { n: number; title: string; desc: stri
     </li>
   )
 }
+
+/* ============================================ Rules tab */
+function RulesTab({ invId }: { invId: number }) {
+  const [activeFormat, setActiveFormat] = useState<'sigma' | 'yara' | 'suricata' | 'kql'>('sigma')
+
+  const { data, isLoading } = useQuery<{
+    investigation_id: number
+    title: string
+    rules: {
+      sigma: string
+      yara: string
+      suricata: string[]
+      kql: string
+    }
+  }>({
+    queryKey: ['investigation-rules', invId],
+    queryFn: () => http.get(`/investigations/${invId}/rules`),
+  })
+
+  if (isLoading) {
+    return (
+      <div className="py-20 flex justify-center">
+        <Spinner />
+      </div>
+    )
+  }
+
+  const content =
+    activeFormat === 'sigma'
+      ? data?.rules?.sigma || ''
+      : activeFormat === 'yara'
+      ? data?.rules?.yara || ''
+      : activeFormat === 'suricata'
+      ? (data?.rules?.suricata || []).join('\n')
+      : data?.rules?.kql || ''
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(content)
+    toast.success('Copied detection rule to clipboard')
+  }
+
+  const handleDownload = () => {
+    const ext = activeFormat === 'sigma' ? 'yml' : activeFormat === 'yara' ? 'yar' : activeFormat === 'suricata' ? 'rules' : 'kql'
+    const blob = new Blob([content], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `ansein-rule-${invId}.${ext}`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">
+            Automated SIEM & IDS Detection Rules
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Instantly export production detection signatures generated from this investigation's IOCs.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleCopy}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-card hover:bg-muted text-xs font-medium transition-colors"
+          >
+            <Copy className="h-3.5 w-3.5" />
+            Copy Rule
+          </button>
+          <button
+            onClick={handleDownload}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors"
+          >
+            <Download className="h-3.5 w-3.5" />
+            Download Rule
+          </button>
+        </div>
+      </div>
+
+      <div className="flex gap-2 p-1 bg-card border border-border rounded-lg max-w-fit">
+        {(['sigma', 'yara', 'suricata', 'kql'] as const).map((fmt) => (
+          <button
+            key={fmt}
+            onClick={() => setActiveFormat(fmt)}
+            className={cn(
+              'px-3.5 py-1.5 text-xs font-medium rounded-md uppercase tracking-wider transition-colors',
+              activeFormat === fmt
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            {fmt}
+          </button>
+        ))}
+      </div>
+
+      <div className="relative rounded-xl border border-border bg-[#090d16] p-5 font-mono text-xs text-foreground overflow-x-auto">
+        <pre className="whitespace-pre-wrap break-all leading-relaxed">
+          {content || '// No rules generated or no IOCs available.'}
+        </pre>
+      </div>
+    </div>
+  )
+}
+
 
 function QuickAction({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) {
   return (
@@ -2160,249 +2247,6 @@ function AnalysisTab({ invId }: { invId: number }) {
   )
 }
 
-/* ============================================ Copilot inline tab */
-function CopilotInline({
-  invId,
-  invTitle,
-  sessionId,
-  onSessionCreated,
-}: {
-  invId: number
-  invTitle: string
-  sessionId: number | null
-  onSessionCreated: (id: number) => void
-}) {
-  const qc = useQueryClient()
-  const [messages, setMessages] = useState<ChatMessage[]>([])
-  const [input, setInput] = useState('')
-  const [sending, setSending] = useState(false)
-  const [currentSessionId, setCurrentSessionId] = useState<number | null>(sessionId)
-  const scrollRef = useRef<HTMLDivElement>(null)
-  // Voice input: snapshot of the input value when listening started, so we
-  // can append transcribed text rather than overwriting whatever the analyst
-  // had already typed.
-  const voiceAnchorRef = useRef('')
-
-  useEffect(() => {
-    if (!currentSessionId) return
-    http.get<ChatMessage[]>(`/copilot/sessions/${currentSessionId}/messages`).then((msgs) => {
-      setMessages(msgs)
-    }).catch(() => {
-      // ignore
-    })
-  }, [currentSessionId])
-
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
-    }
-  }, [messages])
-
-  async function handleSend() {
-    if (!input.trim() || sending) return
-    const userMsg = input.trim()
-    setInput('')
-    voiceAnchorRef.current = ''
-    setSending(true)
-
-    // Optimistic add user message
-    setMessages((m) => [
-      ...m,
-      {
-        id: Date.now(),
-        role: 'user',
-        content: userMsg,
-        citations: [],
-        tokens_used: 0,
-        created_at: new Date().toISOString(),
-      },
-    ])
-
-    try {
-      const resp = await http.post<{
-        session_id: number
-        message: ChatMessage
-      }>('/copilot/ask', {
-        session_id: currentSessionId || undefined,
-        investigation_id: invId,
-        message: userMsg,
-      })
-      if (!currentSessionId) {
-        setCurrentSessionId(resp.session_id)
-        onSessionCreated(resp.session_id)
-        qc.invalidateQueries({ queryKey: ['copilot-sessions'] })
-      }
-      setMessages((m) => [...m, resp.message])
-    } catch (err) {
-      const e = err as Error
-      setMessages((m) => [
-        ...m,
-        {
-          id: Date.now(),
-          role: 'assistant',
-          content: `Sorry, I hit an error: ${e.message}`,
-          citations: [],
-          tokens_used: 0,
-          created_at: new Date().toISOString(),
-        },
-      ])
-    } finally {
-      setSending(false)
-    }
-  }
-
-  function handleKey(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
-    }
-  }
-
-  return (
-    <div className="flex flex-col h-[calc(100vh-360px)] min-h-[500px]">
-      <div className="bg-card border border-border rounded-xl flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="px-5 py-3 border-b border-border flex items-center gap-2">
-          <Bot weight="duotone" className="h-4 w-4 text-primary" />
-          <div>
-            <p className="text-sm font-medium text-foreground">Investigation Copilot</p>
-            <p className="text-[10px] text-muted-foreground/50">
-              Grounded in "{invTitle}" · {currentSessionId ? 'session active' : 'new session'}
-            </p>
-          </div>
-        </div>
-
-        {/* Messages */}
-        <div ref={scrollRef} className="flex-1 overflow-y-auto p-5 space-y-4">
-          {messages.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-card border border-border mb-3">
-                <Bot weight="duotone" className="h-5 w-5 text-primary" />
-              </div>
-              <p className="text-sm font-medium text-foreground">Ask the Copilot</p>
-              <p className="text-xs text-muted-foreground mt-1 max-w-sm">
-                I can answer questions about this investigation's entities, enrichment, and analysis. Try:
-              </p>
-              <div className="mt-4 space-y-1.5">
-                {[
-                  'What threats are present in this investigation?',
-                  'Which IOCs have malicious enrichment data?',
-                  'Summarise the actor hypothesis.',
-                ].map((q) => (
-                  <button
-                    key={q}
-                    onClick={() => setInput(q)}
-                    className="block text-xs text-left px-3 py-1.5 rounded-md bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors w-80 max-w-full"
-                  >
-                    {q}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : (
-            messages.map((m) => (
-              <div
-                key={m.id}
-                className={cn(
-                  'flex gap-3',
-                  m.role === 'user' ? 'flex-row-reverse' : ''
-                )}
-              >
-                <div
-                  className={cn(
-                    'flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full',
-                    m.role === 'user'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-card border border-border text-primary'
-                  )}
-                >
-                  {m.role === 'user' ? <User weight="duotone" className="h-3.5 w-3.5" /> : <Bot weight="duotone" className="h-3.5 w-3.5" />}
-                </div>
-                <div
-                  className={cn(
-                    'flex-1 max-w-[80%] px-3.5 py-2.5 rounded-lg text-sm leading-relaxed',
-                    m.role === 'user'
-                      ? 'bg-primary/10 border border-primary/20 text-foreground'
-                      : 'bg-card border border-border text-foreground'
-                  )}
-                >
-                  {m.role === 'assistant' ? (
-                    <Markdown content={m.content || (m as any).parts?.map((p: any) => p.text || '').join('') || ''} />
-                  ) : (
-                    <p className="whitespace-pre-wrap">{m.content || (m as any).parts?.map((p: any) => p.text || '').join('') || ''}</p>
-                  )}
-                  {m.citations && m.citations.length > 0 && (
-                    <div className="mt-2 pt-2 border-t border-border flex flex-wrap gap-1">
-                      <span className="text-[10px] text-muted-foreground/50">Cites:</span>
-                      {m.citations.slice(0, 5).map((c, i) => (
-                        <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-background border border-border text-muted-foreground ansein-mono">
-                          {c.length > 24 ? c.slice(0, 22) + '…' : c}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))
-          )}
-          {sending && (
-            <div className="flex gap-3">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-card border border-border text-primary">
-                <Bot weight="duotone" className="h-3.5 w-3.5" />
-              </div>
-              <div className="bg-card border border-border rounded-lg px-3.5 py-2.5 text-sm text-muted-foreground">
-                <Loader2 weight="duotone" className="h-3.5 w-3.5 animate-spin inline mr-2" />
-                Thinking…
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Input */}
-        <div className="p-3 border-t border-border">
-          <div className="flex items-end gap-2">
-            <textarea
-              rows={1}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKey}
-              placeholder="Ask about this investigation (type or speak)…"
-              className="flex-1 px-3 py-2 rounded-md bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-none max-h-32"
-              style={{ minHeight: '38px' }}
-            />
-            <VoiceInputButton
-              disabled={sending}
-              onTranscript={(interim) => {
-                if (!voiceAnchorRef.current && !input) {
-                  voiceAnchorRef.current = input
-                }
-                const base = voiceAnchorRef.current || input
-                const merged = base ? `${base} ${interim}`.trim() : interim
-                setInput(merged)
-              }}
-              onFinal={(finalChunk) => {
-                const base = voiceAnchorRef.current || input
-                voiceAnchorRef.current = base ? `${base} ${finalChunk}`.trim() : finalChunk
-                setInput(voiceAnchorRef.current)
-              }}
-            />
-            <button
-              onClick={handleSend}
-              disabled={!input.trim() || sending}
-              className="inline-flex items-center justify-center h-9 w-9 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <Send weight="duotone" className="h-4 w-4" />
-            </button>
-          </div>
-          <p className="text-[10px] text-muted-foreground/50 mt-1.5 text-center">
-            Press Enter to send · Shift+Enter for new line · Click the mic to speak · Answers are grounded in this investigation's data only.
-          </p>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 /* ============================================ Notes Tab */
 function NotesTab({ invId }: { invId: number }) {
   const qc = useQueryClient()
@@ -2775,7 +2619,6 @@ const ACTIVITY_ICONS: Record<string, React.ComponentType<{ className?: string; s
   'note.create': StickyNote,
   'note.delete': StickyNote,
   'note.update': StickyNote,
-  'copilot.ask': Bot,
 }
 
 const ACTIVITY_COLORS: Record<string, string> = {
@@ -2791,7 +2634,6 @@ const ACTIVITY_COLORS: Record<string, string> = {
   'note.create': '#06b6d4',
   'note.delete': '#f43f5e',
   'note.update': '#06b6d4',
-  'copilot.ask': '#8b5cf6',
 }
 
 function activityLabel(action: string): string {
@@ -2808,7 +2650,6 @@ function activityLabel(action: string): string {
     'note.create': 'Note created',
     'note.delete': 'Note deleted',
     'note.update': 'Note updated',
-    'copilot.ask': 'Copilot queried',
   }
   return map[action] || action.split(/[._]/).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
 }

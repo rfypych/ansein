@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowLeft, Home, FolderSearch } from 'lucide-react'
+import { ArrowLeft, House, FolderOpen } from '@phosphor-icons/react/dist/ssr'
 import { Brand } from '@/components/ansein/brand'
 
 export default function NotFound() {
@@ -35,7 +35,7 @@ export default function NotFound() {
               href="/"
               className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
             >
-              <Home className="h-3.5 w-3.5" />
+              <House className="h-3.5 w-3.5" />
               Home
             </Link>
             <Link

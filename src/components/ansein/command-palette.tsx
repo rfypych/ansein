@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { ArrowBendDownLeft, ArrowDown, ArrowUp, Copy as CopyPlus, FileCode, FileText as FileJson, Flask as FlaskConical, Folder as FolderSearch, Gear as SettingsIcon, House, Lightning as Zap, MagnifyingGlass as Search, Play, Plus, Printer, Robot as Bot, ShieldWarning as ShieldAlert, SquaresFour as LayoutDashboard, Star, User as UserIcon } from '@phosphor-icons/react'
+import { ArrowBendDownLeft, ArrowDown, ArrowUp, Copy as CopyPlus, FileCode, FileText as FileJson, Flask as FlaskConical, Folder as FolderSearch, Gear as SettingsIcon, House, Lightning as Zap, MagnifyingGlass as Search, Play, Plus, Printer, ShieldWarning as ShieldAlert, SquaresFour as LayoutDashboard, Star, User as UserIcon } from '@phosphor-icons/react'
 import { useAuthStore, getStoredAccessToken } from '@/lib/auth-store'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -128,7 +128,6 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
       { id: 'investigations', label: 'Investigations', icon: FolderSearch, action: () => go('/app/investigations'), group: 'Investigations', type: 'navigation', hint: 'Browse all cases' },
       { id: 'new-investigation', label: 'New investigation', icon: Plus, action: () => go('/app/investigations/new'), group: 'Investigations', type: 'navigation', hint: 'Create a new case', keywords: 'create add' },
       { id: 'ioc-playground', label: 'IOC Playground', icon: FlaskConical, action: () => go('/app/ioc-playground'), group: 'Navigation', type: 'navigation', hint: 'Quick IOC extraction & enrichment', keywords: 'ioc analyze playground extract' },
-      { id: 'copilot', label: 'Copilot', icon: Bot, action: () => go('/app/copilot'), group: 'Navigation', type: 'navigation', hint: 'Open general Copilot chat' },
       { id: 'settings', label: 'Settings', icon: SettingsIcon, action: () => go('/app/settings'), group: 'Account', type: 'navigation', hint: 'Manage BYOK API keys' },
       { id: 'profile', label: 'Profile', icon: UserIcon, action: () => go('/app/profile'), group: 'Account', type: 'navigation', hint: 'Account & password' },
       ...(user?.is_superuser

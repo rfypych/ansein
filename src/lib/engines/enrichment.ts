@@ -4,6 +4,7 @@
  * All providers fail gracefully (return {} on error).
  */
 import type { EntityType } from '@/lib/engines/extraction'
+import { enrichWithFreeSources } from '@/lib/engines/free-enrichment'
 
 export interface EnrichmentData {
   [provider: string]: Record<string, unknown>
@@ -154,6 +155,9 @@ export function computeAdmiralty(
     const d = enrichment[s]
     if (typeof d?.malicious === 'number' && d.malicious > 0) maliciousCount++
     if (typeof d?.abuse_score === 'number' && d.abuse_score >= 75) maliciousCount++
+    if (s === 'threatfox' && d?.found) maliciousCount++
+    if (s === 'urlhaus' && d?.found) maliciousCount++
+    if (s === 'cisa_kev' && d?.is_known_exploited) maliciousCount++
   }
   if (maliciousCount >= 1 && reliability === 'D') reliability = 'C'
   if (maliciousCount >= 2 && reliability === 'B') reliability = 'A'
@@ -172,7 +176,10 @@ export async function enrichEntity(
   const abuse = keys.abuseipdb_api_key || envKey('ABUSEIPDB_API_KEY')
   const shodan = keys.shodan_api_key || envKey('SHODAN_API_KEY')
 
-  const out: EnrichmentData = {}
+  // Run 100% Free OSINT checks (ThreatFox, URLhaus, CISA KEV, FreeGeoIP, Cloudflare DoH)
+  const freeData = await enrichWithFreeSources(entityType, value)
+  const out: EnrichmentData = { ...freeData }
+
   if (entityType === 'ioc_ip') {
     if (vt) out.virustotal = await vtIp(value, vt)
     if (abuse) out.abuseipdb = await abuseIp(value, abuse)
@@ -184,7 +191,7 @@ export async function enrichEntity(
   } else if (entityType === 'ioc_url') {
     if (vt) out.virustotal = await vtUrl(value, vt)
   } else if (entityType === 'ioc_wallet') {
-    // No standard free enrichment for crypto wallets in v3
+    // No standard free enrichment for crypto wallets
   }
   return out
 }

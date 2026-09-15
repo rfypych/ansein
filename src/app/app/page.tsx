@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
-import { ArrowRight, ChartBar as BarChart3, CheckCircle as CheckCircle2, Clock, Copy as CopyPlus, Eye, FileText, Folder as FolderSearch, Graph as Network, Key as KeyRound, Play, Plus, Robot as Bot, ShieldCheck, ShieldWarning as ShieldAlert, Star, Target, TrendUp as TrendingUp, User, Warning as AlertTriangle, Waveform } from '@phosphor-icons/react'
+import { ArrowRight, ChartBar as BarChart3, CheckCircle as CheckCircle2, Clock, Copy as CopyPlus, Eye, FileText, Folder as FolderSearch, Graph as Network, Key as KeyRound, Play, Plus, ShieldCheck, ShieldWarning as ShieldAlert, Star, Target, TrendUp as TrendingUp, User, Warning as AlertTriangle, Waveform } from '@phosphor-icons/react'
 import { http } from '@/lib/http'
 import { useAuthStore } from '@/lib/auth-store'
 import { Badge, EmptyState, SeverityMeter, Spinner, AnimatedNumber, ProgressRing, Sparkline, DonutChart } from '@/components/ansein/ui'
@@ -39,12 +39,6 @@ interface UserSettings {
   has_custom_llm: boolean
   preferred_llm: string
 }
-
-type ChatSessionList = Array<{
-  id: number
-  title: string
-  updated_at: string
-}>
 
 interface AuditEntry {
   id: number
@@ -94,10 +88,6 @@ export default function DashboardPage() {
     queryKey: ['settings'],
     queryFn: () => http.get<UserSettings>('/settings'),
   })
-  const sessions = useQuery({
-    queryKey: ['copilot-sessions'],
-    queryFn: () => http.get<ChatSessionList>('/copilot/sessions'),
-  })
   const audit = useQuery({
     queryKey: ['dashboard-audit'],
     queryFn: () => http.get<AuditList>('/audit?page=1&page_size=5'),
@@ -124,7 +114,6 @@ export default function DashboardPage() {
         settings.data.has_shodan,
       ].filter(Boolean).length
     : 0
-  const totalSessions = sessions.data?.length || 0
   const recentActivity = recentInv.length
     ? formatRelative(recentInv[0].updated_at)
     : '—'
@@ -211,13 +200,6 @@ export default function DashboardPage() {
           icon={<Waveform weight="duotone" className="h-4 w-4" />}
           accent="amber"
           loading={investigations.isLoading}
-        />
-        <StatCard
-          label="Copilot chats"
-          value={totalSessions}
-          icon={<Bot weight="duotone" className="h-4 w-4" />}
-          accent="violet"
-          loading={sessions.isLoading}
         />
         <StatCard
           label="API keys"
@@ -466,7 +448,6 @@ export default function DashboardPage() {
                 { step: '1', text: 'Create an investigation case', href: '/app/investigations/new' },
                 { step: '2', text: 'Add threat data sources (text/file/URL)', href: '/app/investigations/new' },
                 { step: '3', text: 'Run the extraction pipeline', href: '/app/investigations' },
-                { step: '4', text: 'Query the Copilot for insights', href: '/app/copilot' },
               ].map((s) => (
                 <li key={s.step}>
                   <Link

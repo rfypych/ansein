@@ -121,18 +121,6 @@ export const ENTITY_TYPE_LABELS: Record<string, string> = {
   identity: 'Identity',
 }
 
-export const ENTITY_TYPE_COLORS: Record<string, string> = {
-  threat_actor: '#dc2626',
-  malware: '#7c3aed',
-  tool: '#0d9488',
-  technique: '#0891b2',
-  vulnerability: '#ea580c',
-  ioc_ip: '#16a34a',
-  ioc_domain: '#65a30d',
-  ioc_url: '#9333ea',
-  ioc_hash: '#0d9488',
-  ioc_wallet: '#a16207',
-  target: '#db2777',
-  location: '#475569',
-  identity: '#64748b',
-}
+import { COLOR_MAP } from '@/lib/engines/graph'
+
+export const ENTITY_TYPE_COLORS: Record<string, string> = COLOR_MAP

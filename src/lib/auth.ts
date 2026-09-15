@@ -5,7 +5,12 @@
 import { SignJWT, jwtVerify } from 'jose'
 import bcrypt from 'bcryptjs'
 
-const SECRET_KEY = process.env.SECRET_KEY || 'dev-insecure-secret-change-me'
+const SECRET_KEY = process.env.SECRET_KEY || (() => {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('FATAL: SECRET_KEY environment variable is required in production')
+  }
+  return 'dev-insecure-secret-change-me'
+})()
 const ACCESS_EXPIRES_MIN = Number(process.env.ACCESS_TOKEN_EXPIRE_MINUTES || 1440)
 const REFRESH_EXPIRES_DAYS = Number(process.env.REFRESH_TOKEN_EXPIRE_DAYS || 7)
 
