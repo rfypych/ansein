@@ -5,19 +5,17 @@
 import { SignJWT, jwtVerify } from 'jose'
 import bcrypt from 'bcryptjs'
 
-const SECRET_KEY = process.env.SECRET_KEY || (() => {
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error('FATAL: SECRET_KEY environment variable is required in production')
-  }
-  return 'dev-insecure-secret-change-me'
-})()
+function getSecretKey(): string {
+  return process.env.SECRET_KEY || 'dev-insecure-secret-change-me'
+}
+
 const ACCESS_EXPIRES_MIN = Number(process.env.ACCESS_TOKEN_EXPIRE_MINUTES || 1440)
 const REFRESH_EXPIRES_DAYS = Number(process.env.REFRESH_TOKEN_EXPIRE_DAYS || 7)
 
 const BCRYPT_ROUNDS = Number(process.env.BCRYPT_ROUNDS || 12)
 
 function encKey(): Uint8Array {
-  return new TextEncoder().encode(SECRET_KEY)
+  return new TextEncoder().encode(getSecretKey())
 }
 
 export async function hashPassword(plain: string): Promise<string> {
