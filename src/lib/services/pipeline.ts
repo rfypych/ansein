@@ -254,7 +254,7 @@ export async function runPipeline(investigationId: number, userId: number): Prom
     const allEntities = await db.entity.findMany({ where: { investigationId: inv.id } })
     for (const e of allEntities) {
       let enrichment: EnrichmentData = {}
-      if (e.entityType.startsWith('ioc_') || e.entityType === 'ioc_wallet') {
+      if (e.entityType.startsWith('ioc_') || e.entityType === 'ioc_wallet' || e.entityType === 'vulnerability') {
         enrichment = await enrichEntity(
           e.entityType as any,
           e.value,

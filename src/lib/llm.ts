@@ -40,7 +40,6 @@ async function callOpenAICompatible(
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   }
-  // Some local providers (Ollama, LM Studio) don't need an API key
   if (apiKey) {
     headers.Authorization = `Bearer ${apiKey}`
   }
@@ -55,7 +54,6 @@ async function callOpenAICompatible(
     max_tokens: maxTokens,
   }
 
-  // Some models (e.g., o1, claude proxies) strictly forbid temperature
   if (model.toLowerCase().includes('o1-') || model.toLowerCase().includes('claude')) {
     delete bodyObj.temperature
   }
@@ -69,7 +67,6 @@ async function callOpenAICompatible(
   if (resp.status === 400) {
     const txt = await resp.text().catch(() => '')
     if (txt.toLowerCase().includes('temperature')) {
-      // Retry without temperature
       delete bodyObj.temperature
       resp = await fetch(endpoint, {
         method: 'POST',
@@ -97,6 +94,44 @@ async function callOpenAICompatible(
     tokensOut: data.usage?.completion_tokens || 0,
     provider: 'openai',
   }
+}
+
+const GROQ_CANDIDATE_MODELS = [
+  process.env.GROQ_MODEL,
+  'openai/gpt-oss-120b',
+  'llama-3.3-70b-versatile',
+  'qwen/qwen3.8-27b',
+  'openai/gpt-oss-20b',
+  'llama-3.1-8b-instant',
+].filter(Boolean) as string[]
+
+async function callGroqWithFallback(
+  apiKey: string,
+  messages: ChatMessage[],
+  temperature: number,
+  maxTokens: number
+): Promise<LLMResponse> {
+  const base = process.env.GROQ_API_BASE || 'https://api.groq.com/openai/v1'
+  let lastErr: unknown = null
+  for (const model of GROQ_CANDIDATE_MODELS) {
+    try {
+      return await callOpenAICompatible(
+        apiKey,
+        base,
+        model,
+        messages,
+        temperature,
+        maxTokens
+      ).then((r) => ({ ...r, provider: 'groq' as const }))
+    } catch (e: any) {
+      lastErr = e
+      if (e?.message?.includes('model_not_found') || e?.message?.includes('does not exist')) {
+        continue // try next model
+      }
+      throw e
+    }
+  }
+  throw lastErr || new Error('All Groq models failed')
 }
 
 async function callZai(
@@ -183,14 +218,12 @@ export async function chatCompletion(opts: ChatOptions): Promise<LLMResponse> {
     ).then((r) => ({ ...r, provider: 'openai' as const }))
   }
   if (preferred === 'groq' && userKeys.groq_api_key) {
-    return callOpenAICompatible(
+    return callGroqWithFallback(
       userKeys.groq_api_key,
-      process.env.GROQ_API_BASE || 'https://api.groq.com/openai/v1',
-      process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
       messages,
       temperatureClamped,
       maxTokensClamped
-    ).then((r) => ({ ...r, provider: 'groq' as const }))
+    )
   }
   if (preferred === 'custom' && userKeys.custom_llm_base_url && userKeys.custom_llm_model) {
     return callOpenAICompatible(
@@ -205,14 +238,12 @@ export async function chatCompletion(opts: ChatOptions): Promise<LLMResponse> {
   // Auto preference — try Groq, then OpenAI, then custom, then z-ai
   if (userKeys.groq_api_key) {
     try {
-      return await callOpenAICompatible(
+      return await callGroqWithFallback(
         userKeys.groq_api_key,
-        process.env.GROQ_API_BASE || 'https://api.groq.com/openai/v1',
-        process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
         messages,
         temperatureClamped,
         maxTokensClamped
-      ).then((r) => ({ ...r, provider: 'groq' as const }))
+      )
     } catch (e) {
       console.warn('[llm] Groq failed, falling back:', e)
     }
