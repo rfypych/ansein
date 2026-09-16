@@ -179,16 +179,32 @@ export async function queryOSV(cve: string): Promise<FreeEnrichmentResult['osv']
 }
 
 // ---------------------------------------------------- Free IP Geolocation & ASN
+// Primary: freeipapi.com (60 req/min, no key). Fallback: ip-api.com free tier
+// (45 req/min, no key) — both 100% free. Either may 429 under burst load;
+// callers treat {} as "no data", never as failure.
 export async function queryFreeGeoIP(ip: string): Promise<FreeEnrichmentResult['geo_ip']> {
-  const data = await fetchWithTimeout(`https://freeipapi.com/api/json/${encodeURIComponent(ip)}`)
-  if (data && data.countryName) {
+  const primary = await fetchWithTimeout(`https://freeipapi.com/api/json/${encodeURIComponent(ip)}`)
+  if (primary && primary.countryName) {
     return {
-      country: data.countryName,
-      country_code: data.countryCode,
-      city: data.cityName,
-      region: data.regionName,
-      asn: data.asn || '',
-      isp: data.asnOrganization || '',
+      country: primary.countryName,
+      country_code: primary.countryCode,
+      city: primary.cityName,
+      region: primary.regionName,
+      asn: primary.asn || '',
+      isp: primary.asnOrganization || '',
+    }
+  }
+  const fallback = await fetchWithTimeout(
+    `http://ip-api.com/json/${encodeURIComponent(ip)}?fields=status,country,countryCode,regionName,city,as,isp,org`
+  )
+  if (fallback && fallback.status === 'success' && fallback.country) {
+    return {
+      country: fallback.country,
+      country_code: fallback.countryCode,
+      city: fallback.city,
+      region: fallback.regionName,
+      asn: fallback.as || '',
+      isp: fallback.isp || fallback.org || '',
     }
   }
   return {}
