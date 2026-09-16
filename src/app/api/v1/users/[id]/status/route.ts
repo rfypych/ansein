@@ -7,7 +7,6 @@ import {
   withErrorHandler,
   requireUser,
   getClientIp,
-  safeStringifyJson,
   handlePrismaError,
 } from '@/lib/api'
 import { appendAuditLog } from '@/lib/audit-chain'

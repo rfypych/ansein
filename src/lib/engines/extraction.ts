@@ -291,6 +291,8 @@ export async function extractEntities(
     })
   }
   for (const h of llmHits) {
+    // Never promote PII-redaction placeholders into entities
+    if (/^\[REDACTED_[A-Z_]+\]$/.test(h.value.trim())) continue
     // Normalise defanged LLM values (hxxp://x[.]com) to canonical form so
     // they dedup against the regex hits instead of polluting SIEM rules
     // with undead defanged duplicates.

@@ -82,10 +82,19 @@ export async function GET(
     })
   }
 
-  // Collection Objects: /taxii21/collections/:id/objects (+ aliases)
-  // User-scoped, paginated, incremental.
+  // Collection Objects: /taxii21/collections/:id/objects (+ /objects alias)
+  // User-scoped, paginated, incremental. Cursor pagination: pass the `next`
+  // value from the previous response as `cursor` (opaque base64url of the
+  // last investigation's updatedAt+id), like OpenCTI's TAXII collections.
+  const inCollectionsPath = seg(0) === 'collections'
+  if (inCollectionsPath && seg(1) !== COLLECTION_ID.toLowerCase() && seg(1) !== COLLECTION_ID) {
+    return NextResponse.json(
+      { title: 'Not found', description: 'Unknown TAXII collection' },
+      { status: 404, headers: { 'Content-Type': TAXII_CT } }
+    )
+  }
   const isObjects =
-    (seg(0) === 'collections' && seg(2) === 'objects') ||
+    (inCollectionsPath && seg(2) === 'objects') ||
     seg(0) === 'objects'
   if (!isObjects) {
     return NextResponse.json(
@@ -102,30 +111,68 @@ export async function GET(
     const parsed = new Date(addedAfterRaw)
     if (!Number.isNaN(parsed.getTime())) addedAfter = parsed
   }
+  // Decode opaque cursor -> keyset position (updatedAt desc, id desc)
+  let cursorTime: Date | undefined
+  let cursorId = Number.MAX_SAFE_INTEGER
+  const cursorRaw = url.searchParams.get('cursor')
+  if (cursorRaw) {
+    try {
+      const decoded = JSON.parse(Buffer.from(cursorRaw, 'base64url').toString('utf8')) as {
+        t?: string
+        i?: number
+      }
+      const t = decoded.t ? new Date(decoded.t) : null
+      if (t && !Number.isNaN(t.getTime())) {
+        cursorTime = t
+        if (Number.isFinite(decoded.i)) cursorId = Number(decoded.i)
+      }
+    } catch {
+      // Malformed cursor — ignore and start from the beginning
+    }
+  }
 
   const investigations = await db.investigation.findMany({
     where: {
       userId,
       severityScore: { gte: 50 },
       ...(addedAfter ? { updatedAt: { gt: addedAfter } } : {}),
+      ...(cursorTime
+        ? {
+            OR: [
+              { updatedAt: { lt: cursorTime } },
+              { updatedAt: cursorTime, id: { lt: cursorId } },
+            ],
+          }
+        : {}),
     },
-    take: limit,
-    orderBy: { updatedAt: 'desc' },
+    take: limit + 1, // +1 probes whether a next page exists
+    orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
     include: {
       entities: true,
       relationships: true,
     },
   })
 
+  const page = investigations.slice(0, limit)
   const allObjects: unknown[] = []
 
-  for (const inv of investigations) {
+  for (const inv of page) {
     const bundle = buildStixBundle(inv, inv.entities, inv.relationships)
     allObjects.push(...(bundle.objects as unknown[]))
   }
 
+  const hasMore = investigations.length > limit
+  const last = page[page.length - 1]
+  const next =
+    hasMore && last
+      ? `/api/v1/taxii21/collections/${COLLECTION_ID}/objects?limit=${limit}` +
+        (addedAfterRaw ? `&added_after=${encodeURIComponent(addedAfterRaw)}` : '') +
+        `&cursor=${Buffer.from(JSON.stringify({ t: last.updatedAt.toISOString(), i: last.id })).toString('base64url')}`
+      : undefined
+
   return NextResponse.json({
-    more: false,
+    more: hasMore,
+    ...(next ? { next } : {}),
     objects: allObjects,
   }, {
     headers: { 'Content-Type': TAXII_CT },

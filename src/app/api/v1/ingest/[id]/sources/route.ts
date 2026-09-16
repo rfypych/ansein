@@ -9,7 +9,6 @@ import {
   requireUser,
   handlePrismaError,
   getClientIp,
-  safeStringifyJson,
 } from '@/lib/api'
 import { contentHash } from '@/lib/engines/extraction'
 import { redactPII } from '@/lib/pii-redact'
