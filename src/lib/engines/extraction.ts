@@ -284,13 +284,20 @@ export async function extractEntities(
     })
   }
   for (const h of llmHits) {
-    const normalized = normalizeValue(h.entity_type, h.value)
+    // Normalise defanged LLM values (hxxp://x[.]com) to canonical form so
+    // they dedup against the regex hits instead of polluting SIEM rules
+    // with undead defanged duplicates.
+    const cleanValue =
+      h.entity_type === 'ioc_url' || h.entity_type === 'ioc_domain' || h.entity_type === 'ioc_ip'
+        ? defang(h.value).replace(/[).,;:'"\]]+$/, '')
+        : h.value
+    const normalized = normalizeValue(h.entity_type, cleanValue)
     const key = `${h.entity_type}|${normalized.toLowerCase()}`
     const existing = byKey.get(key)
     if (!existing) {
       byKey.set(key, {
         entity_type: h.entity_type,
-        value: h.value,
+        value: cleanValue,
         normalized,
         confidence: h.confidence,
         source_method: 'llm',
