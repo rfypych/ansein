@@ -103,10 +103,19 @@ const RULES: Rule[] = [
   { type: 'PHONE', pattern: PHONE_PATTERN },
   // API keys last — only matches tokens that survive prior redaction
   // and aren't obviously JWTs (which start with `eyJ`).
+  // CTI exemption: pure-hex strings of file-hash lengths (MD5/SHA-1/
+  // SHA-256/SHA-512) are IOCs — the platform's core product — not secrets.
+  // Redacting them silently destroys hash extraction downstream.
   {
     type: 'API_KEY',
     pattern: API_KEY_PATTERN,
-    validate: (m) => !m.startsWith('eyJ') && !/^-----BEGIN/.test(m),
+    validate: (m) =>
+      !m.startsWith('eyJ') &&
+      !/^-----BEGIN/.test(m) &&
+      !/^[a-fA-F0-9]{32}$/.test(m) &&
+      !/^[a-fA-F0-9]{40}$/.test(m) &&
+      !/^[a-fA-F0-9]{64}$/.test(m) &&
+      !/^[a-fA-F0-9]{128}$/.test(m),
   },
 ]
 
