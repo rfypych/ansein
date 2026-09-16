@@ -98,11 +98,11 @@ async function callOpenAICompatible(
 
 const GROQ_CANDIDATE_MODELS = [
   process.env.GROQ_MODEL,
+  'llama-3.1-8b-instant',
   'openai/gpt-oss-120b',
   'llama-3.3-70b-versatile',
   'qwen/qwen3.8-27b',
   'openai/gpt-oss-20b',
-  'llama-3.1-8b-instant',
 ].filter(Boolean) as string[]
 
 async function callGroqWithFallback(
@@ -125,10 +125,8 @@ async function callGroqWithFallback(
       ).then((r) => ({ ...r, provider: 'groq' as const }))
     } catch (e: any) {
       lastErr = e
-      if (e?.message?.includes('model_not_found') || e?.message?.includes('does not exist')) {
-        continue // try next model
-      }
-      throw e
+      console.warn(`[llm] Groq model candidate '${model}' failed:`, e?.message || e)
+      continue // try next candidate model
     }
   }
   throw lastErr || new Error('All Groq models failed')
