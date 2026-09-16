@@ -152,9 +152,16 @@ export function regexExtract(rawText: string): RegexHit[] {
   for (const m of text.matchAll(RE.CVE)) {
     addUnique('vulnerability', m[0].toUpperCase(), 0.95)
   }
-  // BTC wallets
-  for (const m of text.matchAll(RE.BTC_BECH32)) addUnique('ioc_wallet', m[0], 0.85)
-  for (const m of text.matchAll(RE.BTC_LEGACY)) addUnique('ioc_wallet', m[0], 0.7)
+  // BTC wallets — never pure-hex strings: those are file hashes (an MD5
+  // starting with 1/3 would otherwise double-report as a "wallet")
+  for (const m of text.matchAll(RE.BTC_BECH32)) {
+    if (/^[a-fA-F0-9]+$/.test(m[0])) continue
+    addUnique('ioc_wallet', m[0], 0.85)
+  }
+  for (const m of text.matchAll(RE.BTC_LEGACY)) {
+    if (/^[a-fA-F0-9]+$/.test(m[0])) continue
+    addUnique('ioc_wallet', m[0], 0.7)
+  }
   // Domains (strictly filter files, code extensions, and invalid TLDs)
   for (const m of text.matchAll(RE.DOMAIN)) {
     const v = m[0].toLowerCase()
