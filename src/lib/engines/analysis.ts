@@ -85,8 +85,9 @@ ENTITIES:
 `
 
 function summariseEntities(entities: EntityForAnalysis[]): string {
+  // Support up to 150 entities in prompt
   return entities
-    .slice(0, 50)
+    .slice(0, 150)
     .map((e) => `- [${e.entity_type}] ${e.value} (conf=${e.confidence.toFixed(2)})`)
     .join('\n')
 }
@@ -119,25 +120,58 @@ function heuristicSeverity(
   for (const e of entities) {
     counts[e.entity_type] = (counts[e.entity_type] || 0) + 1
   }
+  
   let severity = 0
-  severity += Math.min(20, (counts.threat_actor || 0) * 20)
-  severity += Math.min(20, (counts.malware || 0) * 10)
-  severity += Math.min(15, (counts.vulnerability || 0) * 8)
-  severity += Math.min(15, (counts.ioc_hash || 0) * 3)
-  severity += Math.min(15, (counts.ioc_ip || 0) * 2)
-  severity += Math.min(15, (counts.ioc_url || 0) * 3)
 
+  // Nation-state / APT actor presence elevates severity significantly
+  if ((counts.threat_actor || 0) > 0) {
+    severity += 35 + Math.min(20, (counts.threat_actor! - 1) * 10)
+  }
+
+  // Active malware families or sophisticated tooling (e.g. Cobalt Strike, Mimikatz)
+  if ((counts.malware || 0) > 0) {
+    severity += 25 + Math.min(15, (counts.malware! - 1) * 5)
+  }
+  if ((counts.tool || 0) > 0) {
+    severity += 15
+  }
+
+  // Known vulnerabilities
+  if ((counts.vulnerability || 0) > 0) {
+    severity += 20 + Math.min(15, (counts.vulnerability! - 1) * 5)
+  }
+
+  // Network & File Indicators
+  severity += Math.min(15, (counts.ioc_hash || 0) * 4)
+  severity += Math.min(15, (counts.ioc_ip || 0) * 3)
+  severity += Math.min(15, (counts.ioc_url || 0) * 4)
+  severity += Math.min(10, (counts.ioc_domain || 0) * 2)
+
+  // Corroborated OSINT intelligence boosts
   for (const enr of enrichmentByEntity) {
-    for (const [, d] of Object.entries(enr)) {
-      if (typeof d?.malicious === 'number' && d.malicious > 0) {
-        severity += Math.min(10, d.malicious * 2)
+    for (const [provider, d] of Object.entries(enr || {})) {
+      // CISA KEV active weaponisation
+      if (provider === 'cisa_kev' && (d as any)?.is_known_exploited) {
+        severity += 25
       }
-      if (typeof d?.abuse_score === 'number' && d.abuse_score >= 75) {
-        severity += 5
+      // ThreatFox confirmed malware
+      if (provider === 'threatfox' && (d as any)?.found) {
+        severity += 20
+      }
+      // URLhaus active payload
+      if (provider === 'urlhaus' && (d as any)?.found) {
+        severity += 15
+      }
+      if (typeof (d as any)?.malicious === 'number' && (d as any).malicious > 0) {
+        severity += Math.min(15, (d as any).malicious * 2)
+      }
+      if (typeof (d as any)?.abuse_score === 'number' && (d as any).abuse_score >= 75) {
+        severity += 10
       }
     }
   }
-  return Math.min(100, severity)
+
+  return Math.min(100, Math.max(10, severity))
 }
 
 function heuristicNarrative(entities: EntityForAnalysis[], severity: number): string {
@@ -433,7 +467,7 @@ export async function analyze(
         entitiesSummary +
         '\n\nENRICHMENT SUMMARY:\n' +
         enrichmentSummary +
-        (sourceText ? '\n\nSOURCE EXCERPT:\n' + sourceText.slice(0, 2000) : '')
+        (sourceText ? '\n\nSOURCE EXCERPT:\n' + sourceText.slice(0, 12000) : '')
 
       const messages: ChatMessage[] = [
         { role: 'system', content: LLM_SYSTEM },

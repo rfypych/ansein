@@ -119,6 +119,65 @@ export function parseStixBundle(bundleJson: any): StixImportResult {
         confidence: 0.85,
         stixId: obj.id,
       })
+    } else if (obj.type === 'campaign') {
+      entities.push({
+        entityType: 'threat_actor',
+        value: obj.name || obj.id,
+        confidence: 0.9,
+        stixId: obj.id,
+      })
+    } else if (obj.type === 'infrastructure') {
+      entities.push({
+        entityType: 'target',
+        value: obj.name || obj.id,
+        confidence: 0.8,
+        stixId: obj.id,
+      })
+    } else if (obj.type === 'location') {
+      entities.push({
+        entityType: 'location',
+        value: obj.name || (obj as any).country || obj.id,
+        confidence: 0.85,
+        stixId: obj.id,
+      })
+    } else if (obj.type === 'identity') {
+      entities.push({
+        entityType: 'identity',
+        value: obj.name || obj.id,
+        confidence: 0.85,
+        stixId: obj.id,
+      })
+    // ---------------- STIX 2.1 Native Cyber-observable Objects (SCOs)
+    } else if (obj.type === 'ipv4-addr' || obj.type === 'ipv6-addr') {
+      entities.push({
+        entityType: 'ioc_ip',
+        value: obj.value || obj.name || obj.id,
+        confidence: 0.95,
+        stixId: obj.id,
+      })
+    } else if (obj.type === 'domain-name') {
+      entities.push({
+        entityType: 'ioc_domain',
+        value: (obj.value || obj.name || obj.id).toLowerCase(),
+        confidence: 0.9,
+        stixId: obj.id,
+      })
+    } else if (obj.type === 'url') {
+      entities.push({
+        entityType: 'ioc_url',
+        value: obj.value || obj.name || obj.id,
+        confidence: 0.95,
+        stixId: obj.id,
+      })
+    } else if (obj.type === 'file') {
+      const hashes = (obj as any).hashes || {}
+      const hashVal = hashes['SHA-256'] || hashes['SHA-1'] || hashes['MD5'] || obj.name || obj.id
+      entities.push({
+        entityType: 'ioc_hash',
+        value: hashVal,
+        confidence: 0.95,
+        stixId: obj.id,
+      })
     } else if (obj.type === 'relationship' && obj.source_ref && obj.target_ref) {
       relationships.push({
         sourceStixId: obj.source_ref,

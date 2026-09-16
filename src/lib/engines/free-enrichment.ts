@@ -53,7 +53,7 @@ export interface FreeEnrichmentResult {
   }
 }
 
-async function fetchWithTimeout(url: string, opts: RequestInit = {}, timeoutMs = 6000): Promise<any | null> {
+async function fetchWithTimeout(url: string, opts: RequestInit = {}, timeoutMs = 4000): Promise<any | null> {
   try {
     const ctrl = new AbortController()
     const timer = setTimeout(() => ctrl.abort(), timeoutMs)

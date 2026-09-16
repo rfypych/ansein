@@ -45,10 +45,13 @@ export function generateSigmaRule(input: RuleGenerationInput): string {
     selections.push(`    selection_hashes:\n        Hashes|contains:\n${hashList}`)
   }
 
+  const selectionKeys: string[] = []
+  if (input.iocs.ips.length > 0) selectionKeys.push('selection_network')
+  if (input.iocs.domains.length > 0) selectionKeys.push('selection_dns')
+  if (input.iocs.hashes.length > 0) selectionKeys.push('selection_hashes')
+
   const detectionBody = selections.length > 0 ? selections.join('\n') : '    selection:\n        CommandLine|contains: \'\''
-  const condition = selections.length > 0
-    ? selections.map((_, idx) => (idx === 0 ? (input.iocs.ips.length ? 'selection_network' : input.iocs.domains.length ? 'selection_dns' : 'selection_hashes') : (input.iocs.domains.length ? ' or selection_dns' : ' or selection_hashes'))).join('')
-    : 'selection'
+  const condition = selectionKeys.length > 0 ? selectionKeys.join(' or ') : 'selection'
 
   return `title: "AnseIn CTI - ${cleanTitle}"
 id: ${crypto.randomUUID ? crypto.randomUUID() : 'c9a2f1b4-7e83-4a1d-9e65-2b4f8c0a9d12'}
@@ -81,21 +84,28 @@ export function generateYaraRule(input: RuleGenerationInput): string {
   const safeName = input.title.replace(/[^a-zA-Z0-9_]/g, '_').slice(0, 40)
   const hashes = input.iocs.hashes
   const domains = input.iocs.domains
+  const urls = input.iocs.urls
 
   const stringEntries: string[] = []
   domains.forEach((d, idx) => {
-    stringEntries.push(`        $domain_${idx} = "${d}" ascii wide`)
+    stringEntries.push(`        $domain_${idx} = "${d.replace(/"/g, '\\"')}" ascii wide nocase`)
+  })
+  urls.forEach((u, idx) => {
+    stringEntries.push(`        $url_${idx} = "${u.replace(/"/g, '\\"')}" ascii wide nocase`)
   })
 
-  const hashEntries = hashes.map((h) => `        // Target Hash: ${h}`).join('\n')
+  // Hashes as literal string indicators
+  hashes.forEach((h, idx) => {
+    stringEntries.push(`        $hash_${idx} = "${h.replace(/"/g, '\\"')}" ascii wide nocase`)
+  })
 
   return `rule AnseIn_${safeName} {
     meta:
-        description = "Automated YARA rule for ${input.title}"
+        description = "Automated YARA rule for ${input.title.replace(/"/g, "'")}"
         author = "AnseIn CTI Engine"
         date = "${new Date().toISOString().split('T')[0]}"
         severity = "${input.severity || 'HIGH'}"
-${hashEntries ? hashEntries + '\n' : ''}    strings:
+    strings:
 ${stringEntries.length > 0 ? stringEntries.join('\n') : '        $placeholder = "MALWARE_INDICATOR"'}
     condition:
         any of them
@@ -109,16 +119,18 @@ ${stringEntries.length > 0 ? stringEntries.join('\n') : '        $placeholder = 
 export function generateSuricataRules(input: RuleGenerationInput): string[] {
   const rules: string[] = []
   let sid = 1000001
+  const cleanTitle = input.title.replace(/["\\]/g, '')
 
   for (const ip of input.iocs.ips) {
     rules.push(
-      `alert ip any any -> ${ip} any (msg:"AnseIn CTI - Outbound traffic to malicious IP [${input.title}]"; classtype:trojan-activity; sid:${sid++}; rev:1;)`
+      `alert ip any any -> ${ip} any (msg:"AnseIn CTI - Outbound traffic to malicious IP [${cleanTitle}]"; classtype:trojan-activity; sid:${sid++}; rev:1;)`
     )
   }
 
   for (const domain of input.iocs.domains) {
+    const cleanDomain = domain.replace(/["\\]/g, '')
     rules.push(
-      `alert dns any any -> any any (msg:"AnseIn CTI - DNS query to malicious domain ${domain}"; dns.query; content:"${domain}"; nocase; classtype:trojan-activity; sid:${sid++}; rev:1;)`
+      `alert dns any any -> any any (msg:"AnseIn CTI - DNS query to malicious domain ${cleanDomain}"; dns.query; content:"${cleanDomain}"; nocase; classtype:trojan-activity; sid:${sid++}; rev:1;)`
     )
   }
 

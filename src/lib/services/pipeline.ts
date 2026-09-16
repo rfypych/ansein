@@ -205,6 +205,37 @@ async function getUserKeys(userId: number): Promise<UserKeys & { virustotal_api_
   }
 }
 
+/**
+ * Lightweight concurrency pool to process tasks in parallel without overflowing external APIs.
+ * Ensures 100+ entities are enriched in seconds rather than triggering Vercel 60s timeouts.
+ */
+async function asyncPool<T, R>(
+  items: T[],
+  concurrency: number,
+  iteratorFn: (item: T, idx: number) => Promise<R>
+): Promise<R[]> {
+  const ret: R[] = new Array(items.length)
+  const executing = new Set<Promise<void>>()
+
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i]
+    const p = Promise.resolve().then(() => iteratorFn(item, i)).then((res) => {
+      ret[i] = res
+    })
+    const e: Promise<void> = p.then(() => {
+      executing.delete(e)
+    })
+    executing.add(e)
+
+    if (executing.size >= concurrency) {
+      await Promise.race(executing)
+    }
+  }
+
+  await Promise.all(executing)
+  return ret
+}
+
 export async function runPipeline(investigationId: number, userId: number): Promise<void> {
   const inv = await db.investigation.findFirst({
     where: { id: investigationId, userId },
@@ -248,11 +279,11 @@ export async function runPipeline(investigationId: number, userId: number): Prom
       valueToId.set(e.normalized.toLowerCase(), created.id)
     }
 
-    // Step 2: enriching
+    // Step 2: enriching with concurrent pool (concurrency: 6) to avoid serverless timeout
     await db.investigation.update({ where: { id: inv.id }, data: { status: 'enriching' } })
-    const entitiesForAnalysis: EntityForAnalysis[] = []
     const allEntities = await db.entity.findMany({ where: { investigationId: inv.id } })
-    for (const e of allEntities) {
+
+    const entitiesForAnalysis: EntityForAnalysis[] = await asyncPool(allEntities, 6, async (e) => {
       let enrichment: EnrichmentData = {}
       if (e.entityType.startsWith('ioc_') || e.entityType === 'ioc_wallet' || e.entityType === 'vulnerability') {
         enrichment = await enrichEntity(
@@ -269,13 +300,13 @@ export async function runPipeline(investigationId: number, userId: number): Prom
         // Read any existing enrichment
         enrichment = safeParseJson<EnrichmentData>(e.enrichment, {})
       }
-      entitiesForAnalysis.push({
+      return {
         entity_type: e.entityType as any,
         value: e.value,
         confidence: e.confidence,
         enrichment,
-      })
-    }
+      }
+    })
 
     // Persist relationships
     const rels = await llmInferRelationships(extracted, text, userKeys)
@@ -306,7 +337,7 @@ export async function runPipeline(investigationId: number, userId: number): Prom
       }
     }
 
-    const result = await analyze(entitiesForAnalysis, merged, userKeys, text.slice(0, 4000))
+    const result = await analyze(entitiesForAnalysis, merged, userKeys, text.slice(0, 25000))
 
     const analysisRun = await db.analysisRun.create({
       data: {

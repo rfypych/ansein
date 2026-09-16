@@ -45,6 +45,31 @@ export interface UserKeys {
   custom_llm_model?: string
 }
 
+// ---------------------------------------------------------------- defanging
+/**
+ * Defang common CTI evasive notations so regexes can match cleanly.
+ * e.g.:
+ *  hxxp:// -> http://
+ *  hxxps:// -> https://
+ *  185[.]220[.]101[.]5 -> 185.220.101.5
+ *  evil[dot]com -> evil.com
+ */
+export function defang(input: string): string {
+  if (!input) return ''
+  return input
+    .replace(/\bhxxp(s?):\/\//gi, 'http$1://')
+    .replace(/\bme\s*\[\s*\.\s*\]\s*ga\b/gi, 'mega')
+    .replace(/\[\.\]/g, '.')
+    .replace(/\(\.\)/g, '.')
+    .replace(/\{\.\}/g, '.')
+    .replace(/\[dot\]/gi, '.')
+    .replace(/\(dot\)/gi, '.')
+    .replace(/\{dot\}/gi, '.')
+    .replace(/\[colon\]/gi, ':')
+    .replace(/\(colon\)/gi, ':')
+    .replace(/\[:\/\/\]/g, '://')
+}
+
 // ---------------------------------------------------------------- regexes
 const RE = {
   IPV4: /\b(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)\b/g,
@@ -61,7 +86,8 @@ const RE = {
   BTC_BECH32: /\bbc1[ac-hj-np-z02-9]{6,87}\b/gi,
 }
 
-const IMAGE_EXT = /\.(jpg|jpeg|png|gif|css|js|svg|webp|ico|woff2?|ttf)$/i
+// Extensions and local filenames that must NEVER be parsed as domains
+const FILE_OR_CODE_EXT = /\.(bin|dll|so|dylib|exe|sys|drv|json|xml|yaml|yml|py|sh|ps1|bat|cmd|vbs|js|ts|tsx|jsx|c|cpp|h|hpp|rs|go|java|class|jar|war|tar|gz|bz2|xz|zip|7z|rar|iso|img|vmdk|tmp|bak|old|swp|pid|lock|txt|log|conf|cfg|ini|inf|reg|dat|db|sqlite|sql|csv|tsv|md|pdf|doc|docx|xls|xlsx|ppt|pptx|jpg|jpeg|png|gif|css|svg|webp|ico|woff2?|ttf|otf|eot)$/i
 
 function isValidIpv4(v: string): boolean {
   if (!/^\d+\.\d+\.\d+\.\d+$/.test(v)) return false
@@ -86,7 +112,8 @@ interface RegexHit {
   confidence: number
 }
 
-export function regexExtract(text: string): RegexHit[] {
+export function regexExtract(rawText: string): RegexHit[] {
+  const text = defang(rawText)
   const hits: RegexHit[] = []
   const seen = new Set<string>()
 
@@ -128,10 +155,19 @@ export function regexExtract(text: string): RegexHit[] {
   // BTC wallets
   for (const m of text.matchAll(RE.BTC_BECH32)) addUnique('ioc_wallet', m[0], 0.85)
   for (const m of text.matchAll(RE.BTC_LEGACY)) addUnique('ioc_wallet', m[0], 0.7)
-  // Domains (filter image/css extensions)
+  // Domains (strictly filter files, code extensions, and invalid TLDs)
   for (const m of text.matchAll(RE.DOMAIN)) {
     const v = m[0].toLowerCase()
-    if (IMAGE_EXT.test(v)) continue
+    if (FILE_OR_CODE_EXT.test(v)) continue
+    // Filter out common false-positive filenames / version strings (e.g. v1.0.0, 1.2.3)
+    if (/^\d+(\.\d+)+$/.test(v)) continue
+    // TLD must have at least 2 alpha characters
+    const parts = v.split('.')
+    const tld = parts[parts.length - 1]
+    if (!/^[a-z]{2,24}$/.test(tld)) continue
+    // Skip if it looks like an IP address or partial octet
+    if (parts.every((p) => /^\d+$/.test(p))) continue
+
     addUnique('ioc_domain', v, 0.85)
   }
 
@@ -148,35 +184,26 @@ TEXT:
 `
 const LLM_SYSTEM = 'You output strict JSON, no prose.'
 
-async function llmExtract(
-  text: string,
+async function callLlmExtractChunk(
+  chunk: string,
   userKeys: UserKeys
 ): Promise<RegexHit[]> {
-  if (text.length < 80) return []
-  const truncated = text.slice(0, 8000)
-  let content: string | null = null
   try {
     const { chatCompletion } = await import('@/lib/llm')
     const resp = await chatCompletion({
       messages: [
         { role: 'system', content: LLM_SYSTEM },
-        { role: 'user', content: LLM_EXTRACTION_PROMPT + '\n```\n' + truncated + '\n```\n' },
+        { role: 'user', content: LLM_EXTRACTION_PROMPT + '\n```\n' + chunk + '\n```\n' },
       ],
       temperature: 0,
       maxTokens: 2048,
       userKeys,
     })
-    content = resp.content
-  } catch (e) {
-    console.warn('[extraction] LLM failed:', e)
-    return []
-  }
-  if (!content) return []
-  const cleaned = content
-    .replace(/^```(?:json)?\s*/i, '')
-    .replace(/\s*```\s*$/i, '')
-    .trim()
-  try {
+    if (!resp.content) return []
+    const cleaned = resp.content
+      .replace(/^```(?:json)?\s*/i, '')
+      .replace(/\s*```\s*$/i, '')
+      .trim()
     const arr = JSON.parse(cleaned) as Array<{
       entity_type: string
       value: string
@@ -194,13 +221,47 @@ async function llmExtract(
       if (!allowed.has(t)) continue
       const v = String(item.value || '').trim()
       if (!v) continue
+      // Don't let LLM re-introduce file extensions as domains
+      if (t === 'ioc_domain' && FILE_OR_CODE_EXT.test(v.toLowerCase())) continue
       const c = Math.min(1, Math.max(0, Number(item.confidence ?? 0.5) || 0.5))
       out.push({ entity_type: t, value: v, confidence: c })
     }
     return out
-  } catch {
+  } catch (e) {
+    console.warn('[extraction] LLM chunk failed:', e)
     return []
   }
+}
+
+async function llmExtract(
+  text: string,
+  userKeys: UserKeys
+): Promise<RegexHit[]> {
+  if (text.length < 80) return []
+  
+  // For massive documents (up to 50k+ chars), use sliding chunks so no threat actor/TTP is lost
+  const CHUNK_SIZE = 7500
+  const CHUNK_OVERLAP = 500
+  const chunks: string[] = []
+  
+  if (text.length <= CHUNK_SIZE) {
+    chunks.push(text)
+  } else {
+    let start = 0
+    // Process up to 5 strategic chunks (up to ~35,000 characters)
+    while (start < text.length && chunks.length < 5) {
+      const end = Math.min(start + CHUNK_SIZE, text.length)
+      chunks.push(text.slice(start, end))
+      start += CHUNK_SIZE - CHUNK_OVERLAP
+    }
+  }
+
+  const allHits: RegexHit[] = []
+  for (const chunk of chunks) {
+    const chunkHits = await callLlmExtractChunk(chunk, userKeys)
+    allHits.push(...chunkHits)
+  }
+  return allHits
 }
 
 // ---------------------------------------------------------------- public API
@@ -329,11 +390,38 @@ export async function llmInferRelationships(
   userKeys: UserKeys = {}
 ): Promise<ExtractedRelationship[]> {
   if (entities.length < 2 || text.length < 50) return []
-  const truncated = text.slice(0, 8000)
   
+  // Combine with heuristic inference as a reliable foundation
+  const heuristicRels = inferRelationships(entities, text)
+  const relMap = new Map<string, ExtractedRelationship>()
+  for (const hr of heuristicRels) {
+    relMap.set(`${hr.source}|${hr.target}|${hr.relation_type}`, hr)
+  }
+
+  // Provide up to 16,000 characters of text for relationship context
+  const excerpt = text.length <= 16000 ? text : text.slice(0, 16000)
+  
+  // Prioritize pivot entities if there are too many to fit in a single prompt
+  const sortedEntities = [...entities].sort((a, b) => {
+    const priority = (type: EntityType) => {
+      switch (type) {
+        case 'threat_actor': return 1
+        case 'malware': return 2
+        case 'vulnerability': return 3
+        case 'tool': return 4
+        case 'technique': return 5
+        case 'ioc_ip': return 6
+        case 'ioc_domain': return 7
+        default: return 8
+      }
+    }
+    return priority(a.entity_type) - priority(b.entity_type)
+  })
+  const selectedEntities = sortedEntities.slice(0, 45)
+
   // Assign IDs to entities for the LLM prompt
   const idMap = new Map<number, ExtractedEntity>()
-  const entitiesListForPrompt = entities.map((e, idx) => {
+  const entitiesListForPrompt = selectedEntities.map((e, idx) => {
     idMap.set(idx + 1, e)
     return { id: idx + 1, type: e.entity_type, value: e.normalized }
   })
@@ -346,7 +434,7 @@ export async function llmInferRelationships(
     const resp = await chatCompletion({
       messages: [
         { role: 'system', content: 'You output strict JSON, no prose.' },
-        { role: 'user', content: LLM_RELATIONSHIPS_PROMPT + '\n```\n' + truncated + '\n```\n\nENTITIES:\n```json\n' + entitiesListJson + '\n```\n' },
+        { role: 'user', content: LLM_RELATIONSHIPS_PROMPT + '\n```\n' + excerpt + '\n```\n\nENTITIES:\n```json\n' + entitiesListJson + '\n```\n' },
       ],
       temperature: 0.1,
       maxTokens: 2048,
@@ -355,10 +443,10 @@ export async function llmInferRelationships(
     content = resp.content
   } catch (e) {
     console.warn('[extraction] LLM relationships failed:', e)
-    return inferRelationships(entities, text) // fallback to heuristic
+    return heuristicRels
   }
   
-  if (!content) return inferRelationships(entities, text)
+  if (!content) return heuristicRels
   
   const cleaned = content
     .replace(/^```(?:json)?\s*/i, '')
@@ -404,12 +492,13 @@ export async function llmInferRelationships(
       })
     }
     
-    // If LLM returned nothing valid but heuristic does, fallback
-    if (out.length === 0) return inferRelationships(entities, text)
+    // Merge LLM inferred relationships with heuristic relationships
+    for (const rel of out) {
+      relMap.set(`${rel.source}|${rel.target}|${rel.relation_type}`, rel)
+    }
     
-    return out
+    return Array.from(relMap.values())
   } catch (e) {
-    console.warn('[extraction] LLM relationships parse failed:', e)
-    return inferRelationships(entities, text)
+    return heuristicRels
   }
 }
