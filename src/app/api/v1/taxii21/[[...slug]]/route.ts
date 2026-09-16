@@ -9,20 +9,26 @@ const TAXII_CT = 'application/taxii+json;version=2.1'
 const COLLECTION_ID = '91a7b452-e421-4f93-b1d5-8d9e6f3b2c1a'
 
 /**
- * TAXII 2.1 Serverless Collections Discovery & Objects Endpoint.
+ * TAXII 2.1 Serverless Collections Discovery & Objects Endpoint
+ * (optional catch-all: serves /taxii21, /taxii21/root,
+ * /taxii21/collections and /taxii21/collections/:id/objects).
  * Allows external SIEMs, MISP, and OpenCTI instances to poll intelligence directly.
  *
- * SECURITY: every endpoint requires a Bearer user token (same JWT as the app).
- * Objects are scoped to the authenticated user's own investigations — there is
- * no cross-tenant leak. Supports `limit` and `added_after` query params for
- * incremental polling like OpenCTI's TAXII collections.
+ * SECURITY: every endpoint except server discovery requires a Bearer user
+ * token (same JWT as the app) or session cookie. Objects are scoped to the
+ * authenticated user's own investigations — no cross-tenant leak. Supports
+ * `limit` and `added_after` query params for incremental polling like
+ * OpenCTI's TAXII collections.
  */
-export async function GET(req: NextRequest) {
-  const url = new URL(req.url)
-  const path = url.pathname
+export async function GET(
+  req: NextRequest,
+  ctx: { params: Promise<{ slug?: string[] }> }
+) {
+  const { slug = [] } = await ctx.params
+  const seg = (i: number) => (slug[i] || '').toLowerCase()
 
-  // TAXII Server Discovery / Server Status (public metadata only, no objects)
-  if (path.endsWith('/taxii21') || path.endsWith('/taxii21/')) {
+  // TAXII Server Discovery (public metadata only, no objects)
+  if (slug.length === 0) {
     return NextResponse.json({
       title: 'AnseIn Serverless CTI TAXII 2.1 Server',
       description: 'Zero-cost serverless threat intelligence sharing endpoint (auth required)',
@@ -46,8 +52,8 @@ export async function GET(req: NextRequest) {
     )
   }
 
-  // API Root information
-  if (path.endsWith('/root') || path.endsWith('/root/')) {
+  // API Root information: /taxii21/root
+  if (seg(0) === 'root' && slug.length === 1) {
     return NextResponse.json({
       title: 'Default API Root',
       description: 'AnseIn user-scoped intelligence feed',
@@ -58,8 +64,8 @@ export async function GET(req: NextRequest) {
     })
   }
 
-  // Collections list
-  if (path.endsWith('/collections') || path.endsWith('/collections/')) {
+  // Collections list: /taxii21/collections
+  if (seg(0) === 'collections' && slug.length === 1) {
     return NextResponse.json({
       collections: [
         {
@@ -76,7 +82,19 @@ export async function GET(req: NextRequest) {
     })
   }
 
-  // Collection Objects (STIX 2.1 Bundle) — user-scoped, paginated, incremental
+  // Collection Objects: /taxii21/collections/:id/objects (+ aliases)
+  // User-scoped, paginated, incremental.
+  const isObjects =
+    (seg(0) === 'collections' && seg(2) === 'objects') ||
+    seg(0) === 'objects'
+  if (!isObjects) {
+    return NextResponse.json(
+      { title: 'Not found', description: 'Unknown TAXII endpoint' },
+      { status: 404, headers: { 'Content-Type': TAXII_CT } }
+    )
+  }
+
+  const url = new URL(req.url)
   const limit = Math.min(100, Math.max(1, Number(url.searchParams.get('limit') || '10')))
   const addedAfterRaw = url.searchParams.get('added_after')
   let addedAfter: Date | undefined
