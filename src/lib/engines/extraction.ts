@@ -239,21 +239,19 @@ async function llmExtract(
 ): Promise<RegexHit[]> {
   if (text.length < 80) return []
   
-  // For massive documents (up to 50k+ chars), use sliding chunks so no threat actor/TTP is lost
+  // Cap LLM extraction to 2 chunks max: every extra chunk is an extra Groq
+  // call, and a burst of calls trips the free-tier TPM/RPM caps (429) which
+  // kills the downstream analysis LLM call too. Regex already covers the
+  // full text for IOCs; LLM chunks cover actors/TTPs in head + tail.
   const CHUNK_SIZE = 7500
-  const CHUNK_OVERLAP = 500
   const chunks: string[] = []
-  
+
   if (text.length <= CHUNK_SIZE) {
     chunks.push(text)
   } else {
-    let start = 0
-    // Process up to 5 strategic chunks (up to ~35,000 characters)
-    while (start < text.length && chunks.length < 5) {
-      const end = Math.min(start + CHUNK_SIZE, text.length)
-      chunks.push(text.slice(start, end))
-      start += CHUNK_SIZE - CHUNK_OVERLAP
-    }
+    // Head chunk (executive summary, attribution) + tail chunk (IOCs, TTPs)
+    chunks.push(text.slice(0, CHUNK_SIZE))
+    chunks.push(text.slice(Math.max(CHUNK_SIZE, text.length - CHUNK_SIZE)))
   }
 
   const allHits: RegexHit[] = []
@@ -350,10 +348,15 @@ export function inferRelationships(
 
     const ips = present.filter((e) => e.entity_type === 'ioc_ip')
     const domains = present.filter((e) => e.entity_type === 'ioc_domain')
+    const urls = present.filter((e) => e.entity_type === 'ioc_url')
+    const hashes = present.filter((e) => e.entity_type === 'ioc_hash')
     const locations = present.filter((e) => e.entity_type === 'location')
     const actors = present.filter((e) => e.entity_type === 'threat_actor')
     const targets = present.filter((e) => e.entity_type === 'target')
     const malware = present.filter((e) => e.entity_type === 'malware')
+    const tools = present.filter((e) => e.entity_type === 'tool')
+    const techniques = present.filter((e) => e.entity_type === 'technique')
+    const vulns = present.filter((e) => e.entity_type === 'vulnerability')
     const identities = present.filter((e) => e.entity_type === 'identity')
 
     for (const ip of ips) for (const d of domains) addRel(ip, d, 'communicates_with', 0.6, para)
@@ -363,7 +366,24 @@ export function inferRelationships(
       }
     }
     for (const a of actors) {
-      for (const t of [...targets, ...malware]) addRel(a, t, 'targets', 0.7, para)
+      for (const t of targets) addRel(a, t, 'targets', 0.7, para)
+      // STIX-grade semantics: actors USE tools/techniques/malware, EXPLOIT vulns
+      for (const m of malware) addRel(a, m, 'uses', 0.7, para)
+      for (const t of tools) addRel(a, t, 'uses', 0.65, para)
+      for (const t of techniques) addRel(a, t, 'uses', 0.65, para)
+      for (const v of vulns) addRel(a, v, 'exploits', 0.7, para)
+      for (const m of malware) addRel(m, a, 'attributed_to', 0.6, para)
+    }
+    // Delivery chain: URLs deliver malware, malware drops hashes, vulns indicate compromise
+    for (const u of urls) for (const m of malware) addRel(u, m, 'delivers', 0.65, para)
+    for (const m of malware) for (const h of hashes) addRel(m, h, 'drops', 0.6, para)
+    for (const v of vulns) {
+      for (const t of targets) addRel(v, t, 'targets', 0.6, para)
+      for (const m of [...malware, ...tools]) addRel(v, m, 'related_to', 0.5, para)
+    }
+    // IOCs indicate malicious infrastructure for the paragraph's actors
+    for (const ioc of [...ips, ...domains, ...urls, ...hashes]) {
+      for (const a of actors) addRel(ioc, a, 'indicates', 0.55, para)
     }
   }
 
@@ -376,7 +396,7 @@ Given the text below and a list of extracted entities (each with an 'id'), ident
 Return a JSON array of objects. Each object MUST have:
 - "source_id": the integer 'id' of the source entity
 - "target_id": the integer 'id' of the target entity
-- "relation_type": a snake_case string (e.g. communicates_with, targets, located_in, uses, owns, drops, resolves_to, related_to)
+- "relation_type": a snake_case string, one of: communicates_with, targets, located_in, uses, exploits, delivers, drops, indicates, attributed_to, owns, resolves_to, related_to
 - "weight": float between 0.0 and 1.0 (use higher weights for explicit links)
 - "evidence": a short quote from the text
 Only use 'id's from the provided list. Return [] if no relationships exist.
@@ -390,7 +410,7 @@ export async function llmInferRelationships(
   userKeys: UserKeys = {}
 ): Promise<ExtractedRelationship[]> {
   if (entities.length < 2 || text.length < 50) return []
-  
+
   // Combine with heuristic inference as a reliable foundation
   const heuristicRels = inferRelationships(entities, text)
   const relMap = new Map<string, ExtractedRelationship>()
@@ -398,8 +418,13 @@ export async function llmInferRelationships(
     relMap.set(`${hr.source}|${hr.target}|${hr.relation_type}`, hr)
   }
 
-  // Provide up to 16,000 characters of text for relationship context
-  const excerpt = text.length <= 16000 ? text : text.slice(0, 16000)
+  // Skip the LLM relationship call on large entity sets: the entity list
+  // alone would blow the prompt budget and every skipped call preserves TPM
+  // headroom for the final analysis call. Heuristic relations stand alone.
+  if (entities.length > 25) return heuristicRels
+
+  // Provide up to 8,000 characters of text for relationship context
+  const excerpt = text.length <= 8000 ? text : text.slice(0, 8000)
   
   // Prioritize pivot entities if there are too many to fit in a single prompt
   const sortedEntities = [...entities].sort((a, b) => {

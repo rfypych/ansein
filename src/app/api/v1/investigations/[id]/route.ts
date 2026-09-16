@@ -33,7 +33,7 @@ function investigationOut(inv: {
   description: string
   status: string
   severityScore: number
-  tags: string
+  tags: unknown
   isStarred: boolean
   createdAt: Date
   updatedAt: Date
@@ -97,7 +97,7 @@ async function update(req: NextRequest, ctx: { params: Promise<{ id: string }> }
   const data: Record<string, unknown> = {}
   if (parsed.data.title !== undefined) data.title = parsed.data.title
   if (parsed.data.description !== undefined) data.description = parsed.data.description
-  if (parsed.data.tags !== undefined) data.tags = safeStringifyJson(parsed.data.tags)
+  if (parsed.data.tags !== undefined) data.tags = parsed.data.tags
   if (parsed.data.status !== undefined) data.status = parsed.data.status
   if (parsed.data.is_starred !== undefined) data.isStarred = parsed.data.is_starred
 
@@ -111,7 +111,7 @@ async function update(req: NextRequest, ctx: { params: Promise<{ id: string }> }
         targetType: 'investigation',
         targetId: invId,
         ipAddress: getClientIp(req),
-        extraMetadata: safeStringifyJson({ investigation_id: invId }),
+        extraMetadata: { investigation_id: invId },
       })
     }
     return ok(investigationOut(inv))
@@ -137,11 +137,11 @@ async function remove(req: NextRequest, ctx: { params: Promise<{ id: string }> }
     targetType: 'investigation',
     targetId: invId,
     ipAddress: getClientIp(req),
-    extraMetadata: safeStringifyJson({
+    extraMetadata: {
       investigation_id: invId,
       title: existing.title,
       scope: canEditAnyInvestigation(user) ? 'any' : 'own',
-    }),
+    },
   })
   return ok({ message: 'Deleted' })
 }

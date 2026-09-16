@@ -95,7 +95,7 @@ async function remove(req: NextRequest, ctx: { params: Promise<{ id: string; not
       targetType: 'investigation',
       targetId: invId,
       ipAddress: getClientIp(req),
-      extraMetadata: safeStringifyJson({ note_id: nId }),
+      extraMetadata: { note_id: nId },
     },
   }).catch(() => {})
 

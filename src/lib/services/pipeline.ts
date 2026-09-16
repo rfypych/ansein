@@ -10,7 +10,7 @@ import { extractEntities, llmInferRelationships, type UserKeys } from '@/lib/eng
 import { enrichEntity, type EnrichmentData } from '@/lib/engines/enrichment'
 import { analyze, type EntityForAnalysis } from '@/lib/engines/analysis'
 import { decrypt } from '@/lib/crypto'
-import { safeParseJson, safeStringifyJson } from '@/lib/api'
+import { safeParseJson } from '@/lib/api'
 import { appendAuditLog } from '@/lib/audit-chain'
 
 /** Write an audit log entry (best-effort — never throws). */
@@ -22,7 +22,7 @@ function audit(userId: number, action: string, targetType: string, targetId: num
     targetType,
     targetId,
     ipAddress: '',
-    extraMetadata: safeStringifyJson({ ts: new Date().toISOString(), ...extra }),
+    extraMetadata: { ts: new Date().toISOString(), ...extra },
   }).catch(() => {})
 }
 
@@ -51,7 +51,7 @@ interface PlaybookRow {
   userId: number
   name: string
   trigger: string
-  actions: string
+  actions: unknown
   enabled: boolean
 }
 
@@ -108,7 +108,7 @@ async function applyAction(
         existing.push(tag)
         await db.investigation.update({
           where: { id: investigationId },
-          data: { tags: safeStringifyJson(existing) },
+          data: { tags: existing },
         })
         break
       }
@@ -172,14 +172,14 @@ async function runPlaybooks(
       targetType: 'investigation',
       targetId: investigationId,
       ipAddress: '',
-      extraMetadata: safeStringifyJson({
+      extraMetadata: {
         ts: new Date().toISOString(),
         playbook_id: p.id,
         playbook_name: p.name,
         trigger: trigger ? `${trigger.type}=${trigger.value ?? ''}` : 'none',
         actions: actions.map((a) => a.type),
         severity: result.severityScore,
-      }),
+      },
     }).catch(() => {})
   }
 }
@@ -249,11 +249,17 @@ export async function runPipeline(investigationId: number, userId: number): Prom
     // Step 1: extracting
     await db.investigation.update({ where: { id: inv.id }, data: { status: 'extracting' } })
 
-    const text = inv.sources.map((s) => s.content).join('\n\n')
-    if (!text.trim()) {
+    // Serverless guard: cap total source text per run. Regex extraction runs
+    // on the FULL text (cheap, no tokens); only the LLM-bound paths work on
+    // the head slice. Without a cap a 150KB report guarantees a Vercel 504.
+    const fullText = inv.sources.map((s) => s.content).join('\n\n')
+    if (!fullText.trim()) {
       await db.investigation.update({ where: { id: inv.id }, data: { status: 'pending' } })
       return
     }
+    const MAX_TEXT = 60000
+    const textTruncated = fullText.length > MAX_TEXT
+    const text = textTruncated ? fullText.slice(0, MAX_TEXT) : fullText
 
     // Wipe existing entities / relationships / analysis (idempotent re-run)
     await db.relationship.deleteMany({ where: { investigationId: inv.id } })
@@ -272,7 +278,7 @@ export async function runPipeline(investigationId: number, userId: number): Prom
           value: e.value,
           normalized: e.normalized,
           confidence: e.confidence,
-          enrichment: '{}',
+          enrichment: {},
           sourceMethod: e.source_method,
         },
       })
@@ -283,9 +289,20 @@ export async function runPipeline(investigationId: number, userId: number): Prom
     await db.investigation.update({ where: { id: inv.id }, data: { status: 'enriching' } })
     const allEntities = await db.entity.findMany({ where: { investigationId: inv.id } })
 
+    // Serverless guard: enrich at most the top-120 entities by confidence and
+    // stop launching new batches after ~200s so the function finishes with a
+    // completed status instead of dying into a Vercel 504 mid-write.
+    const runStartedAt = Date.now()
+    const TIME_BUDGET_MS = 200_000
+    const enrichable = allEntities
+      .filter((e) => e.entityType.startsWith('ioc_') || e.entityType === 'ioc_wallet' || e.entityType === 'vulnerability')
+      .sort((a, b) => b.confidence - a.confidence)
+      .slice(0, 120)
+    const enrichIds = new Set(enrichable.map((e) => e.id))
+
     const entitiesForAnalysis: EntityForAnalysis[] = await asyncPool(allEntities, 6, async (e) => {
       let enrichment: EnrichmentData = {}
-      if (e.entityType.startsWith('ioc_') || e.entityType === 'ioc_wallet' || e.entityType === 'vulnerability') {
+      if (enrichIds.has(e.id) && Date.now() - runStartedAt < TIME_BUDGET_MS) {
         enrichment = await enrichEntity(
           e.entityType as any,
           e.value,
@@ -295,7 +312,7 @@ export async function runPipeline(investigationId: number, userId: number): Prom
             shodan_api_key: userKeys.shodan_api_key,
           }
         )
-        await db.entity.update({ where: { id: e.id }, data: { enrichment: safeStringifyJson(enrichment) } })
+        await db.entity.update({ where: { id: e.id }, data: { enrichment: enrichment as unknown as object } })
       } else {
         // Read any existing enrichment
         enrichment = safeParseJson<EnrichmentData>(e.enrichment, {})
@@ -343,10 +360,10 @@ export async function runPipeline(investigationId: number, userId: number): Prom
       data: {
         investigationId: inv.id,
         narrative: result.narrative,
-        actorHypothesis: safeStringifyJson(result.actor_hypothesis),
+        actorHypothesis: result.actor_hypothesis as unknown as object,
         severityScore: result.severity_score,
-        recommendations: safeStringifyJson(result.recommendations),
-        hypotheses: safeStringifyJson(result.hypotheses),
+        recommendations: result.recommendations as unknown as object,
+        hypotheses: result.hypotheses as unknown as object,
         admiraltyCode: result.admiralty_code,
         confidence: result.confidence,
         modelUsed: result.model_used,
@@ -367,6 +384,8 @@ export async function runPipeline(investigationId: number, userId: number): Prom
       severity: result.severity_score,
       model: result.model_used,
       tokens: result.tokens_used,
+      text_truncated: textTruncated,
+      source_chars: fullText.length,
     })
 
     void analysisRun

@@ -85,31 +85,58 @@ export function generateYaraRule(input: RuleGenerationInput): string {
   const hashes = input.iocs.hashes
   const domains = input.iocs.domains
   const urls = input.iocs.urls
+  const date = new Date().toISOString().split('T')[0]
+  const severity = input.severity || 'HIGH'
 
-  const stringEntries: string[] = []
+  // YARA is a FILE/memory scanner, not a network sniffer. File hashes are
+  // matched with the hash module (exact, no false positives from log text).
+  // Domains/URLs go into a separate memory-strings rule, clearly labelled.
+  const md5s = hashes.filter((h) => /^[a-fA-F0-9]{32}$/.test(h))
+  const sha1s = hashes.filter((h) => /^[a-fA-F0-9]{40}$/.test(h))
+  const sha256s = hashes.filter((h) => /^[a-fA-F0-9]{64}$/.test(h))
+
+  const hashConds: string[] = [
+    ...md5s.map((h) => `hash.md5(0, filesize) == "${h.toLowerCase()}"`),
+    ...sha1s.map((h) => `hash.sha1(0, filesize) == "${h.toLowerCase()}"`),
+    ...sha256s.map((h) => `hash.sha256(0, filesize) == "${h.toLowerCase()}"`),
+  ]
+
+  const fileRule = `rule AnseIn_${safeName}_file {
+    meta:
+        description = "File-hash match for ${input.title.replace(/"/g, "'")}"
+        author = "AnseIn CTI Engine"
+        date = "${date}"
+        severity = "${severity}"
+    condition:
+        ${hashConds.length > 0 ? hashConds.join(' or ') : 'false'}
+}`
+
+  const netStrings: string[] = []
   domains.forEach((d, idx) => {
-    stringEntries.push(`        $domain_${idx} = "${d.replace(/"/g, '\\"')}" ascii wide nocase`)
+    netStrings.push(`        $domain_${idx} = "${d.replace(/"/g, '\\"')}" ascii wide nocase`)
   })
   urls.forEach((u, idx) => {
-    stringEntries.push(`        $url_${idx} = "${u.replace(/"/g, '\\"')}" ascii wide nocase`)
+    netStrings.push(`        $url_${idx} = "${u.replace(/"/g, '\\"')}" ascii wide nocase`)
   })
 
-  // Hashes as literal string indicators
-  hashes.forEach((h, idx) => {
-    stringEntries.push(`        $hash_${idx} = "${h.replace(/"/g, '\\"')}" ascii wide nocase`)
-  })
-
-  return `rule AnseIn_${safeName} {
+  // YARA 'import "hash"' is required for the file rule; keep both rules in
+  // one output so analysts can deploy them together.
+  const memRule = netStrings.length > 0 ? `
+rule AnseIn_${safeName}_memstrings {
     meta:
-        description = "Automated YARA rule for ${input.title.replace(/"/g, "'")}"
+        description = "Memory/process-scan strings (C2 domains/URLs) for ${input.title.replace(/"/g, "'")} — memory-only, expect noise on disk"
         author = "AnseIn CTI Engine"
-        date = "${new Date().toISOString().split('T')[0]}"
-        severity = "${input.severity || 'HIGH'}"
+        date = "${date}"
+        severity = "${severity}"
     strings:
-${stringEntries.length > 0 ? stringEntries.join('\n') : '        $placeholder = "MALWARE_INDICATOR"'}
+${netStrings.join('\n')}
     condition:
         any of them
-}
+}` : ''
+
+  return `import "hash"
+
+${fileRule}${memRule}
 `
 }
 

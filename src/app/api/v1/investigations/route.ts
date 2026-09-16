@@ -29,7 +29,7 @@ function investigationOut(inv: {
   description: string
   status: string
   severityScore: number
-  tags: string
+  tags: unknown
   isStarred: boolean
   createdAt: Date
   updatedAt: Date
@@ -129,7 +129,7 @@ async function create(req: NextRequest) {
         userId: user.id,
         title: parsed.data.title,
         description: parsed.data.description,
-        tags: safeStringifyJson(parsed.data.tags),
+        tags: parsed.data.tags,
         status: 'pending',
       },
     })

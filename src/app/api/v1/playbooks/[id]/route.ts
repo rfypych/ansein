@@ -53,7 +53,7 @@ function playbookOut(p: {
   name: string
   description: string
   trigger: string
-  actions: string
+  actions: unknown
   enabled: boolean
   createdAt: Date
   updatedAt: Date
@@ -102,7 +102,7 @@ async function update(req: NextRequest, ctx: { params: Promise<{ id: string }> }
   if (parsed.data.trigger !== undefined) {
     data.trigger = parsed.data.trigger ? safeStringifyJson(parsed.data.trigger) : ''
   }
-  if (parsed.data.actions !== undefined) data.actions = safeStringifyJson(parsed.data.actions)
+  if (parsed.data.actions !== undefined) data.actions = parsed.data.actions
   if (parsed.data.enabled !== undefined) data.enabled = parsed.data.enabled
 
   try {

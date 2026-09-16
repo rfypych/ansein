@@ -98,7 +98,7 @@ interface EntityRow {
   entityType: EntityType
   value: string
   confidence: number
-  enrichment: string
+  enrichment: unknown
   createdAt?: Date | string
 }
 
@@ -136,10 +136,14 @@ export function buildGraph(
   }
 
   const nodes: GraphNode[] = keptEntities.map((e) => {
+    // Enrichment may be a parsed Json object (JSONB) or legacy raw string
     let hasEnrich = false
     try {
-      const parsed = JSON.parse(e.enrichment || '{}')
-      hasEnrich = !!parsed && Object.keys(parsed).length > 0
+      const parsed =
+        typeof e.enrichment === 'string'
+          ? JSON.parse(e.enrichment || '{}')
+          : (e.enrichment ?? {})
+      hasEnrich = !!parsed && Object.keys(parsed as object).length > 0
     } catch {
       hasEnrich = false
     }

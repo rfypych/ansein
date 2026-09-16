@@ -29,7 +29,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       description: description || 'Imported from STIX 2.1 JSON file',
       status: 'completed',
       severityScore: 70,
-      tags: JSON.stringify(['stix2.1', 'import']),
+      tags: ['stix2.1', 'import'],
     },
   })
 
@@ -57,7 +57,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         normalized: ent.value.toLowerCase(),
         confidence: ent.confidence,
         sourceMethod: 'stix_import',
-        enrichment: '{}',
+        enrichment: {},
       },
     })
     stixToDbId.set(ent.stixId, createdEntity.id)

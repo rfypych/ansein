@@ -1,28 +1,32 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { db } from '@/lib/db'
-import { ok, jsonError, withErrorHandler } from '@/lib/api'
+import { jsonError, withErrorHandler } from '@/lib/api'
 import { decodeToken, makeTokenPair } from '@/lib/auth'
+import { getCookieToken, setAuthCookies, REFRESH_COOKIE } from '@/lib/cookies'
 
 export const dynamic = 'force-dynamic'
 
 const RefreshSchema = z.object({
-  refresh_token: z.string(),
+  refresh_token: z.string().optional(),
 })
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
-  let body: unknown
+  // Prefer the httpOnly cookie; accept a body token for transitional compat.
+  let bodyToken: string | undefined
   try {
-    body = await req.json()
+    const body: unknown = await req.json()
+    const parsed = RefreshSchema.safeParse(body)
+    if (parsed.success) bodyToken = parsed.data.refresh_token
   } catch {
-    return jsonError(400, 'invalid_body', 'Invalid JSON body')
+    // No JSON body — cookie-only refresh. Fine.
   }
-  const parsed = RefreshSchema.safeParse(body)
-  if (!parsed.success) {
-    return jsonError(422, 'validation_error', 'refresh_token is required')
+  const refreshToken = getCookieToken(req, REFRESH_COOKIE) || bodyToken
+  if (!refreshToken) {
+    return jsonError(401, 'invalid_token', 'No refresh token provided')
   }
   type RefreshPayload = { type: string; sub: string }
-  const payload = await decodeToken<RefreshPayload>(parsed.data.refresh_token)
+  const payload = await decodeToken<RefreshPayload>(refreshToken)
   if (!payload || payload.type !== 'refresh') {
     return jsonError(401, 'invalid_token', 'Invalid or expired refresh token')
   }
@@ -36,5 +40,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     email: user.email,
     isSuperuser: user.isSuperuser,
   })
-  return ok(tokens)
+  const res = NextResponse.json(tokens)
+  setAuthCookies(res, tokens)
+  return res
 })

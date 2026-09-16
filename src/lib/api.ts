@@ -28,15 +28,23 @@ export function created<T>(data: T) {
 }
 
 /**
- * Extract Bearer token from request and resolve the active User row.
+ * Resolve the active User row from a Bearer token OR the httpOnly
+ * `ansein_access` cookie. Cookie-first for browser clients (XSS-safe),
+ * Bearer kept for programmatic API consumers (webhooks use their own key).
  * Throws ApiError(401) if missing / invalid / user not found / inactive.
  */
 export async function requireUser(req: NextRequest) {
+  let token: string | null = null
   const auth = req.headers.get('authorization') || req.headers.get('Authorization')
-  if (!auth || !auth.toLowerCase().startsWith('bearer ')) {
+  if (auth && auth.toLowerCase().startsWith('bearer ')) {
+    token = auth.slice(7).trim()
+  }
+  if (!token) {
+    token = req.cookies.get('ansein_access')?.value || null
+  }
+  if (!token) {
     throw new ApiError(401, 'unauthorized', 'Not authenticated')
   }
-  const token = auth.slice(7).trim()
   const payload = await decodeToken<AccessTokenPayload>(token)
   if (!payload || payload.type !== 'access') {
     throw new ApiError(401, 'invalid_token', 'Invalid or expired access token')
@@ -122,9 +130,12 @@ export function withErrorHandler<TArgs extends unknown[]>(
   }
 }
 
-// JSON helpers (SQLite stores Json as text — we encode/decode manually)
-export function safeParseJson<T>(raw: string | null | undefined, fallback: T): T {
-  if (!raw) return fallback
+// JSON helpers. Prisma Json columns return parsed values (object/array) while
+// legacy String columns return raw text — accept both so reads work during
+// and after the String → JSONB migration.
+export function safeParseJson<T>(raw: unknown, fallback: T): T {
+  if (raw === null || raw === undefined || raw === '') return fallback
+  if (typeof raw !== 'string') return raw as T
   try {
     return JSON.parse(raw) as T
   } catch {

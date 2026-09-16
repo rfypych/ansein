@@ -100,7 +100,7 @@ async function create(req: NextRequest, ctx: { params: Promise<{ id: string }> }
         targetType: 'investigation',
         targetId: invId,
         ipAddress: getClientIp(req),
-        extraMetadata: safeStringifyJson({ note_id: note.id }),
+        extraMetadata: { note_id: note.id },
       },
     }).catch(() => {})
     return created(noteOut(note, note.user))

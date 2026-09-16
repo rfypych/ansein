@@ -62,7 +62,7 @@ model Investigation {
   description    String    @default("")
   status         String    @default("pending") // pending | extracting | enriching | analyzing | completed | failed
   severityScore  Float     @default(0) @map("severity_score")
-  tags           String    @default("[]")
+  tags           Json      @default("[]")
   isStarred      Boolean   @default(false) @map("is_starred")
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at")
@@ -120,7 +120,7 @@ model Entity {
   value           String
   normalized      String   @default("")
   confidence      Float    @default(0.5)
-  enrichment      String   @default("{}")
+  enrichment      Json     @default("{}")
   sourceMethod    String   @default("regex") @map("source_method")
   createdAt       DateTime @default(now()) @map("created_at")
 
@@ -159,10 +159,10 @@ model AnalysisRun {
   investigationId Int      @map("investigation_id")
   investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
   narrative       String   @default("")
-  actorHypothesis String   @default("{}") @map("actor_hypothesis")
+  actorHypothesis Json     @default("{}") @map("actor_hypothesis")
   severityScore   Float    @default(0) @map("severity_score")
-  recommendations String   @default("[]")
-  hypotheses      String   @default("[]")
+  recommendations Json     @default("[]")
+  hypotheses      Json     @default("[]")
   admiraltyCode   String   @default("C2") @map("admiralty_code")
   confidence      Float    @default(0.5)
   modelUsed       String   @default("") @map("model_used")
@@ -198,7 +198,7 @@ model ChatMessage {
   session    ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   role       String
   content    String
-  citations  String   @default("[]")
+  citations  Json     @default("[]")
   tokensUsed Int      @default(0) @map("tokens_used")
   createdAt  DateTime @default(now()) @map("created_at")
 
@@ -229,7 +229,7 @@ model AuditLog {
   targetType    String   @default("") @map("target_type")
   targetId      Int?     @map("target_id")
   ipAddress     String   @default("") @map("ip_address")
-  extraMetadata String   @default("{}") @map("extra_metadata")
+  extraMetadata Json     @default("{}") @map("extra_metadata")
   prevHash      String   @default("") @map("prev_hash")
   entryHash     String   @default("") @map("entry_hash")
   createdAt     DateTime @default(now()) @map("created_at")
@@ -256,7 +256,7 @@ model Playbook {
   name        String
   description String   @default("")
   trigger     String   @default("") @map("trigger")
-  actions     String   @default("[]")
+  actions     Json     @default("[]")
   enabled     Boolean  @default(true)
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")

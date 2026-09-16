@@ -2,7 +2,7 @@
  * Client HTTP wrapper — attaches Bearer token, auto-refreshes on 401.
  * Mirrors backend/app/contexts/AuthContext + lib/api.js behavior.
  */
-import { useAuthStore, getStoredAccessToken, getStoredRefreshToken } from '@/lib/auth-store'
+import { useAuthStore, getStoredAccessToken } from '@/lib/auth-store'
 
 const BASE = '/api/v1'
 
@@ -10,21 +10,31 @@ let isRefreshing = false
 let refreshQueue: Array<() => void> = []
 
 async function refreshTokenPair(): Promise<boolean> {
-  const refreshToken = getStoredRefreshToken()
-  if (!refreshToken) return false
+  // Cookie-based refresh: the browser attaches ansein_refresh automatically.
   try {
     const resp = await fetch(`${BASE}/auth/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refresh_token: refreshToken }),
+      body: JSON.stringify({}),
     })
     if (!resp.ok) return false
     const data = await resp.json()
-    useAuthStore.getState().setTokens(data.access_token, data.refresh_token)
+    if (data.access_token && data.refresh_token) {
+      useAuthStore.getState().setTokens(data.access_token, data.refresh_token)
+    }
     return true
   } catch {
     return false
   }
+}
+
+export async function logoutRequest(): Promise<void> {
+  try {
+    await fetch(`${BASE}/auth/logout`, { method: 'POST' })
+  } catch {
+    // ignore — client state is cleared regardless
+  }
+  useAuthStore.getState().logout()
 }
 
 async function request<T = unknown>(

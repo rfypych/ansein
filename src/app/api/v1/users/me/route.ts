@@ -19,7 +19,7 @@ async function getMe(req: NextRequest) {
     targetType: 'user',
     targetId: user.id,
     ipAddress: getClientIp(req),
-    extraMetadata: safeStringifyJson({ ts: new Date().toISOString() }),
+    extraMetadata: { ts: new Date().toISOString() },
   })
   return ok({
     id: user.id,

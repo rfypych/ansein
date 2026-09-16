@@ -156,7 +156,7 @@ async function handler(req: NextRequest) {
       userId: ownerUser.id,
       title: `${payload.title}${piiNote}`,
       description: `Auto-ingested via ${payload.source} webhook · alert_type=${payload.alert_type}${payload.severity_hint ? ` · severity_hint=${payload.severity_hint}` : ''}`,
-      tags: safeStringifyJson(tags),
+      tags,
       status: 'pending',
     },
   })
@@ -181,7 +181,7 @@ async function handler(req: NextRequest) {
     targetType: 'investigation',
     targetId: inv.id,
     ipAddress: ip,
-    extraMetadata: safeStringifyJson({
+    extraMetadata: {
       source: payload.source,
       alert_type: payload.alert_type,
       severity_hint: payload.severity_hint || null,
@@ -189,7 +189,7 @@ async function handler(req: NextRequest) {
       investigation_id: inv.id,
       pii_redacted_count: piiResult.found,
       auth_mode: authMode,
-    }),
+    },
   })
 
   // ---- Optional: run the pipeline immediately ----

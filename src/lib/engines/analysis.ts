@@ -93,19 +93,31 @@ function summariseEntities(entities: EntityForAnalysis[]): string {
 }
 
 function summariseEnrichment(entities: EntityForAnalysis[]): string {
+  // Hard cap: enrichment summaries are the biggest silent TPM consumer.
+  // 60 entities max, ~4000 chars total — enough signal, no rate-limit death.
   const out: string[] = []
+  let totalChars = 0
+  let counted = 0
   for (const e of entities) {
+    if (counted >= 60 || totalChars >= 4000) break
     const keys = Object.keys(e.enrichment || {})
     if (keys.length === 0) continue
+    const parts: string[] = []
     for (const k of keys) {
       const v = e.enrichment[k]
       if (!v || typeof v !== 'object') continue
       const scalars = Object.entries(v as Record<string, unknown>)
         .filter(([, x]) => typeof x !== 'object' && x !== '')
-        .slice(0, 5)
-        .map(([kk, vv]) => `${kk}=${vv}`)
+        .slice(0, 4)
+        .map(([kk, vv]) => `${kk}=${String(vv).slice(0, 80)}`)
         .join(', ')
-      if (scalars) out.push(`- ${k}: { ${scalars} }`)
+      if (scalars) parts.push(`${k}: { ${scalars} }`)
+    }
+    if (parts.length > 0) {
+      const line = `- [${e.entity_type}] ${e.value}: ${parts.join('; ')}`
+      out.push(line)
+      totalChars += line.length
+      counted++
     }
   }
   return out.join('\n') || '(no enrichment data)'
@@ -467,7 +479,7 @@ export async function analyze(
         entitiesSummary +
         '\n\nENRICHMENT SUMMARY:\n' +
         enrichmentSummary +
-        (sourceText ? '\n\nSOURCE EXCERPT:\n' + sourceText.slice(0, 12000) : '')
+        (sourceText ? '\n\nSOURCE EXCERPT:\n' + sourceText.slice(0, 6000) : '')
 
       const messages: ChatMessage[] = [
         { role: 'system', content: LLM_SYSTEM },

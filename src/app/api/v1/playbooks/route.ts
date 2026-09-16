@@ -38,7 +38,7 @@ function playbookOut(p: {
   name: string
   description: string
   trigger: string
-  actions: string
+  actions: unknown
   enabled: boolean
   createdAt: Date
   updatedAt: Date
@@ -112,7 +112,7 @@ async function create(req: NextRequest) {
         name: parsed.data.name,
         description: parsed.data.description,
         trigger: parsed.data.trigger ? safeStringifyJson(parsed.data.trigger) : '',
-        actions: safeStringifyJson(parsed.data.actions),
+        actions: parsed.data.actions as unknown as object,
         enabled: parsed.data.enabled,
       },
     })

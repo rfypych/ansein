@@ -33,7 +33,7 @@ async function handler(req: NextRequest, ctx: { params: Promise<{ id: string }> 
         userId: user.id,
         title: `${inv.title} (copy)`,
         description: inv.description,
-        tags: inv.tags,
+        tags: (inv.tags ?? []) as unknown as object,
         status: 'pending',
         severityScore: 0,
         sources: {
@@ -57,7 +57,7 @@ async function handler(req: NextRequest, ctx: { params: Promise<{ id: string }> 
         targetType: 'investigation',
         targetId: dup.id,
         ipAddress: getClientIp(req),
-        extraMetadata: safeStringifyJson({ source_id: inv.id }),
+        extraMetadata: { source_id: inv.id },
       },
     }).catch(() => {})
     return created({

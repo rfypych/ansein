@@ -1,8 +1,9 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { db } from '@/lib/db'
-import { ok, jsonError, withErrorHandler } from '@/lib/api'
+import { jsonError, withErrorHandler } from '@/lib/api'
 import { verifyPassword, makeTokenPair } from '@/lib/auth'
+import { setAuthCookies } from '@/lib/cookies'
 
 export const dynamic = 'force-dynamic'
 
@@ -43,7 +44,9 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     email: user.email,
     isSuperuser: user.isSuperuser,
   })
-  return ok({
+  // Tokens are delivered BOTH as httpOnly cookies (primary, XSS-safe) and in
+  // the body (transitional compat). The client must not persist them.
+  const res = NextResponse.json({
     ...tokens,
     user: {
       id: user.id,
@@ -56,4 +59,6 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       last_login_at: user.lastLoginAt ? user.lastLoginAt.toISOString() : null,
     },
   })
+  setAuthCookies(res, tokens)
+  return res
 })

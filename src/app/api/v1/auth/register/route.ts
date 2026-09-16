@@ -1,8 +1,9 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { db } from '@/lib/db'
-import { created, jsonError, withErrorHandler, handlePrismaError } from '@/lib/api'
+import { jsonError, withErrorHandler, handlePrismaError } from '@/lib/api'
 import { hashPassword, makeTokenPair } from '@/lib/auth'
+import { setAuthCookies } from '@/lib/cookies'
 
 export const dynamic = 'force-dynamic'
 
@@ -52,19 +53,24 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       email: user.email,
       isSuperuser: user.isSuperuser,
     })
-    return created({
-      ...tokens,
-      user: {
-        id: user.id,
-        email: user.email,
-        full_name: user.fullName,
-        is_active: user.isActive,
-        is_superuser: user.isSuperuser,
-        role: user.role === 'admin' ? 'admin' : user.role === 'editor' ? 'editor' : 'analyst',
-        created_at: user.createdAt.toISOString(),
-        last_login_at: null,
+    const res = NextResponse.json(
+      {
+        ...tokens,
+        user: {
+          id: user.id,
+          email: user.email,
+          full_name: user.fullName,
+          is_active: user.isActive,
+          is_superuser: user.isSuperuser,
+          role: user.role === 'admin' ? 'admin' : user.role === 'editor' ? 'editor' : 'analyst',
+          created_at: user.createdAt.toISOString(),
+          last_login_at: null,
+        },
       },
-    })
+      { status: 201 }
+    )
+    setAuthCookies(res, tokens)
+    return res
   } catch (e) {
     const err = handlePrismaError(e)
     return jsonError(err.status, err.code, err.message)

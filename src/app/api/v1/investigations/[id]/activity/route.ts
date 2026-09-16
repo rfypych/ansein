@@ -25,17 +25,16 @@ async function list(req: NextRequest, ctx: { params: Promise<{ id: string }> }) 
   const inv = await db.investigation.findFirst({ where: { id: invId, userId: user.id } })
   if (!inv) return jsonError(404, 'not_found', 'Investigation not found')
 
-  // Get all audit logs that target this investigation directly OR via metadata.
-  // We pull the last 100 audit logs for this user and filter, since SQLite LIKE
-  // on a JSON text column is the most efficient way to scan metadata.
+  // Get audit logs targeting this investigation directly OR via JSONB metadata.
+  // Native jsonb path query — no LIKE-on-text hack needed anymore.
   const logs = await db.auditLog.findMany({
     where: {
       OR: [
         { targetType: 'investigation', targetId: invId },
-        { action: { startsWith: 'note.' }, extraMetadata: { contains: `"investigation_id":${invId}` } },
-        { action: { startsWith: 'note.' }, extraMetadata: { contains: `"investigation_id": ${invId}` } },
-        { action: 'investigation.pipeline.start', extraMetadata: { contains: `"investigation_id":${invId}` } },
-        { action: 'investigation.pipeline.start', extraMetadata: { contains: `"investigation_id": ${invId}` } },
+        {
+          action: 'investigation.pipeline.start',
+          extraMetadata: { path: ['investigation_id'], equals: invId },
+        },
       ],
     },
     orderBy: { createdAt: 'desc' },

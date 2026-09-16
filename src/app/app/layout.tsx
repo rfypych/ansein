@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { Broadcast, Command as CommandIcon, Flask as FlaskConical, Folder as FolderSearch, Gear as SettingsIcon, Keyboard as KeyboardIcon, Lightning as Zap, List as Menu, Plus, Shield, ShieldCheck, ShieldWarning as ShieldAlert, SignOut as LogOut, SquaresFour as LayoutDashboard, TreeStructure as Workflow, User as UserIcon, X } from '@phosphor-icons/react'
 import { Brand, BrandMark } from '@/components/ansein/brand'
 import { useAuthStore, authUserRole, type AuthUser } from '@/lib/auth-store'
+import { logoutRequest } from '@/lib/http'
 import { ROLE_COLORS } from '@/lib/rbac'
 import { cn } from '@/lib/utils'
 import { AuthGuard } from '@/components/ansein/auth-guard'
@@ -74,9 +75,11 @@ function AppShell({ children }: { children: ReactNode }) {
   }, [])
 
   function handleLogout() {
-    logout()
-    toast.success('Signed out')
-    router.push('/login')
+    logoutRequest().finally(() => {
+      logout()
+      toast.success('Signed out')
+      router.push('/login')
+    })
   }
 
   const initials = user?.email?.[0]?.toUpperCase() || 'A'

@@ -58,11 +58,31 @@ async function callOpenAICompatible(
     delete bodyObj.temperature
   }
 
-  let resp = await fetch(endpoint, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(bodyObj),
-  })
+  // Retry with exponential backoff on rate-limit (429) / transient 5xx.
+  // Groq free tier enforces strict TPM+RPM caps; without backoff a burst of
+  // pipeline calls (extract x N chunks + relationships + analysis) collapses
+  // into silent heuristic fallback. Retry keeps the LLM path alive.
+  let resp: Response | null = null
+  let lastStatus = 0
+  for (let attempt = 0; attempt < 4; attempt++) {
+    if (attempt > 0) {
+      const backoffMs = Math.min(8000, 1000 * 2 ** (attempt - 1))
+      await new Promise((r) => setTimeout(r, backoffMs))
+    }
+    resp = await fetch(endpoint, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(bodyObj),
+    })
+    lastStatus = resp.status
+    if (resp.status !== 429 && (resp.status < 500 || resp.status >= 600)) break
+    // Consume body before retrying so the socket can be reused
+    await resp.text().catch(() => '')
+    if (attempt === 3) {
+      throw new Error(`OpenAI-compatible API rate-limited/unavailable (status ${lastStatus}) after retries`)
+    }
+  }
+  resp = resp as Response
 
   if (resp.status === 400) {
     const txt = await resp.text().catch(() => '')

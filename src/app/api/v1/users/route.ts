@@ -127,11 +127,11 @@ async function createUser(req: NextRequest) {
       targetType: 'user',
       targetId: user.id,
       ipAddress: getClientIp(req),
-      extraMetadata: safeStringifyJson({
+      extraMetadata: {
         target_user_id: user.id,
         target_email: user.email,
         role: normalizedRole,
-      }),
+      },
     })
     return created({
       id: user.id,

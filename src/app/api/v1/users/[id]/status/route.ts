@@ -87,12 +87,12 @@ async function changeStatus(req: NextRequest, ctx: { params: Promise<{ id: strin
       targetType: 'user',
       targetId: targetId,
       ipAddress: getClientIp(req),
-      extraMetadata: safeStringifyJson({
+      extraMetadata: {
         target_user_id: targetId,
         target_email: target.email,
         previous_status: target.isActive,
         new_status: newStatus,
-      }),
+      },
     })
     return ok({
       id: updated.id,

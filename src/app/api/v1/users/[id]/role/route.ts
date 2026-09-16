@@ -92,13 +92,13 @@ async function changeRole(req: NextRequest, ctx: { params: Promise<{ id: string 
       targetType: 'user',
       targetId: targetId,
       ipAddress: getClientIp(req),
-      extraMetadata: safeStringifyJson({
+      extraMetadata: {
         target_user_id: targetId,
         target_email: target.email,
         previous_role: previousRole,
         new_role: newRole,
         self_demotion: caller.id === targetId,
-      }),
+      },
     })
     return ok({
       id: updated.id,

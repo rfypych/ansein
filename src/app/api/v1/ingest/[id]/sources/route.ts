@@ -114,14 +114,14 @@ async function add(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
         targetType: 'investigation',
         targetId: invId,
         ipAddress: getClientIp(req),
-        extraMetadata: safeStringifyJson({
+        extraMetadata: {
           investigation_id: invId,
           source_id: s.id,
           source_type: s.sourceType,
           size_bytes: s.sizeBytes,
           pii_redacted_count: piiResult.found,
           pii_redacted_types: piiResult.types,
-        }),
+        },
       },
     }).catch(() => {})
     return created(sourceOut(s))
@@ -156,7 +156,7 @@ async function remove(req: NextRequest, ctx: { params: Promise<{ id: string }> }
       targetType: 'investigation',
       targetId: invId,
       ipAddress: getClientIp(req),
-      extraMetadata: safeStringifyJson({ investigation_id: invId, source_id: sid }),
+      extraMetadata: { investigation_id: invId, source_id: sid },
     },
   }).catch(() => {})
   return ok({ message: 'Deleted' })

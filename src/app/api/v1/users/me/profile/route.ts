@@ -42,7 +42,7 @@ async function updateProfile(req: NextRequest) {
         targetType: 'user',
         targetId: user.id,
         ipAddress: getClientIp(req),
-        extraMetadata: safeStringifyJson({ ts: new Date().toISOString() }),
+        extraMetadata: { ts: new Date().toISOString() },
       },
     }).catch(() => {})
     return ok({

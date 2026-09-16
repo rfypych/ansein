@@ -27,7 +27,8 @@ export interface AuditChainEntry {
   targetType: string
   targetId: number | null
   ipAddress: string
-  extraMetadata: string
+  // Prisma Json column: object post-migration, raw string pre-migration.
+  extraMetadata: unknown
   createdAt: Date
   prevHash: string
 }
@@ -38,6 +39,15 @@ export interface AuditChainEntry {
  * Field order is fixed and deterministic — never change it without a schema
  * migration, or the chain will appear "broken" against historical rows.
  */
+export function canonicalMetadata(value: unknown): string {
+  if (typeof value === 'string') return value
+  try {
+    return JSON.stringify(value ?? {})
+  } catch {
+    return '{}'
+  }
+}
+
 export function computeAuditHash(entry: AuditChainEntry): string {
   const payload = [
     `id=${entry.id}`,
@@ -46,7 +56,7 @@ export function computeAuditHash(entry: AuditChainEntry): string {
     `targetType=${entry.targetType}`,
     `targetId=${entry.targetId ?? ''}`,
     `ipAddress=${entry.ipAddress}`,
-    `extraMetadata=${entry.extraMetadata}`,
+    `extraMetadata=${canonicalMetadata(entry.extraMetadata)}`,
     `createdAt=${entry.createdAt.toISOString()}`,
     `prevHash=${entry.prevHash}`,
   ].join('|')
@@ -60,7 +70,7 @@ export interface AppendAuditLogInput {
   targetType: string
   targetId: number | null
   ipAddress: string
-  extraMetadata: string
+  extraMetadata: object
 }
 
 /**

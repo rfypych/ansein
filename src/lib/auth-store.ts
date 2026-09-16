@@ -1,6 +1,11 @@
 /**
  * Client-side auth store (Zustand + persist).
- * Stores the access token in localStorage for SPA-style auth.
+ *
+ * SECURITY: access/refresh JWTs live ONLY in httpOnly cookies set by the
+ * server — they are never written to localStorage (XSS-safe). This store
+ * keeps the in-memory token pair transiently for the current tab (used as a
+ * Bearer fallback for non-cookie contexts) and persists ONLY the user
+ * profile. AuthGuard verifies the session against /auth/me (cookie).
  */
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
@@ -34,6 +39,7 @@ export function authUserRole(u: AuthUser | null | undefined): Role {
 }
 
 interface AuthState {
+  /** Transient in-memory tokens (current tab only, never persisted). */
   accessToken: string | null
   refreshToken: string | null
   user: AuthUser | null
@@ -55,34 +61,27 @@ export const useAuthStore = create<AuthState>()(
       login: (tokens, user) =>
         set({ accessToken: tokens.access_token, refreshToken: tokens.refresh_token, user }),
       logout: () => set({ accessToken: null, refreshToken: null, user: null }),
-      isAuthed: () => !!get().accessToken,
+      isAuthed: () => !!get().user,
     }),
     {
       name: 'ansein-auth',
+      // Persist the user profile ONLY — tokens must never touch localStorage.
+      partialize: (s) => ({ user: s.user }) as AuthState,
     }
   )
 )
 
+/** In-memory access token for this tab (null after reload — cookie takes over). */
 export function getStoredAccessToken(): string | null {
   if (typeof window === 'undefined') return null
   try {
-    const raw = localStorage.getItem('ansein-auth')
-    if (!raw) return null
-    const parsed = JSON.parse(raw)
-    return parsed?.state?.accessToken || null
+    return useAuthStore.getState().accessToken
   } catch {
     return null
   }
 }
 
+/** Refresh is cookie-based now; kept for API compat (always null). */
 export function getStoredRefreshToken(): string | null {
-  if (typeof window === 'undefined') return null
-  try {
-    const raw = localStorage.getItem('ansein-auth')
-    if (!raw) return null
-    const parsed = JSON.parse(raw)
-    return parsed?.state?.refreshToken || null
-  } catch {
-    return null
-  }
+  return null
 }
