@@ -10,7 +10,6 @@ import {
   handlePrismaError,
   parsePageParams,
   safeParseJson,
-  safeStringifyJson,
 } from '@/lib/api'
 import { canEditAnyInvestigation } from '@/lib/rbac'
 

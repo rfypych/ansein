@@ -98,6 +98,9 @@ interface Entity {
   source_method: string
   enrichment: Record<string, unknown>
   created_at: string
+  decayed_confidence?: number
+  age_days?: number
+  freshness?: 'fresh' | 'aging' | 'stale' | 'stable'
 }
 
 interface Relationship {
@@ -1884,8 +1887,29 @@ function EntitiesTab({ invId }: { invId: number }) {
                   </button>
                 </div>
                 <div className="mt-3 flex items-center justify-between text-[10px] text-muted-foreground/50">
-                  <span className="flex items-center gap-1">
+                  <span className="flex items-center gap-1.5">
                     via <span className="ansein-mono text-muted-foreground">{e.source_method}</span>
+                    {e.freshness && e.freshness !== 'stable' && (
+                      <span
+                        className={cn(
+                          'inline-flex items-center gap-1 px-1.5 py-0.5 rounded ansein-mono',
+                          e.freshness === 'fresh' && 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-300',
+                          e.freshness === 'aging' && 'bg-amber-500/10 border border-amber-500/20 text-amber-300',
+                          e.freshness === 'stale' && 'bg-rose-500/10 border border-rose-500/20 text-rose-300'
+                        )}
+                        title={`Indicator age: ${e.age_days ?? 0}d — decayed confidence ${((e.decayed_confidence ?? e.confidence) * 100).toFixed(0)}%`}
+                      >
+                        <span
+                          className={cn(
+                            'h-1 w-1 rounded-full',
+                            e.freshness === 'fresh' && 'bg-emerald-400',
+                            e.freshness === 'aging' && 'bg-amber-400',
+                            e.freshness === 'stale' && 'bg-rose-400'
+                          )}
+                        />
+                        {e.freshness}
+                      </span>
+                    )}
                   </span>
                   <div className="flex items-center gap-1.5">
                     <div className="h-1 w-12 rounded-full bg-[border] overflow-hidden">

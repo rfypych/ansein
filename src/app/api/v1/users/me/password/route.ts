@@ -8,7 +8,6 @@ import {
   requireUser,
   handlePrismaError,
   getClientIp,
-  safeStringifyJson,
 } from '@/lib/api'
 import { hashPassword, verifyPassword } from '@/lib/auth'
 

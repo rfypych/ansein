@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { CheckSquare, CircleNotch as Loader2, FileText, Folder as FolderSearch, Graph as Network, MagnifyingGlass as Search, Plus, ShareNetwork as Share2, Square, Star, Trash as Trash2, X } from '@phosphor-icons/react'
+import { CheckSquare, CircleNotch as Loader2, FileText, Folder as FolderSearch, Graph as Network, MagnifyingGlass as Search, Plus, ShareNetwork as Share2, Square, Star, Trash as Trash2, UploadSimple as Upload, X } from '@phosphor-icons/react'
 import { http } from '@/lib/http'
 import { Badge, EmptyState, SeverityMeter, Spinner } from '@/components/ansein/ui'
 import { InvestigationCardSkeleton } from '@/components/ansein/skeletons'
@@ -51,7 +51,19 @@ export default function InvestigationListPage() {
   const [page, setPage] = useState(1)
   const [selected, setSelected] = useState<Set<number>>(new Set())
   const [bulkConfirm, setBulkConfirm] = useState(false)
+  const [stixOpen, setStixOpen] = useState(false)
   const pageSize = 12
+
+  const stixMutation = useMutation({
+    mutationFn: (bundle: unknown) => http.post<{ investigation_id: number; entities_imported: number; relationships_imported: number }>('/import/stix', bundle),
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: ['investigations'] })
+      toast.success(`Imported ${res.entities_imported} entities, ${res.relationships_imported} relationships`)
+      setStixOpen(false)
+      router.push(`/app/investigations/${res.investigation_id}`)
+    },
+    onError: (e: Error) => toast.error(e.message || 'STIX import failed'),
+  })
 
   // Fetch all investigations on the current page
   const { data, isLoading } = useQuery({
@@ -160,14 +172,30 @@ export default function InvestigationListPage() {
             {total} total · {filtered.length} shown{starredCount > 0 && ` · ${starredCount} starred`}
           </p>
         </div>
-        <Link
-          href="/app/investigations/new"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors w-fit"
-        >
-          <Plus weight="duotone" className="h-4 w-4" />
-          New investigation
-        </Link>
+        <div className="flex items-center gap-2 w-fit">
+          <button
+            onClick={() => setStixOpen(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-card border border-border text-sm font-medium text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
+          >
+            <Upload weight="duotone" className="h-4 w-4" />
+            Import STIX
+          </button>
+          <Link
+            href="/app/investigations/new"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+          >
+            <Plus weight="duotone" className="h-4 w-4" />
+            New investigation
+          </Link>
+        </div>
       </div>
+      {stixOpen && (
+        <StixImportModal
+          pending={stixMutation.isPending}
+          onClose={() => setStixOpen(false)}
+          onImport={(bundle) => stixMutation.mutate(bundle)}
+        />
+      )}
 
       {/* Search + filters */}
       <div className="flex flex-col gap-3 mb-6">
@@ -443,6 +471,102 @@ export default function InvestigationListPage() {
           </button>
         </div>
       )}
+    </div>
+  )
+}
+
+/* ============================================ STIX 2.1 import modal */
+function StixImportModal({
+  pending,
+  onClose,
+  onImport,
+}: {
+  pending: boolean
+  onClose: () => void
+  onImport: (bundle: unknown) => void
+}) {
+  const [text, setText] = useState('')
+  const [error, setError] = useState<string | null>(null)
+
+  function parseAndImport(raw: string) {
+    setError(null)
+    let bundle: unknown
+    try {
+      bundle = JSON.parse(raw)
+    } catch {
+      setError('Invalid JSON — paste a STIX 2.1 bundle object.')
+      return
+    }
+    if (!bundle || typeof bundle !== 'object' || !Array.isArray((bundle as { objects?: unknown }).objects)) {
+      setError('Not a STIX 2.1 bundle — expected an object with an "objects" array.')
+      return
+    }
+    onImport(bundle)
+  }
+
+  function onFile(file: File | undefined) {
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) {
+      setError('File too large — 5 MB maximum.')
+      return
+    }
+    const reader = new FileReader()
+    reader.onload = () => parseAndImport(String(reader.result || ''))
+    reader.onerror = () => setError('Could not read file.')
+    reader.readAsText(file)
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 ansein-fade-in" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div
+        className="relative w-full max-w-lg bg-card border border-border rounded-xl p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-1">
+          <h2 className="text-base font-semibold text-foreground">Import STIX 2.1 bundle</h2>
+          <button onClick={onClose} className="text-muted-foreground/50 hover:text-foreground transition-colors" aria-label="Close">
+            <X weight="duotone" className="h-4 w-4" />
+          </button>
+        </div>
+        <p className="text-xs text-muted-foreground mb-4">
+          From OpenCTI, MISP, or AlienVault OTX. Indicators, SCOs, and relationships are mapped to entities.
+        </p>
+        <label className="flex items-center justify-center gap-2 w-full px-4 py-6 rounded-md border border-dashed border-border text-sm text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors cursor-pointer mb-3">
+          <Upload weight="duotone" className="h-4 w-4" />
+          Choose .json bundle file (5 MB max)
+          <input
+            type="file"
+            accept=".json,application/json"
+            className="hidden"
+            onChange={(e) => onFile(e.target.files?.[0])}
+          />
+        </label>
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder='Or paste bundle JSON here: {"type": "bundle", "objects": [...]}'
+          rows={6}
+          className="w-full px-3 py-2.5 rounded-md bg-background border border-border text-foreground placeholder:text-muted-foreground/50 text-xs ansein-mono focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+        />
+        {error && <p className="mt-2 text-xs text-rose-300">{error}</p>}
+        <div className="mt-4 flex justify-end gap-2">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-md border border-border text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => parseAndImport(text)}
+            disabled={pending || !text.trim()}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+          >
+            {pending && <Loader2 className="h-4 w-4 animate-spin" />}
+            Import bundle
+          </button>
+        </div>
+      </div>
     </div>
   )
 }

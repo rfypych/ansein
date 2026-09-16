@@ -7,6 +7,7 @@ import {
   requireUser,
   safeParseJson,
 } from '@/lib/api'
+import { decayEntity } from '@/lib/engines/decay'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,17 +23,24 @@ async function list(req: NextRequest, ctx: { params: Promise<{ id: string }> }) 
     where: { investigationId: invId },
     orderBy: { confidence: 'desc' },
   })
+  const now = new Date()
   return ok(
-    entities.map((e) => ({
-      id: e.id,
-      entity_type: e.entityType,
-      value: e.value,
-      normalized: e.normalized,
-      confidence: e.confidence,
-      source_method: e.sourceMethod,
-      enrichment: safeParseJson<Record<string, unknown>>(e.enrichment, {}),
-      created_at: e.createdAt.toISOString(),
-    }))
+    entities.map((e) => {
+      const decay = decayEntity(e.entityType, e.confidence, e.createdAt, now)
+      return {
+        id: e.id,
+        entity_type: e.entityType,
+        value: e.value,
+        normalized: e.normalized,
+        confidence: e.confidence,
+        source_method: e.sourceMethod,
+        enrichment: safeParseJson<Record<string, unknown>>(e.enrichment, {}),
+        created_at: e.createdAt.toISOString(),
+        decayed_confidence: decay.decayed_confidence,
+        age_days: decay.age_days,
+        freshness: decay.freshness,
+      }
+    })
   )
 }
 

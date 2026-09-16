@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { db } from '@/lib/db'
-import { ok, jsonError, withErrorHandler, requireUser, getClientIp, safeStringifyJson } from '@/lib/api'
+import { ok, jsonError, withErrorHandler, requireUser, getClientIp } from '@/lib/api'
 import { getUserRole } from '@/lib/rbac'
 import { appendAuditLog } from '@/lib/audit-chain'
 
