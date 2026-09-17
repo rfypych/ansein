@@ -49,16 +49,26 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
           ? { source: 'ThreatFox' }
           : {}
 
-  let rows = await db.feedItem.findMany({
-    where,
-    orderBy: { lastSeen: 'desc' },
-    take: 100,
-  })
+  async function readRows() {
+    // 'all' view: balanced sample per source so the 1300-row CISA catalog
+    // cannot crowd out URLhaus/ThreatFox, then merge newest-first.
+    if (!feedSource || feedSource === 'all') {
+      const [cisa, urlhaus, fox] = await Promise.all([
+        db.feedItem.findMany({ where: { source: 'CISA KEV' }, orderBy: { lastSeen: 'desc' }, take: 40 }),
+        db.feedItem.findMany({ where: { source: 'URLhaus' }, orderBy: { lastSeen: 'desc' }, take: 30 }),
+        db.feedItem.findMany({ where: { source: 'ThreatFox' }, orderBy: { lastSeen: 'desc' }, take: 30 }),
+      ])
+      return [...cisa, ...urlhaus, ...fox].sort((a, b) => b.lastSeen.getTime() - a.lastSeen.getTime())
+    }
+    return db.feedItem.findMany({ where, orderBy: { lastSeen: 'desc' }, take: 100 })
+  }
+
+  let rows = await readRows()
 
   // Cold cache (fresh deploy): collect inline once so the page is never empty.
   if (rows.length === 0) {
     await refreshFeedCache().catch(() => {})
-    rows = await db.feedItem.findMany({ where, orderBy: { lastSeen: 'desc' }, take: 100 })
+    rows = await readRows()
   } else {
     // Stale cache: serve instantly, refresh in background after responding.
     const newest = rows.reduce((m, r) => Math.max(m, r.lastSeen.getTime()), 0)

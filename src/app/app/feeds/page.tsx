@@ -40,7 +40,7 @@ interface FeedsResponse {
 
 export default function ThreatFeedsPage() {
   const router = useRouter()
-  const [sourceFilter, setSourceFilter] = useState<'all' | 'cisa' | 'urlhaus'>('all')
+  const [sourceFilter, setSourceFilter] = useState<'all' | 'cisa' | 'urlhaus' | 'threatfox'>('all')
   const [searchQuery, setSearchQuery] = useState('')
 
   const { data, isLoading, refetch, isFetching } = useQuery<FeedsResponse>({
@@ -157,6 +157,17 @@ export default function ThreatFeedsPage() {
             )}
           >
             URLhaus
+          </button>
+          <button
+            onClick={() => setSourceFilter('threatfox')}
+            className={cn(
+              'px-3 py-1 text-xs font-medium rounded-md transition-colors',
+              sourceFilter === 'threatfox'
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            ThreatFox
           </button>
         </div>
       </div>
