@@ -59,22 +59,10 @@ async function handler(req: NextRequest, ctx: { params: Promise<{ id: string }> 
     return jsonError(500, 'pipeline_failed', e instanceof Error ? e.message : 'Pipeline failed')
   }
 
-  // Audit: pipeline complete (best-effort)
+  // No route-level complete audit here on purpose: runPipeline() already
+  // writes the rich investigation.pipeline.complete entry (entities, model,
+  // tokens, coverage). A second thin one only duplicated the timeline.
   const refreshed = await db.investigation.findFirst({ where: { id: invId, userId: user.id } })
-  await db.auditLog.create({
-    data: {
-      userId: user.id,
-      action: 'investigation.pipeline.complete',
-      targetType: 'investigation',
-      targetId: invId,
-      ipAddress: getClientIp(req),
-      extraMetadata: {
-        investigation_id: invId,
-        to_status: refreshed?.status || 'completed',
-        severity_score: refreshed?.severityScore || 0,
-      },
-    },
-  }).catch(() => {})
 
   const updated = refreshed
   if (!updated) return jsonError(404, 'not_found', 'Investigation vanished')
