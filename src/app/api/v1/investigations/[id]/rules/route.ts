@@ -20,7 +20,8 @@ export const GET = withErrorHandler(async (req: NextRequest, { params }: { param
   const inv = await db.investigation.findUnique({
     where: { id },
     include: {
-      entities: true,
+      // Analyst-adjudicated false positives never ship in detection content
+      entities: { where: { isFalsePositive: false } },
       sources: { select: { content: true } },
     },
   })

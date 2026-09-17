@@ -52,7 +52,20 @@ export default function InvestigationListPage() {
   const [selected, setSelected] = useState<Set<number>>(new Set())
   const [bulkConfirm, setBulkConfirm] = useState(false)
   const [stixOpen, setStixOpen] = useState(false)
+  const [bulkOpen, setBulkOpen] = useState(false)
   const pageSize = 12
+
+  const bulkMutation = useMutation({
+    mutationFn: (payload: { title: string; description: string; content: string }) =>
+      http.post<{ investigation_id: number; entities_imported: number }>('/import/iocs', payload),
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: ['investigations'] })
+      toast.success(`Imported ${res.entities_imported} IOCs (regex, no LLM cost)`)
+      setBulkOpen(false)
+      router.push(`/app/investigations/${res.investigation_id}`)
+    },
+    onError: (e: Error) => toast.error(e.message || 'Bulk import failed'),
+  })
 
   const stixMutation = useMutation({
     mutationFn: (bundle: unknown) => http.post<{ investigation_id: number; entities_imported: number; relationships_imported: number }>('/import/stix', bundle),
@@ -174,6 +187,13 @@ export default function InvestigationListPage() {
         </div>
         <div className="flex items-center gap-2 w-fit">
           <button
+            onClick={() => setBulkOpen(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-card border border-border text-sm font-medium text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
+          >
+            <Plus weight="duotone" className="h-4 w-4" />
+            Bulk IOCs
+          </button>
+          <button
             onClick={() => setStixOpen(true)}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-card border border-border text-sm font-medium text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
           >
@@ -194,6 +214,13 @@ export default function InvestigationListPage() {
           pending={stixMutation.isPending}
           onClose={() => setStixOpen(false)}
           onImport={(bundle) => stixMutation.mutate(bundle)}
+        />
+      )}
+      {bulkOpen && (
+        <BulkIocModal
+          pending={bulkMutation.isPending}
+          onClose={() => setBulkOpen(false)}
+          onImport={(payload) => bulkMutation.mutate(payload)}
         />
       )}
 
@@ -564,6 +591,69 @@ function StixImportModal({
           >
             {pending && <Loader2 className="h-4 w-4 animate-spin" />}
             Import bundle
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ============================================ Bulk IOC import modal */
+function BulkIocModal({
+  pending,
+  onClose,
+  onImport,
+}: {
+  pending: boolean
+  onClose: () => void
+  onImport: (payload: { title: string; description: string; content: string }) => void
+}) {
+  const [title, setTitle] = useState('Bulk IOC import')
+  const [content, setContent] = useState('')
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 ansein-fade-in" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div
+        className="relative w-full max-w-lg bg-card border border-border rounded-xl p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-1">
+          <h2 className="text-base font-semibold text-foreground">Bulk IOC import</h2>
+          <button onClick={onClose} className="text-muted-foreground/50 hover:text-foreground transition-colors" aria-label="Close">
+            <X weight="duotone" className="h-4 w-4" />
+          </button>
+        </div>
+        <p className="text-xs text-muted-foreground mb-4">
+          Paste IPs, domains, URLs, hashes, CVEs — one per line or as text. Deterministic regex extraction, no LLM cost, completes in seconds.
+        </p>
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Case title"
+          className="w-full mb-3 px-3 py-2.5 rounded-md bg-background border border-border text-foreground placeholder:text-muted-foreground/50 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+        />
+        <textarea
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder={'185.220.101.5\nmalware-distro.org\nhttp://evil.invalid/x.bin\nd41d8cd98f00b204e9800998ecf8427e\nCVE-2024-3094'}
+          rows={8}
+          className="w-full px-3 py-2.5 rounded-md bg-background border border-border text-foreground placeholder:text-muted-foreground/50 text-xs ansein-mono focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+        />
+        <div className="mt-4 flex justify-end gap-2">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-md border border-border text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => onImport({ title: title.trim() || 'Bulk IOC import', description: '', content })}
+            disabled={pending || !content.trim()}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+          >
+            {pending && <Loader2 className="h-4 w-4 animate-spin" />}
+            Import IOCs
           </button>
         </div>
       </div>

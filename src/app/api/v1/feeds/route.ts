@@ -1,5 +1,8 @@
 import { NextRequest } from 'next/server'
-import { ok, jsonError, withErrorHandler, requireUser } from '@/lib/api'
+import { after } from 'next/server'
+import { db } from '@/lib/db'
+import { ok, withErrorHandler, requireUser } from '@/lib/api'
+import { refreshFeedCache, FEED_STALE_MS } from '@/lib/services/feed-ingest'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,71 +16,59 @@ interface FeedItem {
   confidence: number
 }
 
-async function fetchCisaKev(): Promise<FeedItem[]> {
-  try {
-    const res = await fetch(
-      'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json',
-      { next: { revalidate: 3600 } }
-    )
-    if (!res.ok) return []
-    const data = await res.json()
-    const vulns = (data?.vulnerabilities || []).slice(0, 30)
-    return vulns.map((v: any) => ({
-      id: v.cveID,
-      source: 'CISA KEV',
-      type: 'vulnerability',
-      indicator: v.cveID,
-      description: `${v.vendorProject} ${v.product} - ${v.vulnerabilityName}`,
-      date: v.dateAdded,
-      confidence: 1.0,
-    }))
-  } catch {
-    return []
-  }
-}
-
-async function fetchUrlhaus(): Promise<FeedItem[]> {
-  try {
-    const res = await fetch('https://urlhaus-api.abuse.ch/v1/urls/recent/limit/30/', {
-      next: { revalidate: 1800 },
-    })
-    if (!res.ok) return []
-    const data = await res.json()
-    const urls = (data?.urls || []).slice(0, 30)
-    return urls.map((u: any) => ({
-      id: String(u.id),
-      source: 'URLhaus',
-      type: 'ioc_url',
-      indicator: u.url,
-      description: `Malware URL (${u.threat || 'malware_download'}) - Status: ${u.url_status}`,
-      date: u.date_added,
-      confidence: 0.9,
-    }))
-  } catch {
-    return []
+function toApi(r: {
+  id: number
+  source: string
+  itemType: string
+  indicator: string
+  description: string
+  confidence: number
+  firstSeen: Date
+}): FeedItem {
+  return {
+    id: String(r.id),
+    source: (r.source === 'ThreatFox' ? 'ThreatFox' : r.source === 'URLhaus' ? 'URLhaus' : 'CISA KEV') as FeedItem['source'],
+    type: r.itemType,
+    indicator: r.indicator,
+    description: r.description,
+    date: r.firstSeen.toISOString().slice(0, 10),
+    confidence: r.confidence,
   }
 }
 
 export const GET = withErrorHandler(async (req: NextRequest) => {
   await requireUser(req)
   const url = new URL(req.url)
-  const feedSource = url.searchParams.get('source') // 'cisa' | 'urlhaus' | 'all'
+  const feedSource = url.searchParams.get('source') // 'cisa' | 'urlhaus' | 'threatfox' | 'all'
+  const where =
+    feedSource === 'cisa'
+      ? { source: 'CISA KEV' }
+      : feedSource === 'urlhaus'
+        ? { source: 'URLhaus' }
+        : feedSource === 'threatfox'
+          ? { source: 'ThreatFox' }
+          : {}
 
-  let items: FeedItem[] = []
+  let rows = await db.feedItem.findMany({
+    where,
+    orderBy: { lastSeen: 'desc' },
+    take: 100,
+  })
 
-  if (feedSource === 'cisa') {
-    items = await fetchCisaKev()
-  } else if (feedSource === 'urlhaus') {
-    items = await fetchUrlhaus()
+  // Cold cache (fresh deploy): collect inline once so the page is never empty.
+  if (rows.length === 0) {
+    await refreshFeedCache().catch(() => {})
+    rows = await db.feedItem.findMany({ where, orderBy: { lastSeen: 'desc' }, take: 100 })
   } else {
-    const [cisa, urlhaus] = await Promise.all([fetchCisaKev(), fetchUrlhaus()])
-    items = [...cisa, ...urlhaus].sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-    )
+    // Stale cache: serve instantly, refresh in background after responding.
+    const newest = rows.reduce((m, r) => Math.max(m, r.lastSeen.getTime()), 0)
+    if (Date.now() - newest > FEED_STALE_MS) {
+      after(() => refreshFeedCache().catch(() => {}))
+    }
   }
 
   return ok({
-    total: items.length,
-    items,
+    total: rows.length,
+    items: rows.map(toApi),
   })
 })

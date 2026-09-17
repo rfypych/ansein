@@ -148,7 +148,8 @@ export async function GET(
     take: limit + 1, // +1 probes whether a next page exists
     orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
     include: {
-      entities: true,
+      // False positives are never shared with downstream consumers
+      entities: { where: { isFalsePositive: false } },
       relationships: true,
     },
   })

@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Bug, CaretRight as ChevronRight, Check, CheckCircle as CheckCircle2, Circle, CircleNotch as Loader2, ClipboardText as ClipboardList, ClockCounterClockwise as History, Code, Copy, Copy as CopyPlus, CornersOut as Maximize2, Cpu, CreditCard, Crosshair, Download, DownloadSimple as ArrowDownToLine, Eye, FileCode, FileMagnifyingGlass as FileSearch, FileText, FileText as FileJson, Globe, Graph as Network, GridFour as LayoutGrid, Hash, Key as KeyRound, Keyboard, Lightbulb, Link as LinkIcon, Lock, MagnifyingGlass as Search, MapPin, Note as StickyNote, Pencil, Play, Plus, PushPin as Pin, PushPinSlash as PinOff, Robot as Bot, ShieldWarning as ShieldAlert, Sparkle as Sparkles, Star, Table as TableIcon, Tag, Trash as Trash2, Upload, User, Users, Warning as AlertTriangle, Waveform, Wrench, X as XIcon, XCircle } from '@phosphor-icons/react'
+import { ArrowLeft, Bug, CaretRight as ChevronRight, Check, CheckCircle as CheckCircle2, Circle, CircleNotch as Loader2, ClipboardText as ClipboardList, ClockCounterClockwise as History, Code, Copy, Copy as CopyPlus, CornersOut as Maximize2, Cpu, CreditCard, Crosshair, Download, DownloadSimple as ArrowDownToLine, Eye, FileCode, FileMagnifyingGlass as FileSearch, FileText, FileText as FileJson, Flag, Globe, Graph as Network, GridFour as LayoutGrid, Hash, Key as KeyRound, Keyboard, Lightbulb, Link as LinkIcon, Lock, MagnifyingGlass as Search, MapPin, Note as StickyNote, Pencil, Play, Plus, PushPin as Pin, PushPinSlash as PinOff, Robot as Bot, ShieldWarning as ShieldAlert, Sparkle as Sparkles, Star, Table as TableIcon, Tag, Trash as Trash2, Upload, User, Users, Warning as AlertTriangle, Waveform, Wrench, X as XIcon, XCircle } from '@phosphor-icons/react'
 import { http } from '@/lib/http'
 import { Badge, SeverityMeter, EmptyState, Spinner } from '@/components/ansein/ui'
 import { EntityDetailModal } from '@/components/ansein/entity-detail-modal'
@@ -103,6 +103,7 @@ interface Entity {
   freshness?: 'fresh' | 'aging' | 'stale' | 'stable'
   seen_in_cases?: number
   verified_in_text?: boolean
+  is_false_positive?: boolean
 }
 
 interface Relationship {
@@ -1524,9 +1525,19 @@ function GraphTab({ invId }: { invId: number }) {
 
 /* ============================================ Entities tab */
 function EntitiesTab({ invId }: { invId: number }) {
+  const qc = useQueryClient()
   const entitiesQuery = useQuery({
     queryKey: ['entities', invId],
     queryFn: () => http.get<Entity[]>(`/entities/${invId}`),
+  })
+  const fpMutation = useMutation({
+    mutationFn: ({ entityId, fp }: { entityId: number; fp: boolean }) =>
+      http.patch(`/entities/${invId}`, { entity_id: entityId, is_false_positive: fp }),
+    onSuccess: (_d, v) => {
+      qc.invalidateQueries({ queryKey: ['entities', invId] })
+      toast.success(v.fp ? 'Marked as false positive — excluded from rules & sharing' : 'False-positive flag cleared')
+    },
+    onError: (e: Error) => toast.error(e.message || 'Adjudication failed'),
   })
   const relsQuery = useQuery({
     queryKey: ['relationships', invId],
@@ -1850,7 +1861,10 @@ function EntitiesTab({ invId }: { invId: number }) {
               <div
                 key={e.id}
                 onClick={() => setSelectedEntityId(e.id)}
-                className="bg-card border border-border hover:border-primary/50 transition-colors rounded-lg p-4 cursor-pointer relative overflow-hidden"
+                className={cn(
+                  'bg-card border border-border hover:border-primary/50 transition-colors rounded-lg p-4 cursor-pointer relative overflow-hidden',
+                  e.is_false_positive && 'opacity-60 border-dashed'
+                )}
               >
                 {/* Type accent line at top */}
                 <div
@@ -1875,20 +1889,37 @@ function EntitiesTab({ invId }: { invId: number }) {
                       {e.value}
                     </p>
                   </div>
-                  <button
-                    onClick={(ev) => {
-                      ev.stopPropagation()
-                      copyEntityValue(e)
-                    }}
-                    className="p-1 text-muted-foreground/50 hover:text-foreground transition-colors"
-                    title="Copy value"
-                  >
-                    {copiedId === e.id ? (
-                      <Check weight="duotone" className="h-3 w-3 text-emerald-400" />
-                    ) : (
-                      <Copy weight="duotone" className="h-3 w-3" />
-                    )}
-                  </button>
+                  <div className="flex items-center gap-0.5 flex-shrink-0">
+                    <button
+                      onClick={(ev) => {
+                        ev.stopPropagation()
+                        fpMutation.mutate({ entityId: e.id, fp: !e.is_false_positive })
+                      }}
+                      className={cn(
+                        'p-1 transition-colors',
+                        e.is_false_positive
+                          ? 'text-amber-400 hover:text-amber-300'
+                          : 'text-muted-foreground/50 hover:text-foreground'
+                      )}
+                      title={e.is_false_positive ? 'Clear false-positive flag' : 'Mark as false positive (excludes from rules & sharing)'}
+                    >
+                      <Flag weight="duotone" className="h-3 w-3" />
+                    </button>
+                    <button
+                      onClick={(ev) => {
+                        ev.stopPropagation()
+                        copyEntityValue(e)
+                      }}
+                      className="p-1 text-muted-foreground/50 hover:text-foreground transition-colors"
+                      title="Copy value"
+                    >
+                      {copiedId === e.id ? (
+                        <Check weight="duotone" className="h-3 w-3 text-emerald-400" />
+                      ) : (
+                        <Copy weight="duotone" className="h-3 w-3" />
+                      )}
+                    </button>
+                  </div>
                 </div>
                 <div className="mt-3 flex items-center justify-between text-[10px] text-muted-foreground/50">
                   <span className="flex items-center gap-1.5">
@@ -1899,6 +1930,14 @@ function EntitiesTab({ invId }: { invId: number }) {
                         title="Value not found verbatim in sources — LLM paraphrase, treat with caution"
                       >
                         unverified
+                      </span>
+                    )}
+                    {e.is_false_positive && (
+                      <span
+                        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded ansein-mono bg-amber-500/10 border border-amber-500/20 text-amber-300"
+                        title="Analyst-adjudicated false positive — excluded from SIEM rules and TAXII sharing"
+                      >
+                        false positive
                       </span>
                     )}
                     {(e.seen_in_cases || 0) > 0 && (
