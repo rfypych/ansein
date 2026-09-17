@@ -60,62 +60,49 @@ async function collectCisaKev(out: CollectedFeedItem[]): Promise<void> {
 }
 
 async function collectUrlhaus(out: CollectedFeedItem[]): Promise<void> {
-  const data = await getJson('https://urlhaus-api.abuse.ch/v1/urls/recent/limit/100/')
-  const urls = Array.isArray(data?.urls) ? data.urls : []
-  for (const u of urls) {
-    if (!u?.url) continue
+  // The /v1/urls/recent API now 401s without a key — use the public
+  // csv_online dump (updated every few minutes) instead.
+  const { getUrlhausRecent } = await import('@/lib/engines/free-enrichment')
+  const rows = await getUrlhausRecent(100)
+  for (const u of rows) {
     out.push({
       source: 'URLhaus',
       itemType: 'ioc_url',
-      indicator: String(u.url),
-      title: String(u.url).slice(0, 120),
-      description: `Malware URL (${u.threat || 'malware_download'}) - Status: ${u.url_status || 'unknown'}`,
-      detail: { threat: u.threat, url_status: u.url_status, host: u.host, date_added: u.date_added },
+      indicator: u.url,
+      title: u.url.slice(0, 120),
+      description: `Malware URL (${u.threat || 'malware_download'}) - Status: ${u.status || 'unknown'}`,
+      detail: { threat: u.threat, url_status: u.status, host: u.host, date_added: u.date },
       confidence: 0.9,
-      seenAt: u.date_added ? new Date(u.date_added) : new Date(),
+      seenAt: u.date ? new Date(u.date) : new Date(),
     })
   }
 }
 
-function threatfoxType(iocType: string): string | null {
-  const t = (iocType || '').toLowerCase()
-  if (t.includes('ip')) return 'ioc_ip'
-  if (t.includes('domain')) return 'ioc_domain'
-  if (t.includes('url')) return 'ioc_url'
-  if (t.includes('hash')) return 'ioc_hash'
-  return null
-}
-
 async function collectThreatfox(out: CollectedFeedItem[]): Promise<void> {
-  const data = await getJson(
-    'https://threatfox-api.abuse.ch/api/v1/',
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: 'get_iocs', days: 1 }),
-    },
-    15000
-  )
-  const iocs = Array.isArray(data?.data) ? data.data.slice(0, 150) : []
-  for (const ioc of iocs) {
-    const type = threatfoxType(String(ioc.ioc_type || ''))
-    if (!type || !ioc.ioc) continue
-    const value = type === 'ioc_ip' ? String(ioc.ioc).split(':')[0] : String(ioc.ioc)
+  // Same story: get_iocs API 401s anonymously — public csv/recent dump.
+  const { getThreatfoxRecent } = await import('@/lib/engines/free-enrichment')
+  const rows = await getThreatfoxRecent(150)
+  for (const ioc of rows) {
+    const t = (ioc.type || '').toLowerCase()
+    const itemType = t.includes('ip')
+      ? 'ioc_ip'
+      : t.includes('domain')
+        ? 'ioc_domain'
+        : t.includes('url')
+          ? 'ioc_url'
+          : t.includes('hash')
+            ? 'ioc_hash'
+            : 'ioc_domain'
+    const value = itemType === 'ioc_ip' ? ioc.value.split(':')[0] : ioc.value
     out.push({
       source: 'ThreatFox',
-      itemType: type,
+      itemType,
       indicator: value,
-      title: value,
-      description: `${ioc.threat_type_desc || ioc.threat_type || 'malware'}${ioc.malware_printable ? ` (${ioc.malware_printable})` : ''}`,
-      detail: {
-        threat_type: ioc.threat_type_desc || ioc.threat_type,
-        malware: ioc.malware_printable,
-        confidence_level: ioc.confidence_level,
-        first_seen: ioc.first_seen,
-        tags: ioc.tags || [],
-      },
+      title: value.slice(0, 120),
+      description: `${ioc.threat || 'malware'}${ioc.malware ? ` (${ioc.malware})` : ''}`,
+      detail: { threat_type: ioc.threat, malware: ioc.malware, confidence_level: ioc.confidence, first_seen: ioc.firstSeen, tags: ioc.tags },
       confidence: 0.85,
-      seenAt: ioc.first_seen ? new Date(ioc.first_seen) : new Date(),
+      seenAt: ioc.firstSeen ? new Date(ioc.firstSeen) : new Date(),
     })
   }
 }

@@ -16,6 +16,7 @@
     "../../src/lib/engines/analysis.ts",
     "../../src/lib/engines/decay.ts",
     "../../src/lib/engines/enrichment.ts",
+    "../../src/lib/engines/free-enrichment.ts",
     "../../src/lib/llm.ts"
   ]
 }

@@ -44,6 +44,7 @@ model UserSettings {
   virustotalApiKey   String   @default("") @map("virustotal_api_key")
   abuseipdbApiKey    String   @default("") @map("abuseipdb_api_key")
   shodanApiKey       String   @default("") @map("shodan_api_key")
+  abusechApiKey      String   @default("") @map("abusech_api_key")
   preferredLlm       String   @default("auto") @map("preferred_llm")
   customLlmApiKey    String   @default("") @map("custom_llm_api_key")
   customLlmBaseUrl   String   @default("") @map("custom_llm_base_url")

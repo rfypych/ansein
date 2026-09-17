@@ -19,6 +19,7 @@ const UpdateSchema = z.object({
   virustotal_api_key: z.string().max(500).optional(),
   abuseipdb_api_key: z.string().max(500).optional(),
   shodan_api_key: z.string().max(500).optional(),
+  abusech_api_key: z.string().max(500).optional(),
   preferred_llm: z.enum(['auto', 'openai', 'groq', 'custom']).optional(),
   // Custom OpenAI-compatible LLM provider
   custom_llm_api_key: z.string().max(500).optional(),
@@ -35,6 +36,7 @@ function settingsOut(s: {
   virustotalApiKey: string
   abuseipdbApiKey: string
   shodanApiKey: string
+  abusechApiKey: string
   preferredLlm: string
   customLlmApiKey: string
   customLlmBaseUrl: string
@@ -48,6 +50,7 @@ function settingsOut(s: {
     has_virustotal: !!s.virustotalApiKey,
     has_abuseipdb: !!s.abuseipdbApiKey,
     has_shodan: !!s.shodanApiKey,
+    has_abusech: !!s.abusechApiKey,
     has_custom_llm: !!(s.customLlmBaseUrl && s.customLlmModel),
     custom_llm_base_url: s.customLlmBaseUrl || '',
     custom_llm_model: s.customLlmModel || '',
@@ -98,6 +101,8 @@ async function updateSettings(req: NextRequest) {
     data.abuseipdbApiKey = parsed.data.abuseipdb_api_key ? encrypt(parsed.data.abuseipdb_api_key) : ''
   if (parsed.data.shodan_api_key !== undefined)
     data.shodanApiKey = parsed.data.shodan_api_key ? encrypt(parsed.data.shodan_api_key) : ''
+  if (parsed.data.abusech_api_key !== undefined)
+    data.abusechApiKey = parsed.data.abusech_api_key ? encrypt(parsed.data.abusech_api_key) : ''
   if (parsed.data.custom_llm_api_key !== undefined)
     data.customLlmApiKey = parsed.data.custom_llm_api_key ? encrypt(parsed.data.custom_llm_api_key) : ''
   if (parsed.data.custom_llm_base_url !== undefined)
@@ -147,6 +152,7 @@ export async function getUserDecryptedKeys(userId: number) {
     virustotal_api_key: s.virustotalApiKey ? decrypt(s.virustotalApiKey) : '',
     abuseipdb_api_key: s.abuseipdbApiKey ? decrypt(s.abuseipdbApiKey) : '',
     shodan_api_key: s.shodanApiKey ? decrypt(s.shodanApiKey) : '',
+    abusech_api_key: s.abusechApiKey ? decrypt(s.abusechApiKey) : '',
     preferred_llm: s.preferredLlm,
     custom_llm_api_key: s.customLlmApiKey ? decrypt(s.customLlmApiKey) : '',
     custom_llm_base_url: s.customLlmBaseUrl || '',

@@ -189,7 +189,7 @@ export interface PipelineProgress {
   message?: string
 }
 
-async function getUserKeys(userId: number): Promise<UserKeys & { virustotal_api_key?: string; abuseipdb_api_key?: string; shodan_api_key?: string }> {
+async function getUserKeys(userId: number): Promise<UserKeys & { virustotal_api_key?: string; abuseipdb_api_key?: string; shodan_api_key?: string; abusech_api_key?: string }> {
   const settings = await db.userSettings.findUnique({ where: { userId } })
   if (!settings) return {}
   return {
@@ -202,6 +202,7 @@ async function getUserKeys(userId: number): Promise<UserKeys & { virustotal_api_
     virustotal_api_key: settings.virustotalApiKey ? decrypt(settings.virustotalApiKey) : undefined,
     abuseipdb_api_key: settings.abuseipdbApiKey ? decrypt(settings.abuseipdbApiKey) : undefined,
     shodan_api_key: settings.shodanApiKey ? decrypt(settings.shodanApiKey) : undefined,
+    abusech_api_key: settings.abusechApiKey ? decrypt(settings.abusechApiKey) : undefined,
   }
 }
 
@@ -323,6 +324,7 @@ export async function runPipeline(investigationId: number, userId: number): Prom
             virustotal_api_key: userKeys.virustotal_api_key,
             abuseipdb_api_key: userKeys.abuseipdb_api_key,
             shodan_api_key: userKeys.shodan_api_key,
+            abusech_api_key: userKeys.abusech_api_key,
           }
         )
         await db.entity.update({ where: { id: e.id }, data: { enrichment: enrichment as unknown as object } })
