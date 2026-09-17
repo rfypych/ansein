@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 import { db } from '@/lib/db'
+import { appendAuditLog } from '@/lib/audit-chain'
 import {
   ok,
   jsonError,
@@ -34,15 +35,13 @@ async function updateProfile(req: NextRequest) {
       data: { fullName: parsed.data.full_name.trim() },
     })
     // Audit log
-    await db.auditLog.create({
-      data: {
-        userId: user.id,
-        action: 'user.profile.update',
-        targetType: 'user',
-        targetId: user.id,
-        ipAddress: getClientIp(req),
-        extraMetadata: { ts: new Date().toISOString() },
-      },
+    await appendAuditLog(db, {
+      userId: user.id,
+      action: 'user.profile.update',
+      targetType: 'user',
+      targetId: user.id,
+      ipAddress: getClientIp(req),
+      extraMetadata: { ts: new Date().toISOString() },
     }).catch(() => {})
     return ok({
       id: updated.id,

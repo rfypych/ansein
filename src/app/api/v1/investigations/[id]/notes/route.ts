@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 import { db } from '@/lib/db'
+import { appendAuditLog } from '@/lib/audit-chain'
 import {
   ok,
   created,
@@ -91,16 +92,14 @@ async function create(req: NextRequest, ctx: { params: Promise<{ id: string }> }
       },
       include: { user: { select: { fullName: true, email: true } } },
     })
-    // Audit log (best-effort)
-    await db.auditLog.create({
-      data: {
-        userId: user.id,
-        action: 'note.create',
-        targetType: 'investigation',
-        targetId: invId,
-        ipAddress: getClientIp(req),
-        extraMetadata: { note_id: note.id },
-      },
+    // Audit log (best-effort, hash-chained)
+    await appendAuditLog(db, {
+      userId: user.id,
+      action: 'note.create',
+      targetType: 'investigation',
+      targetId: invId,
+      ipAddress: getClientIp(req),
+      extraMetadata: { note_id: note.id },
     }).catch(() => {})
     return created(noteOut(note, note.user))
   } catch (e) {

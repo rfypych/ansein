@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 import { db } from '@/lib/db'
+import { appendAuditLog } from '@/lib/audit-chain'
 import {
   ok,
   jsonError,
@@ -86,16 +87,14 @@ async function remove(req: NextRequest, ctx: { params: Promise<{ id: string; not
 
   await db.investigationNote.delete({ where: { id: nId } })
 
-  // Audit log (best-effort)
-  await db.auditLog.create({
-    data: {
-      userId: user.id,
-      action: 'note.delete',
-      targetType: 'investigation',
-      targetId: invId,
-      ipAddress: getClientIp(req),
-      extraMetadata: { note_id: nId },
-    },
+  // Audit log (best-effort, hash-chained)
+  await appendAuditLog(db, {
+    userId: user.id,
+    action: 'note.delete',
+    targetType: 'investigation',
+    targetId: invId,
+    ipAddress: getClientIp(req),
+    extraMetadata: { note_id: nId },
   }).catch(() => {})
 
   return ok({ message: 'Deleted' })
