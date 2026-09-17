@@ -14,6 +14,8 @@ export interface UserEnrichKeys {
   virustotal_api_key?: string
   abuseipdb_api_key?: string
   shodan_api_key?: string
+  /** Optional free abuse.ch key — unlocks live ThreatFox/URLhaus API; without it, public bulk-export dumps are used. */
+  abusech_api_key?: string
 }
 
 const VT_BASE = 'https://www.virustotal.com/api/v3'
@@ -175,9 +177,10 @@ export async function enrichEntity(
   const vt = keys.virustotal_api_key || envKey('VIRUSTOTAL_API_KEY')
   const abuse = keys.abuseipdb_api_key || envKey('ABUSEIPDB_API_KEY')
   const shodan = keys.shodan_api_key || envKey('SHODAN_API_KEY')
+  const abusech = keys.abusech_api_key || envKey('ABUSECH_API_KEY')
 
   // Run 100% Free OSINT checks (ThreatFox, URLhaus, CISA KEV, FreeGeoIP, Cloudflare DoH)
-  const freeData = await enrichWithFreeSources(entityType, value)
+  const freeData = await enrichWithFreeSources(entityType, value, { abusech_api_key: abusech || undefined })
   const out: EnrichmentData = { ...freeData }
 
   if (entityType === 'ioc_ip') {

@@ -20,6 +20,7 @@ interface UserSettings {
   has_virustotal: boolean
   has_abuseipdb: boolean
   has_shodan: boolean
+  has_abusech: boolean
   has_webhook_secret: boolean
   updated_at: string
 }
@@ -68,6 +69,15 @@ const PROVIDERS = [
     color: '#7c3aed',
     description: 'Internet-connected device metadata, ports, and vulnerabilities.',
     url: 'https://www.shodan.io/dashboard',
+    badge: 'Enrichment',
+  },
+  {
+    key: 'abusech_api_key',
+    name: 'abuse.ch',
+    icon: ShieldCheck,
+    color: '#f43f5e',
+    description: 'Live ThreatFox/URLhaus API (free key). Without it, public bulk-export dumps are used automatically.',
+    url: 'https://abuse.ch/',
     badge: 'Enrichment',
   },
 ] as const
@@ -307,7 +317,7 @@ export default function SettingsPage() {
                   <ProviderCard
                     key={p.key}
                     provider={p}
-                    has={settingsQuery.data ? (p.key === 'virustotal_api_key' ? settingsQuery.data.has_virustotal : p.key === 'abuseipdb_api_key' ? settingsQuery.data.has_abuseipdb : settingsQuery.data.has_shodan) : false}
+                    has={settingsQuery.data ? (p.key === 'virustotal_api_key' ? settingsQuery.data.has_virustotal : p.key === 'abuseipdb_api_key' ? settingsQuery.data.has_abuseipdb : p.key === 'abusech_api_key' ? settingsQuery.data.has_abusech : settingsQuery.data.has_shodan) : false}
                     values={values}
                     visible={visible}
                     savingKey={savingKey}

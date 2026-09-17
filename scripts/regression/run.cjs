@@ -54,6 +54,16 @@ async function main() {
   const ex = require(path.join(OUT, 'engines', 'extraction.js'))
   const an = require(path.join(OUT, 'engines', 'analysis.js'))
   const dc = require(path.join(OUT, 'engines', 'decay.js'))
+  const fe = require(path.join(OUT, 'engines', 'free-enrichment.js'))
+
+  // 0. abuse.ch CSV parsing incl. commas-inside-quotes (lesson: ThreatFox tags)
+  const tfr = fe.parseCsvLine('"2026-09-17 02:48:17", "1921447", "evil.invalid", "domain", "payload_delivery", "js.clearfake", "None", "ClearFake", "", "100", "False", "None", "ClearFake,mac-0xdcf2,macos", "1", "anonymous"')
+  eq('threatfox csv field count', tfr.length, 15)
+  eq('threatfox csv value', tfr[2], 'evil.invalid')
+  eq('threatfox csv tags kept whole', tfr[12], 'ClearFake,mac-0xdcf2,macos')
+  const uhr = fe.parseCsvLine('"3917893","2026-09-17 02:46:12","http://85.12.237.201:49126/bin.sh","online","2026-09-17 02:46:12","malware_download","32-bit,arm,elf,Mozi","https://urlhaus.abuse.ch/url/3917893/","geenensp"')
+  eq('urlhaus csv url', uhr[2], 'http://85.12.237.201:49126/bin.sh')
+  eq('urlhaus csv tags kept whole', uhr[6], '32-bit,arm,elf,Mozi')
 
   // 1. defang (lesson: CTI reports obfuscate IOCs)
   eq('defang hxxp+[.]', ex.defang('hxxp://evil[.]com/x'), 'http://evil.com/x')
