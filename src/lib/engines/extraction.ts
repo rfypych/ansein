@@ -228,6 +228,56 @@ TEXT:
 `
 const LLM_SYSTEM = 'You output strict JSON, no prose.'
 
+/**
+ * Lenient JSON-array parse for LLM chunk output. A dense 7.5KB window can
+ * yield 40+ entities and the model may hit its output budget mid-array;
+ * strict parsing would discard the ENTIRE chunk (all-or-nothing data loss).
+ * This salvages every complete {...} object and skips fragments. Entries
+ * still pass the allowlist + grounding checks downstream.
+ */
+function parseJsonArrayLenient(cleaned: string): Array<Record<string, unknown>> {
+  try {
+    const arr: unknown = JSON.parse(cleaned)
+    if (Array.isArray(arr)) return arr.filter((x): x is Record<string, unknown> => !!x && typeof x === 'object')
+  } catch {
+    // fall through to fragment salvage below
+  }
+  const out: Array<Record<string, unknown>> = []
+  let depth = 0
+  let start = -1
+  let inStr = false
+  let esc = false
+  for (let i = 0; i < cleaned.length; i++) {
+    const ch = cleaned[i]
+    if (inStr) {
+      if (esc) esc = false
+      else if (ch === '\\') esc = true
+      else if (ch === '"') inStr = false
+      continue
+    }
+    if (ch === '"') inStr = true
+    else if (ch === '{') {
+      if (depth === 0) start = i
+      depth++
+    } else if (ch === '}') {
+      depth--
+      if (depth === 0 && start >= 0) {
+        try {
+          const obj: unknown = JSON.parse(cleaned.slice(start, i + 1))
+          if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
+            out.push(obj as Record<string, unknown>)
+          }
+        } catch {
+          // skip truncated fragment
+        }
+        start = -1
+      }
+      if (depth < 0) depth = 0
+    }
+  }
+  return out
+}
+
 async function callLlmExtractChunk(
   chunk: string,
   userKeys: UserKeys
@@ -240,7 +290,7 @@ async function callLlmExtractChunk(
         { role: 'user', content: LLM_EXTRACTION_PROMPT + '\n```\n' + chunk + '\n```\n' },
       ],
       temperature: 0,
-      maxTokens: 2048,
+      maxTokens: 4096,
       userKeys,
     })
     if (!resp.content) return []
@@ -248,11 +298,7 @@ async function callLlmExtractChunk(
       .replace(/^```(?:json)?\s*/i, '')
       .replace(/\s*```\s*$/i, '')
       .trim()
-    const arr = JSON.parse(cleaned) as Array<{
-      entity_type: string
-      value: string
-      confidence?: number
-    }>
+    const arr = parseJsonArrayLenient(cleaned)
     if (!Array.isArray(arr)) return []
     const allowed = new Set<EntityType>([
       'threat_actor', 'malware', 'tool', 'target', 'technique', 'vulnerability',
