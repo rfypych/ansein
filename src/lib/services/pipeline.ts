@@ -258,15 +258,25 @@ export async function runPipeline(investigationId: number, userId: number): Prom
       return
     }
     const MAX_TEXT = 60000
+    const HEAD_CHARS = 30000
+    const TAIL_CHARS = 30000
     const textTruncated = fullText.length > MAX_TEXT
-    const text = textTruncated ? fullText.slice(0, MAX_TEXT) : fullText
+    // CTI reports keep IOC appendices at the END — a head-only cut silently
+    // drops them. Keep head (narrative/TTPs) + tail (appendix IOCs) so regex
+    // still sees hashes buried on the last pages. LLM chunk selection runs
+    // over the FULL text separately (dense windows, same call budget).
+    const text = textTruncated
+      ? fullText.slice(0, HEAD_CHARS) +
+        '\n\n[...MIDDLE TRUNCATED FOR SCALE...]\n\n' +
+        fullText.slice(-TAIL_CHARS)
+      : fullText
 
     // Wipe existing entities / relationships / analysis (idempotent re-run)
     await db.relationship.deleteMany({ where: { investigationId: inv.id } })
     await db.entity.deleteMany({ where: { investigationId: inv.id } })
     await db.analysisRun.deleteMany({ where: { investigationId: inv.id } })
 
-    const { entities: extracted } = await extractEntities(text, userKeys)
+    const { entities: extracted } = await extractEntities(text, userKeys, fullText)
 
     // Persist entities; build value→id map for relationship wiring
     const valueToId = new Map<string, number>()

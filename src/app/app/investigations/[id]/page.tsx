@@ -102,6 +102,7 @@ interface Entity {
   age_days?: number
   freshness?: 'fresh' | 'aging' | 'stale' | 'stable'
   seen_in_cases?: number
+  verified_in_text?: boolean
 }
 
 interface Relationship {
@@ -1890,6 +1891,14 @@ function EntitiesTab({ invId }: { invId: number }) {
                 <div className="mt-3 flex items-center justify-between text-[10px] text-muted-foreground/50">
                   <span className="flex items-center gap-1.5">
                     via <span className="ansein-mono text-muted-foreground">{e.source_method}</span>
+                    {e.verified_in_text === false && (
+                      <span
+                        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded ansein-mono bg-zinc-500/10 border border-zinc-500/20 text-zinc-400"
+                        title="Value not found verbatim in sources — LLM paraphrase, treat with caution"
+                      >
+                        unverified
+                      </span>
+                    )}
                     {(e.seen_in_cases || 0) > 0 && (
                       <span
                         className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded ansein-mono bg-violet-500/10 border border-violet-500/20 text-violet-300"

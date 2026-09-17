@@ -100,6 +100,43 @@ export function contentHash(text: string): string {
   return createHash('sha256').update(text, 'utf8').digest('hex')
 }
 
+/**
+ * Grounding check — is this extracted value actually present in the source?
+ * Guards SIEM rules and badges against LLM paraphrase drift (e.g. a technique
+ * the model reworded into something the document never said).
+ *
+ * Grounded when: the full value appears verbatim (case-insensitive), OR any
+ * verifiable fragment inside it does (T-code, CVE, IP, domain, file hash).
+ * Computed at READ time from current sources — no migration, and re-adding
+ * sources automatically re-grounds everything.
+ */
+export function isGroundedInText(
+  value: string,
+  _entityType: string,
+  defangedLowerHaystack: string
+): boolean {
+  const v = value.toLowerCase().trim()
+  if (!v) return false
+  const hay = defangedLowerHaystack
+  if (hay.includes(v)) return true
+  const probes = new Set<string>()
+  const probeRes = [
+    /\bCVE-\d{4}-\d{4,7}\b/gi,
+    /\bT\d{4}(?:\.\d{3})?\b/gi,
+    /\b(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)\b/g,
+    /\b[a-f0-9]{32,128}\b/g,
+    /\b[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+\.[a-z]{2,24}\b/g,
+  ]
+  for (const re of probeRes) {
+    re.lastIndex = 0
+    for (const m of v.matchAll(re)) probes.add(m[0])
+  }
+  for (const p of probes) {
+    if (p.length >= 4 && hay.includes(p)) return true
+  }
+  return false
+}
+
 function normalizeValue(type: EntityType, value: string): string {
   if (type.startsWith('ioc_')) return value.toLowerCase()
   if (type === 'vulnerability') return value.toUpperCase()
@@ -240,25 +277,54 @@ async function callLlmExtractChunk(
   }
 }
 
+/** Score a window for CTI density so the 2-chunk LLM budget is spent where
+ *  the threats actually are — not blindly on head+tail. Same call budget,
+ *  strictly better coverage on long advisories. */
+function scoreChunk(window: string): number {
+  const count = (re: RegExp, cap: number) => Math.min(cap, (window.match(re) || []).length)
+  return (
+    3 * count(/\bCVE-\d{4}-\d{4,7}\b/gi, 10) +
+    2 * count(/\b(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)\b/g, 20) +
+    1 * count(/\b(?!\.)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24}\b/gi, 20) +
+    2 * count(/\bT\d{4}(?:\.\d{3})?\b|\bapt\b|malware|cobalt|mimikatz|impacket|powershell|\bc2\b|exploit|ransomware|threat.actor|ttps|lateral|exfiltrat|backdoor|webshell|cobalt|lsass|ntds/gi, 10)
+  )
+}
+
 async function llmExtract(
   text: string,
   userKeys: UserKeys
 ): Promise<RegexHit[]> {
   if (text.length < 80) return []
-  
+
   // Cap LLM extraction to 2 chunks max: every extra chunk is an extra Groq
   // call, and a burst of calls trips the free-tier TPM/RPM caps (429) which
-  // kills the downstream analysis LLM call too. Regex already covers the
-  // full text for IOCs; LLM chunks cover actors/TTPs in head + tail.
+  // kills the downstream analysis LLM call too. Windows are scored by CTI
+  // density: head (attribution/summary) + the densest other window, so a
+  // Mimikatz buried on page 9 is still seen. Same budget, no blindness.
   const CHUNK_SIZE = 7500
+  const OVERLAP = 500
   const chunks: string[] = []
 
   if (text.length <= CHUNK_SIZE) {
     chunks.push(text)
   } else {
-    // Head chunk (executive summary, attribution) + tail chunk (IOCs, TTPs)
-    chunks.push(text.slice(0, CHUNK_SIZE))
-    chunks.push(text.slice(Math.max(CHUNK_SIZE, text.length - CHUNK_SIZE)))
+    const step = CHUNK_SIZE - OVERLAP
+    const windows: string[] = []
+    for (let start = 0; start < text.length && windows.length < 24; start += step) {
+      windows.push(text.slice(start, start + CHUNK_SIZE))
+      if (start + CHUNK_SIZE >= text.length) break
+    }
+    let bestIdx = 1
+    let bestScore = -1
+    for (let i = 1; i < windows.length; i++) {
+      const s = scoreChunk(windows[i])
+      if (s > bestScore) {
+        bestScore = s
+        bestIdx = i
+      }
+    }
+    chunks.push(windows[0])
+    if (windows.length > 1) chunks.push(windows[bestIdx])
   }
 
   const allHits: RegexHit[] = []
@@ -272,10 +338,13 @@ async function llmExtract(
 // ---------------------------------------------------------------- public API
 export async function extractEntities(
   text: string,
-  userKeys: UserKeys = {}
+  userKeys: UserKeys = {},
+  llmText?: string
 ): Promise<{ entities: ExtractedEntity[]; usedLlm: boolean }> {
   const regexHits = regexExtract(text)
-  const llmHits = await llmExtract(text, userKeys)
+  // LLM chunk selection runs over the FULL text (dense windows), while regex
+  // runs on the caller-provided (possibly truncated) slice.
+  const llmHits = await llmExtract(llmText ?? text, userKeys)
 
   // Merge with dedup by (type, normalized.lower()) keeping highest confidence
   const byKey = new Map<string, ExtractedEntity>()

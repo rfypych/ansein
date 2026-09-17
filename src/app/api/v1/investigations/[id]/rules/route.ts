@@ -7,6 +7,7 @@ import {
   generateSuricataRules,
   generateKqlQuery,
 } from '@/lib/engines/detection-rules'
+import { defang, isGroundedInText } from '@/lib/engines/extraction'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,17 +21,36 @@ export const GET = withErrorHandler(async (req: NextRequest, { params }: { param
     where: { id },
     include: {
       entities: true,
+      sources: { select: { content: true } },
     },
   })
 
   if (!inv) return jsonError(404, 'not_found', 'Investigation not found')
 
+  // SIEM safety: only grounded IOCs become detection content. An ungrounded
+  // (LLM-paraphrased, absent from sources) value must never ship in a rule.
+  const corpus = defang(inv.sources.map((s) => s.content).join('\n')).toLowerCase()
   const ips: string[] = []
   const domains: string[] = []
   const hashes: string[] = []
   const urls: string[] = []
+  let unverifiedExcluded = 0
 
   for (const e of inv.entities) {
+    const isIoc =
+      e.entityType === 'ioc_ip' ||
+      e.entityType === 'ioc_domain' ||
+      e.entityType === 'ioc_hash' ||
+      e.entityType === 'ioc_url'
+    if (!isIoc) continue
+    if (
+      e.sourceMethod !== 'regex' &&
+      e.sourceMethod !== 'stix_import' &&
+      !isGroundedInText(e.value, e.entityType, corpus)
+    ) {
+      unverifiedExcluded++
+      continue
+    }
     if (e.entityType === 'ioc_ip') ips.push(e.value)
     else if (e.entityType === 'ioc_domain') domains.push(e.value)
     else if (e.entityType === 'ioc_hash') hashes.push(e.value)
@@ -54,6 +74,7 @@ export const GET = withErrorHandler(async (req: NextRequest, { params }: { param
   return ok({
     investigation_id: inv.id,
     title: inv.title,
+    unverified_excluded: unverifiedExcluded,
     rules: {
       sigma,
       yara,

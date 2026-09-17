@@ -8,6 +8,7 @@ import {
   safeParseJson,
 } from '@/lib/api'
 import { decayEntity } from '@/lib/engines/decay'
+import { defang, isGroundedInText } from '@/lib/engines/extraction'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,10 +20,20 @@ async function list(req: NextRequest, ctx: { params: Promise<{ id: string }> }) 
   const inv = await db.investigation.findFirst({ where: { id: invId, userId: user.id } })
   if (!inv) return jsonError(404, 'not_found', 'Investigation not found')
 
-  const entities = await db.entity.findMany({
-    where: { investigationId: invId },
-    orderBy: { confidence: 'desc' },
-  })
+  const [entities, sources] = await Promise.all([
+    db.entity.findMany({
+      where: { investigationId: invId },
+      orderBy: { confidence: 'desc' },
+    }),
+    db.source.findMany({
+      where: { investigationId: invId },
+      select: { content: true },
+    }),
+  ])
+  // Grounding corpus: all source text, defanged+lowered once. Regex hits are
+  // grounded by construction; LLM paraphrases are verified here so the UI
+  // can label (and rules can exclude) ungrounded values.
+  const corpus = defang(sources.map((s) => s.content).join('\n')).toLowerCase()
   // Cross-case correlation: how many OTHER investigations of this user
   // contain the same (type, normalized) indicator. One grouped query —
   // this is the cheap version of OpenCTI's observable correlation.
@@ -46,6 +57,10 @@ async function list(req: NextRequest, ctx: { params: Promise<{ id: string }> }) 
   return ok(
     entities.map((e) => {
       const decay = decayEntity(e.entityType, e.confidence, e.createdAt, now)
+      const grounded =
+        e.sourceMethod === 'regex' ||
+        e.sourceMethod === 'stix_import' ||
+        isGroundedInText(e.value, e.entityType, corpus)
       return {
         id: e.id,
         entity_type: e.entityType,
@@ -59,6 +74,7 @@ async function list(req: NextRequest, ctx: { params: Promise<{ id: string }> }) 
         age_days: decay.age_days,
         freshness: decay.freshness,
         seen_in_cases: seenCounts[`${e.entityType}|${e.normalized.toLowerCase()}`] || 0,
+        verified_in_text: grounded,
       }
     })
   )
