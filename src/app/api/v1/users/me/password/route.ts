@@ -44,7 +44,8 @@ async function changePassword(req: NextRequest) {
   try {
     await db.user.update({
       where: { id: user.id },
-      data: { hashedPassword: hashed },
+      // New password = new session generation: all other sessions die.
+      data: { hashedPassword: hashed, tokenVersion: { increment: 1 } },
     })
     // Audit log the password change
     await db.auditLog.create({

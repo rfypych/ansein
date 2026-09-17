@@ -57,6 +57,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       id: user.id,
       email: user.email,
       isSuperuser: user.isSuperuser,
+      tokenVersion: user.tokenVersion,
     })
     const res = NextResponse.json(
       {

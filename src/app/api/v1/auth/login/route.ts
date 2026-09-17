@@ -55,6 +55,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     id: user.id,
     email: user.email,
     isSuperuser: user.isSuperuser,
+    tokenVersion: user.tokenVersion,
   })
   // Tokens are delivered BOTH as httpOnly cookies (primary, XSS-safe) and in
   // the body (transitional compat). The client must not persist them.

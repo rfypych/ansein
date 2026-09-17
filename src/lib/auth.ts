@@ -35,7 +35,9 @@ export interface AccessTokenPayload {
   sub: string
   type: 'access'
   email: string
-  is_superuser: boolean
+  isSuperuser: boolean
+  /** Session generation — must equal users.token_version, else revoked. */
+  version: number
   iat: number
   exp: number
   jti: string
@@ -44,17 +46,25 @@ export interface AccessTokenPayload {
 export interface RefreshTokenPayload {
   sub: string
   type: 'refresh'
+  /** Session generation — must equal users.token_version, else revoked. */
+  version: number
   iat: number
   exp: number
   jti: string
 }
 
-export async function signAccessToken(user: { id: number; email: string; isSuperuser: boolean }): Promise<string> {
+export async function signAccessToken(user: {
+  id: number
+  email: string
+  isSuperuser: boolean
+  tokenVersion: number
+}): Promise<string> {
   const now = Math.floor(Date.now() / 1000)
   return new SignJWT({
     type: 'access',
     email: user.email,
     is_superuser: user.isSuperuser,
+    version: user.tokenVersion,
   })
     .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
     .setSubject(String(user.id))
@@ -64,9 +74,9 @@ export async function signAccessToken(user: { id: number; email: string; isSuper
     .sign(encKey())
 }
 
-export async function signRefreshToken(userId: number): Promise<string> {
+export async function signRefreshToken(userId: number, tokenVersion: number): Promise<string> {
   const now = Math.floor(Date.now() / 1000)
-  return new SignJWT({ type: 'refresh' })
+  return new SignJWT({ type: 'refresh', version: tokenVersion })
     .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
     .setSubject(String(userId))
     .setIssuedAt(now)
@@ -97,10 +107,15 @@ export interface TokenPair {
   token_type: 'bearer'
 }
 
-export async function makeTokenPair(user: { id: number; email: string; isSuperuser: boolean }): Promise<TokenPair> {
+export async function makeTokenPair(user: {
+  id: number
+  email: string
+  isSuperuser: boolean
+  tokenVersion: number
+}): Promise<TokenPair> {
   const [access_token, refresh_token] = await Promise.all([
     signAccessToken(user),
-    signRefreshToken(user.id),
+    signRefreshToken(user.id, user.tokenVersion),
   ])
   return { access_token, refresh_token, token_type: 'bearer' }
 }

@@ -20,6 +20,9 @@ model User {
   isActive       Boolean   @default(true) @map("is_active")
   // Role-based access control: "analyst" | "editor" | "admin"
   role           String    @default("analyst")
+  // Session revocation counter: embedded in every JWT; logout and password
+  // changes bump it, instantly invalidating all previously issued tokens.
+  tokenVersion   Int       @default(0) @map("token_version")
   isSuperuser    Boolean   @default(false) @map("is_superuser")
   createdAt      DateTime  @default(now()) @map("created_at")
   lastLoginAt    DateTime? @map("last_login_at")

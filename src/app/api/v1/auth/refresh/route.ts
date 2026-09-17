@@ -25,7 +25,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   if (!refreshToken) {
     return jsonError(401, 'invalid_token', 'No refresh token provided')
   }
-  type RefreshPayload = { type: string; sub: string }
+  type RefreshPayload = { type: string; sub: string; version?: number }
   const payload = await decodeToken<RefreshPayload>(refreshToken)
   if (!payload || payload.type !== 'refresh') {
     return jsonError(401, 'invalid_token', 'Invalid or expired refresh token')
@@ -35,10 +35,15 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   if (!user || !user.isActive) {
     return jsonError(401, 'invalid_token', 'User not found or inactive')
   }
+  // Revoked generation (logout / password change bumps token_version)
+  if ((payload.version ?? 0) !== user.tokenVersion) {
+    return jsonError(401, 'revoked', 'Session revoked — please sign in again')
+  }
   const tokens = await makeTokenPair({
     id: user.id,
     email: user.email,
     isSuperuser: user.isSuperuser,
+    tokenVersion: user.tokenVersion,
   })
   const res = NextResponse.json(tokens)
   setAuthCookies(res, tokens)
