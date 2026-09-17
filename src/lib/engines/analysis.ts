@@ -464,7 +464,8 @@ export async function analyze(
   entities: EntityForAnalysis[],
   mergedEnrichment: EnrichmentData,
   userKeys: UserKeys = {},
-  sourceText = ''
+  sourceText = '',
+  correlationNote = ''
 ): Promise<AnalysisResult> {
   // Build merged enrichment list per-entity for severity calc
   const enrichmentByEntity = entities.map((e) => e.enrichment)
@@ -479,6 +480,7 @@ export async function analyze(
         entitiesSummary +
         '\n\nENRICHMENT SUMMARY:\n' +
         enrichmentSummary +
+        (correlationNote ? '\n\nCROSS-CASE CORRELATION (same indicators in your other investigations — weigh recurrence as campaign signal):\n' + correlationNote : '') +
         (sourceText ? '\n\nSOURCE EXCERPT:\n' + sourceText.slice(0, 6000) : '')
 
       const messages: ChatMessage[] = [

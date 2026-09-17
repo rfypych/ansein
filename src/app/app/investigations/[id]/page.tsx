@@ -101,6 +101,7 @@ interface Entity {
   decayed_confidence?: number
   age_days?: number
   freshness?: 'fresh' | 'aging' | 'stale' | 'stable'
+  seen_in_cases?: number
 }
 
 interface Relationship {
@@ -1889,6 +1890,14 @@ function EntitiesTab({ invId }: { invId: number }) {
                 <div className="mt-3 flex items-center justify-between text-[10px] text-muted-foreground/50">
                   <span className="flex items-center gap-1.5">
                     via <span className="ansein-mono text-muted-foreground">{e.source_method}</span>
+                    {(e.seen_in_cases || 0) > 0 && (
+                      <span
+                        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded ansein-mono bg-violet-500/10 border border-violet-500/20 text-violet-300"
+                        title={`Also seen in ${e.seen_in_cases} other case(s) — possible campaign overlap`}
+                      >
+                        ×{e.seen_in_cases} cases
+                      </span>
+                    )}
                     {e.freshness && e.freshness !== 'stable' && (
                       <span
                         className={cn(
