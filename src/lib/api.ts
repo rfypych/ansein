@@ -57,6 +57,12 @@ export async function requireUser(req: NextRequest) {
   if (!user || !user.isActive) {
     throw new ApiError(401, 'inactive', 'Account is inactive or not found')
   }
+  // Revoked generation (logout / password change bumps token_version).
+  // Tokens issued before the version column existed carry no version and
+  // are treated as generation 0 — matching fresh rows, rejected after bump.
+  if ((payload.version ?? 0) !== user.tokenVersion) {
+    throw new ApiError(401, 'revoked', 'Session revoked — please sign in again')
+  }
   return user
 }
 
