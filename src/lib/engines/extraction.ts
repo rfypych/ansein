@@ -296,11 +296,12 @@ async function llmExtract(
 ): Promise<RegexHit[]> {
   if (text.length < 80) return []
 
-  // Cap LLM extraction to 2 chunks max: every extra chunk is an extra Groq
+  // Cap LLM extraction to 3 chunks max: every extra chunk is an extra Groq
   // call, and a burst of calls trips the free-tier TPM/RPM caps (429) which
   // kills the downstream analysis LLM call too. Windows are scored by CTI
-  // density: head (attribution/summary) + the densest other window, so a
-  // Mimikatz buried on page 9 is still seen. Same budget, no blindness.
+  // density: head (attribution/summary) + the two densest distinct windows,
+  // so a Mimikatz buried on page 9 is still seen. Proven on AA24-038A: 2
+  // chunks missed the Credential-Access section; 3 chunks cover it.
   const CHUNK_SIZE = 7500
   const OVERLAP = 500
   const chunks: string[] = []
@@ -314,17 +315,13 @@ async function llmExtract(
       windows.push(text.slice(start, start + CHUNK_SIZE))
       if (start + CHUNK_SIZE >= text.length) break
     }
-    let bestIdx = 1
-    let bestScore = -1
-    for (let i = 1; i < windows.length; i++) {
-      const s = scoreChunk(windows[i])
-      if (s > bestScore) {
-        bestScore = s
-        bestIdx = i
-      }
-    }
+    const ranked = windows
+      .map((w, i) => ({ i, s: scoreChunk(w) }))
+      .filter((x) => x.i > 0)
+      .sort((a, b) => b.s - a.s)
+      .slice(0, 2)
     chunks.push(windows[0])
-    if (windows.length > 1) chunks.push(windows[bestIdx])
+    for (const r of ranked) chunks.push(windows[r.i])
   }
 
   const allHits: RegexHit[] = []
