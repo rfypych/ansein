@@ -329,7 +329,7 @@ export default function InvestigationDetailPage({ params }: { params: Promise<{ 
                     </span>
                   )}
                 </div>
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground break-words">
                   {inv.title}
                 </h1>
                 {inv.description && (
