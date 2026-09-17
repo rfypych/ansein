@@ -10,8 +10,7 @@ import {
   handlePrismaError,
   getClientIp,
 } from '@/lib/api'
-import { contentHash } from '@/lib/engines/extraction'
-import { redactPII } from '@/lib/pii-redact'
+import { persistSource } from '@/lib/services/source-intake'
 
 export const dynamic = 'force-dynamic'
 
@@ -78,51 +77,14 @@ async function add(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   if (!parsed.success) {
     return jsonError(422, 'validation_error', parsed.error.issues[0]?.message || 'Invalid input')
   }
-  // PII auto-redaction: scan content before persistence. The original
-  // text is discarded — only the redacted payload ever reaches the DB or
-  // downstream extraction/LLM stages.
-  const piiResult = redactPII(parsed.data.content)
-  const content = piiResult.redacted
-  const piiNote =
-    piiResult.found > 0
-      ? `[PII REDACTED: ${piiResult.found} items]`
-      : ''
-  const title = piiNote
-    ? parsed.data.title
-      ? `${parsed.data.title} ${piiNote}`
-      : piiNote
-    : parsed.data.title
 
   try {
-    const s = await db.source.create({
-      data: {
-        investigationId: invId,
-        sourceType: parsed.data.source_type,
-        title,
-        content,
-        contentHash: contentHash(content),
-        mimeType: parsed.data.mime_type,
-        sizeBytes: Buffer.byteLength(content, 'utf8'),
-      },
+    const s = await persistSource(invId, user.id, getClientIp(req), {
+      sourceType: parsed.data.source_type,
+      title: parsed.data.title,
+      content: parsed.data.content,
+      mimeType: parsed.data.mime_type,
     })
-    // Audit: source added (redaction count logged in metadata)
-    await db.auditLog.create({
-      data: {
-        userId: user.id,
-        action: 'source.add',
-        targetType: 'investigation',
-        targetId: invId,
-        ipAddress: getClientIp(req),
-        extraMetadata: {
-          investigation_id: invId,
-          source_id: s.id,
-          source_type: s.sourceType,
-          size_bytes: s.sizeBytes,
-          pii_redacted_count: piiResult.found,
-          pii_redacted_types: piiResult.types,
-        },
-      },
-    }).catch(() => {})
     return created(sourceOut(s))
   } catch (e) {
     const err = handlePrismaError(e)
