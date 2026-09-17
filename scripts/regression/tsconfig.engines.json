@@ -17,6 +17,7 @@
     "../../src/lib/engines/decay.ts",
     "../../src/lib/engines/enrichment.ts",
     "../../src/lib/engines/free-enrichment.ts",
-    "../../src/lib/llm.ts"
+    "../../src/lib/llm.ts",
+    "../../src/lib/rate-limit.ts"
   ]
 }
