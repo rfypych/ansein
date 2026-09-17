@@ -134,6 +134,7 @@ interface Analysis {
   confidence: number
   model_used: string
   tokens_used: number
+  provider?: string
   created_at: string
   hypotheses?: ThreatHypothesis[]
 }
@@ -2170,6 +2171,16 @@ function AnalysisTab({ invId }: { invId: number }) {
             <Cpu weight="duotone" className="h-4 w-4 text-primary" />
             {data.model_used || 'heuristic'}
           </p>
+          {data.provider && (
+            <p className="mt-1">
+              <span
+                className="text-[10px] px-1.5 py-0.5 rounded ansein-mono bg-primary/10 border border-primary/20 text-primary"
+                title="Backend that produced this analysis"
+              >
+                via {data.provider}
+              </span>
+            </p>
+          )}
           <div className="mt-3 flex items-center gap-2">
             <div className="flex-1">
               <p className="text-[10px] text-muted-foreground/50 mb-1">Confidence</p>

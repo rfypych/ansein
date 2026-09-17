@@ -48,6 +48,7 @@ async function handler(req: NextRequest, ctx: { params: Promise<{ id: string }> 
     confidence: latest.confidence,
     model_used: latest.modelUsed,
     tokens_used: latest.tokensUsed,
+    provider: latest.provider || (latest.modelUsed === 'heuristic' ? 'heuristic' : 'unknown'),
     created_at: latest.createdAt.toISOString(),
   })
 }
