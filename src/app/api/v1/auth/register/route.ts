@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { db } from '@/lib/db'
-import { jsonError, withErrorHandler, handlePrismaError } from '@/lib/api'
+import { jsonError, withErrorHandler, handlePrismaError, getClientIp } from '@/lib/api'
 import { hashPassword, makeTokenPair } from '@/lib/auth'
 import { setAuthCookies } from '@/lib/cookies'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,6 +15,10 @@ const RegisterSchema = z.object({
 })
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
+  const rl = checkRateLimit(`register:${getClientIp(req)}`, 5, 3_600_000)
+  if (!rl.allowed) {
+    return jsonError(429, 'rate_limited', 'Too many registrations from this address, try again later')
+  }
   let body: unknown
   try {
     body = await req.json()

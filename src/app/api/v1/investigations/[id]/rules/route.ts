@@ -45,6 +45,7 @@ export const GET = withErrorHandler(async (req: NextRequest, { params }: { param
     if (!isIoc) continue
     if (
       e.sourceMethod !== 'regex' &&
+      e.sourceMethod !== 'both' &&
       e.sourceMethod !== 'stix_import' &&
       !isGroundedInText(e.value, e.entityType, corpus)
     ) {

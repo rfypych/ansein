@@ -126,6 +126,8 @@ interface Analysis {
   narrative: string
   actor_hypothesis: Record<string, unknown>
   severity_score: number
+  severity_breakdown?: { total: number; factors: Array<{ label: string; points: number }> }
+  severity_agrees_with_heuristic?: boolean
   recommendations: string[]
   admiralty_code: string
   confidence: number
@@ -2146,6 +2148,41 @@ function AnalysisTab({ invId }: { invId: number }) {
           </p>
         </div>
       </div>
+
+      {/* Severity accounting — every point itemised, no black box */}
+      {data.severity_breakdown && data.severity_breakdown.factors.length > 0 && (
+        <div className="bg-card border border-border rounded-xl p-5">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50">
+              Why this score
+            </p>
+            {data.severity_agrees_with_heuristic === false && (
+              <span
+                className="text-[10px] px-1.5 py-0.5 rounded ansein-mono bg-amber-500/10 border border-amber-500/20 text-amber-300"
+                title="The stored score (possibly LLM-set) differs from the heuristic recomputation by more than 15 points"
+              >
+                differs from heuristic
+              </span>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            {data.severity_breakdown.factors.map((f, i) => (
+              <div key={i} className="flex items-center gap-3 text-xs">
+                <span className="flex-1 text-muted-foreground truncate" title={f.label}>
+                  {f.label}
+                </span>
+                <div className="h-1 w-24 rounded-full bg-[border] overflow-hidden flex-shrink-0">
+                  <div
+                    className="h-full rounded-full"
+                    style={{ width: `${Math.min(100, f.points)}%`, background: severityColor }}
+                  />
+                </div>
+                <span className="ansein-mono text-muted-foreground w-8 text-right">+{f.points}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Narrative */}
       {data.narrative && (
