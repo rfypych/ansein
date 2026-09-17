@@ -112,12 +112,21 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
     timelineAtRef.current = timelineAt
   }, [timelineAt])
 
+  // Minimum edge-weight filter — the hairball tamer. Hides weak co-occurrence
+  // edges (and nodes left with none) without restarting the simulation.
+  const [minWeight, setMinWeight] = useState(0)
+  const minWeightRef = useRef(0)
+  useEffect(() => {
+    minWeightRef.current = minWeight
+  }, [minWeight])
+
   // Initialize / reset the slider to "show all" when the underlying graph data
   // changes (e.g. user switches investigations, pipeline re-runs).
   useEffect(() => {
 
     setTimelineAt(null)
 
+    setMinWeight(0)
     setIsPlaying(false)
   }, [data])
 
@@ -170,57 +179,86 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
    * The simulation is NOT restarted — node positions are preserved so dragging
    * the slider feels smooth.
    */
-  const applyTimelineFilter = useCallback((at: number | null) => {
+  const applyTimelineFilter = useCallback((at: number | null, minW: number, edges: GraphEdge[]) => {
     const nodeSel = nodeSelRef.current
     const linkSel = linkSelRef.current
     const edgeLabelSel = edgeLabelSelRef.current
     if (!nodeSel || !linkSel || !edgeLabelSel) return
-    if (at == null) {
+    const timeOkNode = (n: GraphNode): boolean => {
+      if (at == null) return true
+      if (!n.createdAt) return true
+      return Date.parse(n.createdAt) <= at
+    }
+    const idOf = (x: unknown): number | string => {
+      if (x && typeof x === 'object' && 'id' in (x as Record<string, unknown>)) {
+        return (x as { id: number | string }).id
+      }
+      return x as number | string
+    }
+    const timeOkEdge = (sTs: unknown, tTs: unknown): boolean => {
+      if (at == null) return true
+      const sOk = !sTs || (typeof sTs === 'string' && Date.parse(sTs) <= at)
+      const tOk = !tTs || (typeof tTs === 'string' && Date.parse(tTs) <= at)
+      return !!(sOk && tOk)
+    }
+    // Full-graph degree (ignores filters): nodes that never had edges stay
+    // visible even at high thresholds — only *disconnected-by-filter* nodes hide.
+    // (edges param kept explicit so the filter is testable without closures.)
+    const fullDegree = new Map<number | string, number>()
+    for (const e of edges) {
+      const s = (typeof e.source === 'object' && e.source ? (e.source as { id: number | string }).id : e.source) as number | string
+      const t = (typeof e.target === 'object' && e.target ? (e.target as { id: number | string }).id : e.target) as number | string
+      fullDegree.set(s, (fullDegree.get(s) || 0) + 1)
+      fullDegree.set(t, (fullDegree.get(t) || 0) + 1)
+    }
+    const visibleNodes = new Set<number | string>()
+    linkSel.each((l) => {
+      const s = l.source as unknown
+      const t = l.target as unknown
+      const sNode = s as GraphNode
+      const tNode = t as GraphNode
+      const sTs = sNode && typeof sNode === 'object' ? sNode.createdAt : undefined
+      const tTs = tNode && typeof tNode === 'object' ? tNode.createdAt : undefined
+      if (timeOkEdge(sTs, tTs) && (l.weight ?? 0) >= minW) {
+        visibleNodes.add(idOf(s))
+        visibleNodes.add(idOf(t))
+      }
+    });
+    if (at == null && minW <= 0) {
       // Show everything.
       nodeSel.style('display', '').attr('opacity', 1)
       linkSel.style('display', '').attr('stroke-opacity', 0.6)
       edgeLabelSel.style('display', '').attr('opacity', 0.8)
       return
     }
+    const edgeVisible = (l: GraphEdge & { source: unknown; target: unknown }): boolean => {
+      const s = l.source as Partial<GraphNode> | number | string
+      const t = l.target as Partial<GraphNode> | number | string
+      const sTs = typeof s === 'object' && s ? (s as Partial<GraphNode>).createdAt : undefined
+      const tTs = typeof t === 'object' && t ? (t as Partial<GraphNode>).createdAt : undefined
+      return timeOkEdge(sTs, tTs) && (l.weight ?? 0) >= minW
+    }
     nodeSel
       .style('display', (n) => {
-        if (!n.createdAt) return ''
-        return Date.parse(n.createdAt) <= at ? '' : 'none'
+        if (!timeOkNode(n)) return 'none'
+        if (minW <= 0) return ''
+        const id = (n as GraphNode).id
+        if (!fullDegree.has(id)) return ''
+        return visibleNodes.has(id) ? '' : 'none'
       })
       .attr('opacity', (n) => {
-        if (!n.createdAt) return 1
-        return Date.parse(n.createdAt) <= at ? 1 : 0
+        if (!timeOkNode(n)) return 0
+        if (minW <= 0) return 1
+        const id = (n as GraphNode).id
+        if (!fullDegree.has(id)) return 1
+        return visibleNodes.has(id) ? 1 : 0
       })
     linkSel
-      .style('display', (l) => {
-        const sTs = (l.source as GraphNode).createdAt
-        const tTs = (l.target as GraphNode).createdAt
-        const sOk = !sTs || Date.parse(sTs) <= at
-        const tOk = !tTs || Date.parse(tTs) <= at
-        return sOk && tOk ? '' : 'none'
-      })
-      .attr('stroke-opacity', (l) => {
-        const sTs = (l.source as GraphNode).createdAt
-        const tTs = (l.target as GraphNode).createdAt
-        const sOk = !sTs || Date.parse(sTs) <= at
-        const tOk = !tTs || Date.parse(tTs) <= at
-        return sOk && tOk ? 0.6 : 0
-      })
+      .style('display', (l) => (edgeVisible(l) ? '' : 'none'))
+      .attr('stroke-opacity', (l) => (edgeVisible(l) ? 0.6 : 0))
     edgeLabelSel
-      .style('display', (l) => {
-        const sTs = (l.source as GraphNode).createdAt
-        const tTs = (l.target as GraphNode).createdAt
-        const sOk = !sTs || Date.parse(sTs) <= at
-        const tOk = !tTs || Date.parse(tTs) <= at
-        return sOk && tOk ? '' : 'none'
-      })
-      .attr('opacity', (l) => {
-        const sTs = (l.source as GraphNode).createdAt
-        const tTs = (l.target as GraphNode).createdAt
-        const sOk = !sTs || Date.parse(sTs) <= at
-        const tOk = !tTs || Date.parse(tTs) <= at
-        return sOk && tOk ? 0.8 : 0
-      })
+      .style('display', (l) => (edgeVisible(l) ? '' : 'none'))
+      .attr('opacity', (l) => (edgeVisible(l) ? 0.8 : 0))
   }, [])
 
   useEffect(() => {
@@ -594,10 +632,10 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
     linkSelRef.current = link as unknown as d3.Selection<SVGPathElement, GraphEdge & { source: unknown; target: unknown }, SVGGElement, unknown>
     edgeLabelSelRef.current = edgeLabelGroup as unknown as d3.Selection<SVGGElement, GraphEdge & { source: unknown; target: unknown }, SVGGElement, unknown>
 
-    // Apply the current timeline filter to the freshly-rendered graph so the
-    // initial state matches the slider position (e.g. user reloads the page
+    // Apply the current filters to the freshly-rendered graph so the
+    // initial state matches the slider positions (e.g. user reloads the page
     // mid-playback).
-    applyTimelineFilter(timelineAtRef.current)
+    applyTimelineFilter(timelineAtRef.current, minWeightRef.current, data.edges)
 
     return () => {
       resizeObs.disconnect()
@@ -612,8 +650,8 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
 
   // Filter effect — fires on every slider change. Does NOT restart the sim.
   useEffect(() => {
-    applyTimelineFilter(timelineAt)
-  }, [timelineAt, applyTimelineFilter])
+    applyTimelineFilter(timelineAt, minWeight, data.edges)
+  }, [timelineAt, minWeight, data.edges, applyTimelineFilter])
 
   function zoomBy(factor: number) {
     if (!svgSelRef.current || !zoomRef.current) return
@@ -923,6 +961,28 @@ export function GraphView({ data, height = 'calc(100vh - 360px)' }: GraphViewPro
             <p className="text-[9px] text-amber-400/70 mb-1.5">
               No relationships detected. Click a node to inspect.
             </p>
+          )}
+          {data.edges.length > 0 && (
+            <div className="mb-2">
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-[9px] uppercase tracking-widest ansein-mono text-muted-foreground/50">
+                  Min edge weight
+                </p>
+                <span className="text-[9px] text-muted-foreground/50 ansein-mono">
+                  ≥{minWeight.toFixed(2)} · {data.edges.filter((e) => (e.weight ?? 0) >= minWeight).length}/{data.edges.length} edges
+                </span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.05}
+                value={minWeight}
+                onChange={(e) => setMinWeight(Number(e.target.value))}
+                className="w-full h-1 accent-primary cursor-pointer"
+                title="Hide relationships weaker than this (tames hairball graphs)"
+              />
+            </div>
           )}
           {/* Communities legend — shown when community data exists */}
           {hasCommunities && data.communities && data.communities.length > 0 && (

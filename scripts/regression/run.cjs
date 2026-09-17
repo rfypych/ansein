@@ -155,6 +155,21 @@ async function main() {
   const lone = an.severityBreakdown([{ entity_type: 'ioc_domain' }], [])
   ok('lone domain is LOW band', lone.total < 40)
 
+  // 11. NVD CVSS anchor: external ground truth moves the score deterministically
+  const cvssCrit = an.severityBreakdown(
+    [{ entity_type: 'vulnerability' }],
+    [{ nvd: { found: true, cvss_v31: 9.8 } }]
+  )
+  const cvssFactor = cvssCrit.factors.find((f) => f.label.startsWith('Max CVSS'))
+  eq('cvss 9.8 contributes +20', cvssFactor && cvssFactor.points, 20)
+  const cvssMid = an.severityBreakdown(
+    [{ entity_type: 'vulnerability' }],
+    [{ nvd: { found: true, cvss_v3: 5.5 } }]
+  )
+  eq('cvss 5.5 contributes +11', (cvssMid.factors.find((f) => f.label.startsWith('Max CVSS')) || {}).points, 11)
+  const noNvd = an.severityBreakdown([{ entity_type: 'vulnerability' }], [{}])
+  ok('no cvss factor without nvd data', !noNvd.factors.some((f) => f.label.startsWith('Max CVSS')))
+
   console.log(`\nengines: ${pass} passed, ${fail} failed`)
   for (const f of failures) console.log('FAIL:', f)
   process.exit(fail === 0 ? 0 : 1)

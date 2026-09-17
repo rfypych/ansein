@@ -2921,6 +2921,14 @@ function ActivityTab({ invId }: { invId: number }) {
                                       {formatBytes(meta.size_bytes as number)}
                                     </span>
                                   )}
+                                  {typeof meta.extraction_coverage === 'object' && meta.extraction_coverage !== null && (
+                                    <span
+                                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] bg-card border border-border text-muted-foreground/50 ansein-mono"
+                                      title={`IOC recall ${Math.round(((meta.extraction_coverage as Record<string, number>).ioc_recall ?? 0) * 100)}% · T-code recall ${Math.round(((meta.extraction_coverage as Record<string, number>).tcode_recall ?? 0) * 100)}%`}
+                                    >
+                                      recall IOC {Math.round(((meta.extraction_coverage as Record<string, number>).ioc_recall ?? 0) * 100)}% · TTP {Math.round(((meta.extraction_coverage as Record<string, number>).tcode_recall ?? 0) * 100)}%
+                                    </span>
+                                  )}
                                 </div>
                               </div>
                             </div>

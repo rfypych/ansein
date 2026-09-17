@@ -188,8 +188,19 @@ export function severityBreakdown(
   let hausHits = 0
   let malScore = 0
   let abuseHits = 0
+  let maxCvss = 0
   for (const enr of enrichmentByEntity) {
     for (const [provider, d] of Object.entries(enr || {})) {
+      // NVD CVSS anchor: the only severity input grounded in an external,
+      // independently-maintained standard (NIST) rather than our own
+      // hand-tuned constants. CVSS 10 -> +20, 7 -> +14, 4 -> +8.
+      if (provider === 'nvd' && d && typeof d === 'object') {
+        const dd = d as Record<string, unknown>
+        for (const k of ['cvss_v31', 'cvss_v3']) {
+          const v = Number(dd[k])
+          if (Number.isFinite(v) && v > maxCvss) maxCvss = Math.min(10, v)
+        }
+      }
       // CISA KEV active weaponisation
       if (provider === 'cisa_kev' && (d as any)?.is_known_exploited) {
         kevHits++
@@ -211,6 +222,7 @@ export function severityBreakdown(
     }
   }
   // Cap OSINT corroboration so enrichment alone cannot max out severity
+  if (maxCvss > 0) add(`Max CVSS ${maxCvss} (NVD)`, Math.min(20, Math.round(maxCvss * 2)))
   add(`CISA KEV exploited ×${kevHits}`, Math.min(25, kevHits * 25))
   add(`ThreatFox hits ×${foxHits}`, Math.min(20, foxHits * 20))
   add(`URLhaus hits ×${hausHits}`, Math.min(15, hausHits * 15))
