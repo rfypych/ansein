@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { db } from '@/lib/db'
 import { ok, jsonError, withErrorHandler, requireUser, parsePageParams, safeParseJson } from '@/lib/api'
-import { verifyAuditChain } from '@/lib/audit-chain'
+import { verifyAuditChain, backfillAuditChain } from '@/lib/audit-chain'
 import { canViewFullAuditLog, can } from '@/lib/rbac'
 
 export const dynamic = 'force-dynamic'
@@ -80,5 +80,27 @@ async function verify(req: NextRequest) {
   })
 }
 
+/**
+ * POST /api/v1/audit/backfill
+ *
+ * One-time maintenance: fills prevHash/entryHash for rows created before
+ * hash-chaining was consistently applied (empty-hash rows), using the
+ * CURRENT canonicalization. Rows that already carry a hash — even ones from
+ * a legacy algorithm era that can no longer be reproduced — are left
+ * untouched (rewriting history would destroy evidence, not repair it).
+ * Those stay reported as a legacy prefix by verifyAuditChain.
+ * Admin-only. Idempotent: safe to run repeatedly.
+ */
+async function backfill(req: NextRequest) {
+  const user = await requireUser(req)
+  if (!can(user, 'audit.verify_chain')) {
+    return jsonError(403, 'forbidden', 'Administrator access required')
+  }
+  const summary = await backfillAuditChain(db)
+  return ok(summary)
+}
+
 export const GET = withErrorHandler(list)
 export const POST = withErrorHandler(verify)
+export const PUT = withErrorHandler(backfill)
+export const PUT = withErrorHandler(backfill)
