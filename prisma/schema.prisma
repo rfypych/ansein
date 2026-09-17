@@ -172,6 +172,7 @@ model AnalysisRun {
   confidence      Float    @default(0.5)
   modelUsed       String   @default("") @map("model_used")
   tokensUsed      Int      @default(0) @map("tokens_used")
+  provider        String   @default("")
   createdAt       DateTime @default(now()) @map("created_at")
 
   @@index([investigationId])

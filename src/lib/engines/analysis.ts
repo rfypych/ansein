@@ -38,6 +38,8 @@ export interface AnalysisResult {
   model_used: string
   tokens_used: number
   hypotheses: ThreatHypothesis[]
+  /** Which backend produced the narrative (groq/openai/custom/pollinations/zai/heuristic). */
+  provider: string
 }
 
 const LLM_SYSTEM = 'You output strict JSON, no prose, no code fences. Use GitHub-flavored Markdown (headings, bold, lists, code blocks) for the narrative and recommendations fields.'
@@ -561,6 +563,7 @@ export async function analyze(
         model_used: resp.model,
         tokens_used: resp.tokensIn + resp.tokensOut,
         hypotheses: normaliseHypotheses(parsed.hypotheses, generateHypotheses(entities, severity)),
+        provider: resp.provider,
       }
     } catch (e) {
       console.warn('[analysis] LLM failed, using heuristic:', e)
@@ -580,5 +583,6 @@ export async function analyze(
     model_used: 'heuristic',
     tokens_used: 0,
     hypotheses: generateHypotheses(entities, severity),
+    provider: 'heuristic',
   }
 }

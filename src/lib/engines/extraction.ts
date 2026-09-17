@@ -83,6 +83,9 @@ const RE = {
   SHA256: /\b[a-fA-F0-9]{64}\b/g,
   SHA512: /\b[a-fA-F0-9]{128}\b/g,
   CVE: /\bCVE-\d{4}-\d{4,7}\b/gi,
+  // MITRE ATT&CK technique codes (T1059, T1003.001). Deterministic recall
+  // for explicitly-coded TTPs — no LLM needed, never missed, never invented.
+  TCODE: /\bT\d{4}(?:\.\d{3})?\b/g,
   BTC_LEGACY: /\b[13][a-km-zA-HJ-NP-Z1-9]{25,34}\b/g,
   BTC_BECH32: /\bbc1[ac-hj-np-z02-9]{6,87}\b/gi,
 }
@@ -189,6 +192,10 @@ export function regexExtract(rawText: string): RegexHit[] {
   // CVE
   for (const m of text.matchAll(RE.CVE)) {
     addUnique('vulnerability', m[0].toUpperCase(), 0.95)
+  }
+  // MITRE technique codes
+  for (const m of text.matchAll(RE.TCODE)) {
+    addUnique('technique', m[0].toUpperCase(), 0.85)
   }
   // BTC wallets — never pure-hex strings: those are file hashes (an MD5
   // starting with 1/3 would otherwise double-report as a "wallet")
@@ -466,9 +473,75 @@ export async function extractEntities(
       if (existing.source_method === 'regex') existing.source_method = 'both'
     }
   }
+  // Fold bare T-codes into LLM techniques that name them ("PowerShell
+  // (T1059)" absorbs "T1059") so the entity list doesn't show both the code
+  // and the paraphrase as separate findings.
+  for (const [key, ent] of byKey) {
+    if (ent.entity_type !== 'technique' || ent.source_method !== 'regex') continue
+    const code = ent.normalized.toLowerCase()
+    for (const other of byKey.values()) {
+      if (other === ent) continue
+      if (other.entity_type !== 'technique' || other.source_method !== 'llm') continue
+      if (other.normalized.toLowerCase().includes(code)) {
+        other.confidence = Math.max(other.confidence, ent.confidence)
+        other.source_method = 'both'
+        byKey.delete(key)
+        break
+      }
+    }
+  }
   return {
     entities: Array.from(byKey.values()),
     usedLlm: llmHits.length > 0 || regexHits.length === 0,
+  }
+}
+
+export interface ExtractionCoverage {
+  /** Fraction of regex-detectable IOCs that survived into entities (0-1). */
+  ioc_recall: number
+  /** Fraction of MITRE T-codes in text reflected in technique entities. */
+  tcode_recall: number
+  regex_iocs: number
+  persisted_iocs: number
+  tcodes_in_text: number
+  tcodes_captured: number
+}
+
+/**
+ * Honest recall accounting: re-runs deterministic extraction over the full
+ * text and measures what fraction made it into the final entity set.
+ * Logged to the pipeline-complete audit entry so recall regressions are
+ * visible historically instead of claimed in prose.
+ */
+export function computeCoverage(fullText: string, extracted: ExtractedEntity[]): ExtractionCoverage {
+  const iocTypes = new Set(['ioc_ip', 'ioc_domain', 'ioc_url', 'ioc_hash', 'ioc_wallet'])
+  const hits = regexExtract(fullText)
+  const expected = new Set(
+    hits.filter((h) => iocTypes.has(h.entity_type)).map((h) => `${h.entity_type}|${normalizeValue(h.entity_type, h.value).toLowerCase()}`)
+  )
+  const got = new Set(
+    extracted.filter((e) => iocTypes.has(e.entity_type)).map((e) => `${e.entity_type}|${e.normalized.toLowerCase()}`)
+  )
+  let matched = 0
+  for (const k of expected) if (got.has(k)) matched++
+
+  const codeRe = /\bT\d{4}(?:\.\d{3})?\b/g
+  const codes = new Set<string>()
+  for (const m of fullText.matchAll(codeRe)) codes.add(m[0].toUpperCase())
+  const techValues = extracted
+    .filter((e) => e.entity_type === 'technique')
+    .map((e) => e.normalized.toLowerCase())
+  let codeHit = 0
+  for (const c of codes) {
+    if (techValues.some((v) => v.includes(c.toLowerCase()))) codeHit++
+  }
+  return {
+    ioc_recall: expected.size === 0 ? 1 : matched / expected.size,
+    tcode_recall: codes.size === 0 ? 1 : codeHit / codes.size,
+    regex_iocs: expected.size,
+    persisted_iocs: got.size,
+    tcodes_in_text: codes.size,
+    tcodes_captured: codeHit,
   }
 }
 

@@ -132,6 +132,29 @@ async function main() {
   const emptyBd = an.severityBreakdown([], [])
   eq('empty case floors at 10', emptyBd.total, 10)
 
+  // 8. MITRE T-code deterministic recall (lesson: LLM-only techniques miss coded TTPs)
+  const tc = ex.regexExtract('Used T1059.001 and T1003 against the DC. See also T1078.')
+  const tcodes = tc.filter((h) => h.entity_type === 'technique').map((h) => h.value).sort()
+  eq('tcodes extracted', tcodes, ['T1003', 'T1059.001', 'T1078'])
+
+  // 9. coverage accounting (lesson: recall must be measured, not claimed)
+  const cov = ex.computeCoverage('C2 1.2.3.4 and 5.6.7.8 with T1059. See CVE-2024-3094.', [
+    { entity_type: 'ioc_ip', value: '1.2.3.4', normalized: '1.2.3.4', confidence: 0.95, source_method: 'regex' },
+    { entity_type: 'technique', value: 'PowerShell (T1059)', normalized: 'PowerShell (T1059)', confidence: 0.9, source_method: 'llm' },
+    { entity_type: 'vulnerability', value: 'CVE-2024-3094', normalized: 'CVE-2024-3094', confidence: 0.95, source_method: 'regex' },
+  ])
+  eq('ioc recall 1/2', cov.ioc_recall, 1 / 2)
+  eq('tcode recall 1/1', cov.tcode_recall, 1)
+
+  // 10. doctrine bands: nation-state + KEV must land HIGH; lone benign domain LOW
+  const apt = an.severityBreakdown(
+    [{ entity_type: 'threat_actor' }, { entity_type: 'vulnerability' }, { entity_type: 'ioc_ip' }],
+    [{ cisa_kev: { is_known_exploited: true } }]
+  )
+  ok('apt+kev is HIGH band', apt.total >= 70)
+  const lone = an.severityBreakdown([{ entity_type: 'ioc_domain' }], [])
+  ok('lone domain is LOW band', lone.total < 40)
+
   console.log(`\nengines: ${pass} passed, ${fail} failed`)
   for (const f of failures) console.log('FAIL:', f)
   process.exit(fail === 0 ? 0 : 1)

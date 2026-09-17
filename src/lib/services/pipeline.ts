@@ -6,7 +6,7 @@
  * pending → extracting → enriching → analyzing → completed (or failed)
  */
 import { db } from '@/lib/db'
-import { extractEntities, llmInferRelationships, type UserKeys } from '@/lib/engines/extraction'
+import { extractEntities, llmInferRelationships, computeCoverage, type UserKeys } from '@/lib/engines/extraction'
 import { enrichEntity, type EnrichmentData } from '@/lib/engines/enrichment'
 import { analyze, type EntityForAnalysis } from '@/lib/engines/analysis'
 import { decrypt } from '@/lib/crypto'
@@ -407,6 +407,7 @@ export async function runPipeline(investigationId: number, userId: number): Prom
         confidence: result.confidence,
         modelUsed: result.model_used,
         tokensUsed: result.tokens_used,
+        provider: result.provider,
       },
     })
 
@@ -425,6 +426,7 @@ export async function runPipeline(investigationId: number, userId: number): Prom
       tokens: result.tokens_used,
       text_truncated: textTruncated,
       source_chars: fullText.length,
+      extraction_coverage: computeCoverage(fullText, extracted),
     })
 
     void analysisRun
