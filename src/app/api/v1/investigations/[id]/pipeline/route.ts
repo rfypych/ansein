@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 import { db } from '@/lib/db'
+import { appendAuditLog } from '@/lib/audit-chain'
 import {
   ok,
   jsonError,
@@ -26,34 +27,30 @@ async function handler(req: NextRequest, ctx: { params: Promise<{ id: string }> 
     return jsonError(409, 'in_progress', `Investigation is already ${inv.status}. Wait for completion.`)
   }
 
-  // Audit: pipeline start (best-effort)
-  await db.auditLog.create({
-    data: {
-      userId: user.id,
-      action: 'investigation.pipeline.start',
-      targetType: 'investigation',
-      targetId: invId,
-      ipAddress: getClientIp(req),
-      extraMetadata: { investigation_id: invId, from_status: inv.status },
-    },
+  // Audit: pipeline start (best-effort, hash-chained)
+  await appendAuditLog(db, {
+    userId: user.id,
+    action: 'investigation.pipeline.start',
+    targetType: 'investigation',
+    targetId: invId,
+    ipAddress: getClientIp(req),
+    extraMetadata: { investigation_id: invId, from_status: inv.status },
   }).catch(() => {})
 
   try {
     await runPipeline(invId, user.id)
   } catch (e) {
     console.error('[pipeline] error:', e)
-    // Audit: pipeline failed (best-effort)
-    await db.auditLog.create({
-      data: {
-        userId: user.id,
-        action: 'investigation.pipeline.failed',
-        targetType: 'investigation',
-        targetId: invId,
-        ipAddress: getClientIp(req),
-        extraMetadata: {
-          investigation_id: invId,
-          error: e instanceof Error ? e.message.slice(0, 200) : 'unknown',
-        },
+    // Audit: pipeline failed (best-effort, hash-chained)
+    await appendAuditLog(db, {
+      userId: user.id,
+      action: 'investigation.pipeline.failed',
+      targetType: 'investigation',
+      targetId: invId,
+      ipAddress: getClientIp(req),
+      extraMetadata: {
+        investigation_id: invId,
+        error: e instanceof Error ? e.message.slice(0, 200) : 'unknown',
       },
     }).catch(() => {})
     return jsonError(500, 'pipeline_failed', e instanceof Error ? e.message : 'Pipeline failed')

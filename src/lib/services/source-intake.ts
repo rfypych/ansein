@@ -6,6 +6,7 @@
 import { db } from '@/lib/db'
 import { contentHash } from '@/lib/engines/extraction'
 import { redactPII } from '@/lib/pii-redact'
+import { appendAuditLog } from '@/lib/audit-chain'
 
 export interface SourceIntakeInput {
   sourceType: string
@@ -47,21 +48,19 @@ export async function persistSource(
     },
   })
   // Audit: source added (redaction count logged in metadata)
-  await db.auditLog.create({
-    data: {
-      userId,
-      action: 'source.add',
-      targetType: 'investigation',
-      targetId: invId,
-      ipAddress: ip,
-      extraMetadata: {
-        investigation_id: invId,
-        source_id: s.id,
-        source_type: s.sourceType,
-        size_bytes: s.sizeBytes,
-        pii_redacted_count: piiResult.found,
-        pii_redacted_types: piiResult.types,
-      },
+  await appendAuditLog(db, {
+    userId,
+    action: 'source.add',
+    targetType: 'investigation',
+    targetId: invId,
+    ipAddress: ip,
+    extraMetadata: {
+      investigation_id: invId,
+      source_id: s.id,
+      source_type: s.sourceType,
+      size_bytes: s.sizeBytes,
+      pii_redacted_count: piiResult.found,
+      pii_redacted_types: piiResult.types,
     },
   }).catch(() => {})
   return s

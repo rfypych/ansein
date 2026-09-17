@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 import { db } from '@/lib/db'
+import { appendAuditLog } from '@/lib/audit-chain'
 import {
   ok,
   jsonError,
@@ -48,15 +49,13 @@ async function changePassword(req: NextRequest) {
       data: { hashedPassword: hashed, tokenVersion: { increment: 1 } },
     })
     // Audit log the password change
-    await db.auditLog.create({
-      data: {
-        userId: user.id,
-        action: 'user.password.change',
-        targetType: 'user',
-        targetId: user.id,
-        ipAddress: getClientIp(req),
-        extraMetadata: { ts: new Date().toISOString() },
-      },
+    await appendAuditLog(db, {
+      userId: user.id,
+      action: 'user.password.change',
+      targetType: 'user',
+      targetId: user.id,
+      ipAddress: getClientIp(req),
+      extraMetadata: { ts: new Date().toISOString() },
     }).catch(() => {})
     return ok({ message: 'Password updated successfully' })
   } catch (e) {

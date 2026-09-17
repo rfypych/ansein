@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 import { db } from '@/lib/db'
+import { appendAuditLog } from '@/lib/audit-chain'
 import {
   ok,
   created,
@@ -48,16 +49,14 @@ async function handler(req: NextRequest, ctx: { params: Promise<{ id: string }> 
       },
       include: { sources: true },
     })
-    // Audit log
-    await db.auditLog.create({
-      data: {
-        userId: user.id,
-        action: 'investigation.duplicate',
-        targetType: 'investigation',
-        targetId: dup.id,
-        ipAddress: getClientIp(req),
-        extraMetadata: { source_id: inv.id },
-      },
+    // Audit log (hash-chained)
+    await appendAuditLog(db, {
+      userId: user.id,
+      action: 'investigation.duplicate',
+      targetType: 'investigation',
+      targetId: dup.id,
+      ipAddress: getClientIp(req),
+      extraMetadata: { source_id: inv.id },
     }).catch(() => {})
     return created({
       id: dup.id,

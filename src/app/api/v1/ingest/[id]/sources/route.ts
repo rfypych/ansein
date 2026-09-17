@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 import { db } from '@/lib/db'
+import { appendAuditLog } from '@/lib/audit-chain'
 import {
   ok,
   created,
@@ -110,15 +111,13 @@ async function remove(req: NextRequest, ctx: { params: Promise<{ id: string }> }
   if (!existing) return jsonError(404, 'not_found', 'Source not found')
   await db.source.delete({ where: { id: sid } })
   // Audit: source removed
-  await db.auditLog.create({
-    data: {
-      userId: user.id,
-      action: 'source.delete',
-      targetType: 'investigation',
-      targetId: invId,
-      ipAddress: getClientIp(req),
-      extraMetadata: { investigation_id: invId, source_id: sid },
-    },
+  await appendAuditLog(db, {
+    userId: user.id,
+    action: 'source.delete',
+    targetType: 'investigation',
+    targetId: invId,
+    ipAddress: getClientIp(req),
+    extraMetadata: { investigation_id: invId, source_id: sid },
   }).catch(() => {})
   return ok({ message: 'Deleted' })
 }
