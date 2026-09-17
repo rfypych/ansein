@@ -207,7 +207,7 @@ export default function SettingsPage() {
               </span>
             </div>
             <p className="text-xs text-muted-foreground mb-4">
-              Which LLM to use when both OpenAI and Groq keys are configured.
+              Which LLM to use first. Auto tries Groq, then OpenAI, then custom, then the free keyless fallback.
             </p>
             <div className="flex flex-wrap gap-2">
               {([
