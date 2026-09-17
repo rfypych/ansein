@@ -129,7 +129,10 @@ function AppShell({ children }: { children: ReactNode }) {
       )}
 
       {/* ---------- Main content ---------- */}
-      <div className="flex-1 flex flex-col">
+      {/* min-w-0 is load-bearing: without it this flex item refuses to shrink
+          below its content's intrinsic width and the whole page gains ~340px
+          of horizontal overflow on narrow viewports (measured live). */}
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile top bar */}
         <div className="md:hidden flex items-center justify-between h-14 px-4 border-b border-border bg-card/60 backdrop-blur-xl z-20">
           <button
