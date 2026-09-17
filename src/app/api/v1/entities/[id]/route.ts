@@ -59,6 +59,7 @@ async function list(req: NextRequest, ctx: { params: Promise<{ id: string }> }) 
       const decay = decayEntity(e.entityType, e.confidence, e.createdAt, now)
       const grounded =
         e.sourceMethod === 'regex' ||
+        e.sourceMethod === 'both' ||
         e.sourceMethod === 'stix_import' ||
         isGroundedInText(e.value, e.entityType, corpus)
       return {

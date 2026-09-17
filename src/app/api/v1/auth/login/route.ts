@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { db } from '@/lib/db'
-import { jsonError, withErrorHandler } from '@/lib/api'
+import { jsonError, withErrorHandler, getClientIp } from '@/lib/api'
 import { verifyPassword, makeTokenPair } from '@/lib/auth'
 import { setAuthCookies } from '@/lib/cookies'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,6 +14,17 @@ const LoginSchema = z.object({
 })
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
+  // Per-IP brute-force brake: 10 attempts/minute (per-instance, best-effort
+  // on serverless — see rate-limit.ts for the honest limitation note).
+  const rl = checkRateLimit(`login:${getClientIp(req)}`, 10, 60_000)
+  if (!rl.allowed) {
+    const res = NextResponse.json(
+      { detail: 'Too many login attempts, try again shortly', code: 'rate_limited' },
+      { status: 429 }
+    )
+    res.headers.set('Retry-After', String(Math.ceil(rl.retryAfterMs / 1000)))
+    return res
+  }
   let body: unknown
   try {
     body = await req.json()

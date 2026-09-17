@@ -276,7 +276,10 @@ export async function runPipeline(investigationId: number, userId: number): Prom
     await db.entity.deleteMany({ where: { investigationId: inv.id } })
     await db.analysisRun.deleteMany({ where: { investigationId: inv.id } })
 
-    const { entities: extracted } = await extractEntities(text, userKeys, fullText)
+    // Regex runs over the FULL text (millisecond CPU cost): IOC recall must
+    // not depend on the 60k truncation window. LLM windows are selected
+    // from the full text separately inside extractEntities.
+    const { entities: extracted } = await extractEntities(fullText, userKeys, fullText)
 
     // Persist entities; build value→id map for relationship wiring
     const valueToId = new Map<string, number>()

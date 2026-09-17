@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "NODE_ENV=production node .next/standalone/server.js",
     "lint": "eslint .",
+    "test:engines": "node scripts/regression/run.cjs",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
