@@ -277,14 +277,28 @@ async function callLlmExtractChunk(
   }
 }
 
-/** Score a window's NARRATIVE density (actors, tools, TTPs in prose). */
-function scoreNarrative(window: string): number {
-  const count = (re: RegExp, cap: number) => Math.min(cap, (window.match(re) || []).length)
-  return count(/\bT\d{4}(?:\.\d{3})?\b|\bapt\b|malware|cobalt|mimikatz|impacket|powershell|\bc2\b|exploit|ransomware|threat.actor|ttps|lateral|exfiltrat|backdoor|webshell|lsass|ntds|credential|persistence/gi, 25)
+/** Score a window's NARRATIVE density (actors, tools, TTPs in prose). Exported for testability. */
+export function scoreNarrative(window: string): number {
+  const KW =
+    /\bT\d{4}(?:\.\d{3})?\b|\bapt\b|malware|cobalt|mimikatz|impacket|powershell|\bc2\b|exploit|ransomware|threat.actor|ttps|lateral|exfiltrat|backdoor|webshell|lsass|ntds|credential|persistence/gi
+  const hits = window.match(KW) || []
+  // Volume (uncapped — caps saturate on dense advisories and force arbitrary
+  // ties) plus topical variety: a window naming mimikatz AND impacket AND
+  // ntds outranks one repeating "exploit" twenty times.
+  const distinct = new Set(hits.map((h) => h.toLowerCase())).size
+  // Rare named-tooling bonus: credential-access and C2 tooling (Mimikatz et
+  // al.) is sparse in text but high-value as entities. A MITRE technique
+  // catalog outscores it on volume alone, burying the tool names — the bonus
+  // corrects that. List is intentionally tiny and stable (well-known tools).
+  const rare = window.match(
+    /\bmimikatz\b|\bimpacket\b|cobalt.?strike|\bpsexec\b|bloodhound|sharphound|\brubeus\b|secretsdump|ntdsutil|vssadmin|\bfrp\b|comsvcs|magnet.?ram|advanced.?ip.?scanner|\bwc?mic\b/gi
+  ) || []
+  const rareDistinct = new Set(rare.map((h) => h.toLowerCase())).size
+  return hits.length + 3 * Math.min(15, distinct) + 10 * Math.min(4, rareDistinct)
 }
 
-/** Score a window's IOC density (machine-readable indicators). */
-function scoreIocs(window: string): number {
+/** Score a window's IOC density (machine-readable indicators). Exported for testability. */
+export function scoreIocs(window: string): number {
   const count = (re: RegExp, cap: number) => Math.min(cap, (window.match(re) || []).length)
   return (
     3 * count(/\bCVE-\d{4}-\d{4,7}\b/gi, 10) +
