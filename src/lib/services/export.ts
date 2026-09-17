@@ -245,6 +245,8 @@ export function buildStixBundle(
       baseObj.name = e.value
     } else if (stixType === 'tool' || stixType === 'vulnerability') {
       baseObj.name = e.value
+    } else if (stixType === 'attack-pattern') {
+      baseObj.name = e.value
     } else if (stixType === 'identity') {
       baseObj.name = e.value
       baseObj.identity_class = 'organization'
