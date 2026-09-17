@@ -124,8 +124,18 @@ export default function AuditPage() {
 
   // Hash chain verification (POST /audit — runs verifyAuditChain on the most
   // recent sample of entries). Admin-only; hidden from editor/analyst UI.
+  // Rows predating consistent hash-chaining report as a legacy prefix, not
+  // as tampering — see verified_from_id / legacy_prefix_ids.
   const [chainStatus, setChainStatus] = useState<
-    | { valid: boolean; brokenAt: number | null; sampleSize: number; scannedAt: string }
+    | {
+        valid: boolean
+        brokenAt: number | null
+        sampleSize: number
+        scannedAt: string
+        verifiedFromId: number | null
+        verifiedCount: number
+        legacyPrefixIds: number[]
+      }
     | null
   >(null)
 
@@ -135,6 +145,9 @@ export default function AuditPage() {
         valid: boolean
         brokenAt: number | null
         sample_size: number
+        verified_from_id: number | null
+        verified_count: number
+        legacy_prefix_ids: number[]
       }>('/audit', {}),
     onSuccess: (data) => {
       setChainStatus({
@@ -142,9 +155,16 @@ export default function AuditPage() {
         brokenAt: data.brokenAt,
         sampleSize: data.sample_size,
         scannedAt: new Date().toISOString(),
+        verifiedFromId: data.verified_from_id,
+        verifiedCount: data.verified_count ?? 0,
+        legacyPrefixIds: data.legacy_prefix_ids ?? [],
       })
       if (data.valid) {
         toast.success(`Chain intact — verified ${data.sample_size} entries`)
+      } else if ((data.legacy_prefix_ids ?? []).length > 0) {
+        toast.warning(
+          `Chain intact since #${data.verified_from_id} — ${data.legacy_prefix_ids.length} legacy row(s) predate verification`
+        )
       } else {
         toast.error(`Chain broken at entry #${data.brokenAt}`)
       }
@@ -152,6 +172,18 @@ export default function AuditPage() {
     onError: (err) => {
       const e = err as Error
       toast.error(e.message || 'Verification failed')
+    },
+  })
+
+  const backfillMutation = useMutation({
+    mutationFn: () => http.put<{ total: number; backfilled: number; skipped: number }>('/audit', {}),
+    onSuccess: (data) => {
+      toast.success(`Backfilled ${data.backfilled} of ${data.total} entries (${data.skipped} already chained)`)
+      verifyMutation.mutate()
+    },
+    onError: (err) => {
+      const e = err as Error
+      toast.error(e.message || 'Backfill failed')
     },
   })
 
@@ -195,38 +227,55 @@ export default function AuditPage() {
               : 'A hash-chained record of your own actions. Workspace-wide events are visible to editors and administrators.'}
           </p>
         </div>
-        {/* Verify chain button — admin-only */}
+        {/* Verify chain + backfill buttons — admin-only */}
         {canVerify && (
-          <button
-            onClick={() => verifyMutation.mutate()}
-            disabled={verifyMutation.isPending}
-            className={cn(
-              'inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs font-medium border transition-colors flex-shrink-0',
-              chainStatus?.valid === false
-                ? 'bg-rose-500/15 text-rose-300 border-rose-500/40 hover:bg-rose-500/25'
-                : chainStatus?.valid === true
-                  ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/25'
-                  : 'bg-card text-muted-foreground border-border hover:text-foreground hover:border-primary/50',
-            )}
-            title="Recompute hashes for the most recent entries and verify the chain is intact"
-          >
-            {verifyMutation.isPending ? (
-              <Spinner className="h-3.5 w-3.5" />
-            ) : chainStatus?.valid === false ? (
-              <AlertTriangle weight="duotone" className="h-3.5 w-3.5" />
-            ) : chainStatus?.valid === true ? (
-              <ShieldCheck weight="duotone" className="h-3.5 w-3.5" />
-            ) : (
-              <Link2 weight="duotone" className="h-3.5 w-3.5" />
-            )}
-            {verifyMutation.isPending
-              ? 'Verifying…'
-              : chainStatus?.valid === false
-                ? `Chain broken at #${chainStatus.brokenAt}`
-                : chainStatus?.valid === true
-                  ? `Chain intact (${chainStatus.sampleSize} checked)`
-                  : 'Verify chain'}
-          </button>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={() => backfillMutation.mutate()}
+              disabled={backfillMutation.isPending || verifyMutation.isPending}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs font-medium border transition-colors bg-card text-muted-foreground border-border hover:text-foreground hover:border-primary/50 disabled:opacity-60"
+              title="One-time maintenance: chain pre-hash-era rows so they verify (never rewrites existing hashes)"
+            >
+              {backfillMutation.isPending ? (
+                <Spinner className="h-3.5 w-3.5" />
+              ) : (
+                <Link2 weight="duotone" className="h-3.5 w-3.5" />
+              )}
+              {backfillMutation.isPending ? 'Backfilling…' : 'Backfill chain'}
+            </button>
+            <button
+              onClick={() => verifyMutation.mutate()}
+              disabled={verifyMutation.isPending}
+              className={cn(
+                'inline-flex items-center gap-2 px-3 py-2 rounded-md text-xs font-medium border transition-colors flex-shrink-0',
+                chainStatus && !chainStatus.valid && chainStatus.legacyPrefixIds.length === 0
+                  ? 'bg-rose-500/15 text-rose-300 border-rose-500/40 hover:bg-rose-500/25'
+                  : chainStatus && (chainStatus.valid || chainStatus.verifiedCount > 0)
+                    ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/25'
+                    : 'bg-card text-muted-foreground border-border hover:text-foreground hover:border-primary/50',
+              )}
+              title="Recompute hashes for the most recent entries and verify the chain is intact"
+            >
+              {verifyMutation.isPending ? (
+                <Spinner className="h-3.5 w-3.5" />
+              ) : chainStatus && !chainStatus.valid && chainStatus.legacyPrefixIds.length === 0 ? (
+                <AlertTriangle weight="duotone" className="h-3.5 w-3.5" />
+              ) : chainStatus && (chainStatus.valid || chainStatus.verifiedCount > 0) ? (
+                <ShieldCheck weight="duotone" className="h-3.5 w-3.5" />
+              ) : (
+                <Link2 weight="duotone" className="h-3.5 w-3.5" />
+              )}
+              {verifyMutation.isPending
+                ? 'Verifying…'
+                : chainStatus && !chainStatus.valid && chainStatus.legacyPrefixIds.length === 0
+                  ? `Chain broken at #${chainStatus.brokenAt}`
+                  : chainStatus && !chainStatus.valid
+                    ? `Intact since #${chainStatus.verifiedFromId} · ${chainStatus.legacyPrefixIds.length} legacy`
+                    : chainStatus?.valid
+                      ? `Chain intact (${chainStatus.sampleSize} checked)`
+                      : 'Verify chain'}
+            </button>
+          </div>
         )}
       </div>
 

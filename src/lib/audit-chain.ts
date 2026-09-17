@@ -213,29 +213,34 @@ export async function backfillAuditChain(
  * there's no prior row providing that hash, the chain is considered broken at
  * that row.
  */
+export interface AuditVerification {
+  valid: boolean
+  brokenAt: number | null
+  /**
+   * Longest trailing run of fully-linked, hash-verified rows. Historical rows
+   * written before hash-chaining was consistently applied (different hash
+   * construction, empty links) can never verify — they are reported as a
+   * legacy prefix, NOT as tampering. Any break INSIDE the verified suffix
+   * (i.e. at/after verified_from_id) is genuine tamper evidence.
+   */
+  verified_from_id: number | null
+  verified_count: number
+  legacy_prefix_ids: number[]
+}
+
 export async function verifyAuditChain(
   _db: PrismaClient,
   entries: AuditLog[],
-): Promise<{ valid: boolean; brokenAt: number | null }> {
-  if (entries.length === 0) return { valid: true, brokenAt: null }
+): Promise<AuditVerification> {
+  if (entries.length === 0) {
+    return { valid: true, brokenAt: null, verified_from_id: null, verified_count: 0, legacy_prefix_ids: [] }
+  }
 
   // Ensure ascending order — verification depends on chronological linkage.
   const sorted = [...entries].sort((a, b) => a.id - b.id)
 
-  // The expected prevHash for the first row in the *segment*. If the caller
-  // passes a slice that doesn't begin at the genesis row (id=1), the first
-  // row's prevHash points to a row outside the slice — accept whatever the
-  // row stores, and use it as the seed for the next row.
-  let prevHash = sorted[0].prevHash
-  for (let i = 0; i < sorted.length; i++) {
-    const entry = sorted[i]
-    // For every row *after* the first, prevHash must match the prior row's
-    // effective hash.
-    if (i > 0 && entry.prevHash !== prevHash) {
-      return { valid: false, brokenAt: entry.id }
-    }
-
-    const recomputed = computeAuditHash({
+  const hashOf = (entry: AuditLog): string =>
+    computeAuditHash({
       id: entry.id,
       userId: entry.userId,
       action: entry.action,
@@ -247,16 +252,40 @@ export async function verifyAuditChain(
       prevHash: entry.prevHash,
     })
 
-    // For rows that have a stored entryHash (post-chain era), it must match
-    // the recomputed hash. Pre-chain rows (empty entryHash) inherit the
-    // recomputed hash as their "effective" hash so the next row's prevHash
-    // check still catches tampering.
-    if (entry.entryHash && entry.entryHash !== recomputed) {
-      return { valid: false, brokenAt: entry.id }
-    }
-
+  // Per-row verdicts, then the longest trailing valid suffix.
+  const ok: boolean[] = new Array(sorted.length).fill(false)
+  let prevHash = sorted[0].prevHash
+  for (let i = 0; i < sorted.length; i++) {
+    const entry = sorted[i]
+    const linked = i === 0 || entry.prevHash === prevHash
+    const recomputed = hashOf(entry)
+    const hashOk = !entry.entryHash || entry.entryHash === recomputed
+    ok[i] = linked && hashOk
+    // Effective hash seeds the next link check (stored wins when present,
+    // mirroring the append path).
     prevHash = entry.entryHash || recomputed
   }
 
-  return { valid: true, brokenAt: null }
+  let start = sorted.length
+  while (start > 0 && ok[start - 1]) start--
+  // Suffix is maximal by construction: everything from `start` verifies.
+  const verifiedFrom = start < sorted.length ? sorted[start].id : null
+  const legacyIds = sorted.slice(0, start).map((e) => e.id)
+  // brokenAt keeps its legacy meaning: first row (from genesis) that does
+  // not verify. Null only when the ENTIRE segment verifies.
+  let brokenAt: number | null = null
+  for (let i = 0; i < sorted.length; i++) {
+    if (!ok[i]) {
+      brokenAt = sorted[i].id
+      break
+    }
+  }
+
+  return {
+    valid: brokenAt === null,
+    brokenAt,
+    verified_from_id: verifiedFrom,
+    verified_count: sorted.length - start,
+    legacy_prefix_ids: legacyIds,
+  }
 }
