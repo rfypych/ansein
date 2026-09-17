@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server'
+import { z } from 'zod'
 import { db } from '@/lib/db'
 import {
   ok,
@@ -76,9 +77,52 @@ async function list(req: NextRequest, ctx: { params: Promise<{ id: string }> }) 
         freshness: decay.freshness,
         seen_in_cases: seenCounts[`${e.entityType}|${e.normalized.toLowerCase()}`] || 0,
         verified_in_text: grounded,
+        is_false_positive: e.isFalsePositive,
       }
     })
   )
 }
 
 export const GET = withErrorHandler(list)
+
+const AdjudicateSchema = z.object({
+  entity_id: z.number().int(),
+  is_false_positive: z.boolean(),
+})
+
+/**
+ * PATCH /entities/[investigationId] — analyst adjudication.
+ * Marks an entity as false positive (or clears it). FP entities are
+ * excluded from SIEM rules and TAXII sharing, but kept in analyst exports
+ * with their flag, so the decision itself stays auditable.
+ */
+const patch = withErrorHandler(async (req: NextRequest, ctx: { params: Promise<{ id: string }> }) => {
+  const user = await requireUser(req)
+  const { id } = await ctx.params
+  const invId = Number(id)
+  if (!Number.isFinite(invId)) return jsonError(400, 'invalid_id', 'Invalid investigation ID')
+  const inv = await db.investigation.findFirst({ where: { id: invId, userId: user.id } })
+  if (!inv) return jsonError(404, 'not_found', 'Investigation not found')
+
+  let body: unknown
+  try {
+    body = await req.json()
+  } catch {
+    return jsonError(400, 'invalid_body', 'Invalid JSON body')
+  }
+  const parsed = AdjudicateSchema.safeParse(body)
+  if (!parsed.success) {
+    return jsonError(422, 'validation_error', 'entity_id and is_false_positive are required')
+  }
+  const ent = await db.entity.findFirst({
+    where: { id: parsed.data.entity_id, investigationId: invId },
+  })
+  if (!ent) return jsonError(404, 'not_found', 'Entity not found in this investigation')
+  const updated = await db.entity.update({
+    where: { id: ent.id },
+    data: { isFalsePositive: parsed.data.is_false_positive },
+  })
+  return ok({ id: updated.id, is_false_positive: updated.isFalsePositive })
+})
+
+export const PATCH = patch

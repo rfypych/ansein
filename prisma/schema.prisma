@@ -121,6 +121,7 @@ model Entity {
   normalized      String   @default("")
   confidence      Float    @default(0.5)
   enrichment      Json     @default("{}")
+  isFalsePositive Boolean  @default(false) @map("is_false_positive")
   sourceMethod    String   @default("regex") @map("source_method")
   createdAt       DateTime @default(now()) @map("created_at")
 
@@ -246,6 +247,26 @@ model AppConfig {
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("app_config")
+}
+
+// -------------------------------------------------- threat feed cache
+// Persisted OSINT feed items collected by lazy refresh (see feeds route).
+// Lets /app/feeds render instantly from DB and survive upstream outages.
+model FeedItem {
+  id          Int      @id @default(autoincrement())
+  source      String
+  itemType    String   @map("item_type")
+  indicator   String
+  title       String   @default("")
+  description String   @default("")
+  detail      Json     @default("{}")
+  confidence  Float    @default(0.9)
+  firstSeen   DateTime @default(now()) @map("first_seen")
+  lastSeen    DateTime @default(now()) @updatedAt @map("last_seen")
+
+  @@unique([source, indicator])
+  @@index([source, lastSeen])
+  @@map("feed_items")
 }
 
 // -------------------------------------------------------------- playbooks

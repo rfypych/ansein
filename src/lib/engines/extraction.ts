@@ -138,7 +138,7 @@ export function isGroundedInText(
   return false
 }
 
-function normalizeValue(type: EntityType, value: string): string {
+export function normalizeValue(type: EntityType, value: string): string {
   if (type.startsWith('ioc_')) return value.toLowerCase()
   if (type === 'vulnerability') return value.toUpperCase()
   return value.trim()

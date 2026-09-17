@@ -86,6 +86,7 @@ export function buildJsonExport(
       confidence: e.confidence,
       enrichment: safeParseJson<Record<string, unknown>>(e.enrichment, {}),
       source_method: e.sourceMethod,
+      is_false_positive: e.isFalsePositive,
     })),
     relationships: rels.map((r) => ({
       source_id: r.sourceId,
@@ -213,6 +214,9 @@ export function buildStixBundle(
       baseObj.name = e.value
       baseObj.value = e.value
     }
+    // Analyst adjudication travels with the object (custom STIX property);
+    // machine consumers (rules/TAXII) already exclude FPs upstream.
+    if (e.isFalsePositive) baseObj.x_ansein_false_positive = true
     objects.push(baseObj)
   }
 
