@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { CaretDown as ChevronDown, Check, CircleNotch as Loader2, Cpu, Crown, Envelope as Mail, Eye, EyeClosed as EyeOff, Folder as FolderSearch, Gear as Settings, Key as KeyRound, Lock, MagnifyingGlass as Search, Pencil, Robot as Bot, Shield, ShieldCheck, ShieldWarning as ShieldAlert, TreeStructure as Workflow, UserMinus, UserPlus, Users, WarningCircle as AlertCircle, Waveform, X } from '@phosphor-icons/react'
+import { CaretDown as ChevronDown, Check, CircleNotch as Loader2, Cpu, Crown, DownloadSimple as Download, Envelope as Mail, Eye, EyeClosed as EyeOff, Folder as FolderSearch, Gear as Settings, Key as KeyRound, Lock, MagnifyingGlass as Search, Pencil, Robot as Bot, Shield, ShieldCheck, ShieldWarning as ShieldAlert, TreeStructure as Workflow, UserMinus, UserPlus, Users, WarningCircle as AlertCircle, Waveform, X } from '@phosphor-icons/react'
 import { http } from '@/lib/http'
 import { useAuthStore, type AuthUser, authUserRole, type Role } from '@/lib/auth-store'
 import { Badge, Spinner, AnimatedNumber, EmptyState, DonutChart } from '@/components/ansein/ui'
@@ -91,6 +91,30 @@ export default function AdminPage() {
 
 function SystemOverview() {
   const authUser = useAuthStore((s) => s.user)
+  const [backingUp, setBackingUp] = useState(false)
+
+  async function downloadBackup() {
+    if (backingUp) return
+    setBackingUp(true)
+    try {
+      const res = await fetch('/api/v1/admin/backup')
+      if (!res.ok) throw new Error(`Backup failed (${res.status})`)
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `ansein-backup-${new Date().toISOString().slice(0, 10)}.json`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+      toast.success('Workspace backup downloaded — store it somewhere safe')
+    } catch {
+      toast.error('Backup failed')
+    } finally {
+      setBackingUp(false)
+    }
+  }
 
   const usersQuery = useQuery({
     queryKey: ['admin', 'users'],
@@ -143,6 +167,31 @@ function SystemOverview() {
           color="#f59e0b"
           sub="Hash-chained log"
         />
+      </div>
+
+      {/* Workspace backup */}
+      <div className="bg-card border border-border rounded-xl p-6 mb-6">
+        <div className="flex flex-col md:flex-row md:items-center gap-4 justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-teal-500/15 border border-teal-500/30">
+              <Download weight="duotone" className="h-3.5 w-3.5 text-teal-400" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-foreground">Workspace backup</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Full disaster copy: cases, sources, entities, analyses, playbooks, audit log. No password hashes, ever.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={downloadBackup}
+            disabled={backingUp}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors w-fit flex-shrink-0"
+          >
+            {backingUp ? <Loader2 weight="duotone" className="h-4 w-4 animate-spin" /> : <Download weight="duotone" className="h-4 w-4" />}
+            {backingUp ? 'Preparing…' : 'Download backup'}
+          </button>
+        </div>
       </div>
 
       {/* Role distribution */}

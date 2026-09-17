@@ -9,7 +9,15 @@ import { db } from '@/lib/db'
 import { extractEntities, llmInferRelationships, computeCoverage, type UserKeys } from '@/lib/engines/extraction'
 import { enrichEntity, type EnrichmentData } from '@/lib/engines/enrichment'
 import { analyze, type EntityForAnalysis } from '@/lib/engines/analysis'
-import { decrypt } from '@/lib/crypto'
+import { decryptVersioned } from '@/lib/crypto'
+
+/** Version-aware key read: undecryptable rows (rotated SECRET_KEY) yield
+ *  undefined — same fallback path as "no key", but visible in health. */
+function readKey(stored: string): string | undefined {
+  if (!stored) return undefined
+  const r = decryptVersioned(stored)
+  return r.value || undefined
+}
 import { safeParseJson } from '@/lib/api'
 import { appendAuditLog } from '@/lib/audit-chain'
 
@@ -193,16 +201,16 @@ async function getUserKeys(userId: number): Promise<UserKeys & { virustotal_api_
   const settings = await db.userSettings.findUnique({ where: { userId } })
   if (!settings) return {}
   return {
-    openai_api_key: settings.openaiApiKey ? decrypt(settings.openaiApiKey) : undefined,
-    groq_api_key: settings.groqApiKey ? decrypt(settings.groqApiKey) : undefined,
+    openai_api_key: readKey(settings.openaiApiKey),
+    groq_api_key: readKey(settings.groqApiKey),
     preferred_llm: settings.preferredLlm,
-    custom_llm_api_key: settings.customLlmApiKey ? decrypt(settings.customLlmApiKey) : undefined,
+    custom_llm_api_key: readKey(settings.customLlmApiKey),
     custom_llm_base_url: settings.customLlmBaseUrl || undefined,
     custom_llm_model: settings.customLlmModel || undefined,
-    virustotal_api_key: settings.virustotalApiKey ? decrypt(settings.virustotalApiKey) : undefined,
-    abuseipdb_api_key: settings.abuseipdbApiKey ? decrypt(settings.abuseipdbApiKey) : undefined,
-    shodan_api_key: settings.shodanApiKey ? decrypt(settings.shodanApiKey) : undefined,
-    abusech_api_key: settings.abusechApiKey ? decrypt(settings.abusechApiKey) : undefined,
+    virustotal_api_key: readKey(settings.virustotalApiKey),
+    abuseipdb_api_key: readKey(settings.abuseipdbApiKey),
+    shodan_api_key: readKey(settings.shodanApiKey),
+    abusech_api_key: readKey(settings.abusechApiKey),
   }
 }
 
