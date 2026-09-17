@@ -116,18 +116,32 @@ function stixId(type: string, intId: number): string {
   return `${type}--${uuidv5(String(intId), STIX_NAMESPACE)}`
 }
 
+/** Escape single quotes for STIX pattern string literals. */
+function stixEscape(value: string): string {
+  return value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
+}
+
+function hashAlgoName(hash: string): 'MD5' | 'SHA-1' | 'SHA-256' | 'SHA-512' {
+  const h = hash.trim()
+  if (/^[a-fA-F0-9]{32}$/.test(h)) return 'MD5'
+  if (/^[a-fA-F0-9]{40}$/.test(h)) return 'SHA-1'
+  if (/^[a-fA-F0-9]{128}$/.test(h)) return 'SHA-512'
+  return 'SHA-256'
+}
+
 function stixPattern(entityType: string, value: string): string {
+  const v = stixEscape(value)
   switch (entityType) {
     case 'ioc_ip':
-      return `[ipv4-addr:value = '${value}']`
+      return value.includes(':') ? `[ipv6-addr:value = '${v}']` : `[ipv4-addr:value = '${v}']`
     case 'ioc_domain':
-      return `[domain-name:value = '${value}']`
+      return `[domain-name:value = '${v}']`
     case 'ioc_url':
-      return `[url:value = '${value}']`
+      return `[url:value = '${v}']`
     case 'ioc_hash':
-      return `[file:hashes.'SHA-256' = '${value}']`
+      return `[file:hashes.'${hashAlgoName(value)}' = '${v}']`
     default:
-      return `[x-ansein:${entityType} = '${value}']`
+      return `[domain-name:value = '${v}']`
   }
 }
 
@@ -137,7 +151,6 @@ function stixTypeFor(entityType: string): string {
     case 'ioc_domain':
     case 'ioc_url':
     case 'ioc_hash':
-    case 'ioc_wallet':
       return 'indicator'
     case 'malware':
       return 'malware'
@@ -153,10 +166,36 @@ function stixTypeFor(entityType: string): string {
     case 'location':
       return 'location'
     case 'technique':
-      return 'x-mitre-attack-pattern'
+      return 'attack-pattern'
     default:
-      return 'x-ansein-entity'
+      // Unknown/legacy types (incl. wallets): emit a plain note. A made-up
+      // x- SDO without an extension definition breaks strict STIX parsers;
+      // a note always imports cleanly.
+      return 'note'
   }
+}
+
+/**
+ * Normalize internal relation names to the STIX 2.1 relationship vocabulary
+ * subset we can defend: related-to, uses, targets, attributed-to, indicates,
+ * delivers, originates-from, resolves-to. Everything else (communicates_with,
+ * exploits, drops, located_in, ...) collapses to related-to — universally
+ * importable — instead of shipping snake_case inventiveness to OpenCTI/MISP.
+ */
+function stixRelationType(internal: string): string {
+  const t = (internal || '').trim().toLowerCase().replace(/_/g, '-')
+  const allow = new Set([
+    'related-to',
+    'uses',
+    'targets',
+    'attributed-to',
+    'indicates',
+    'delivers',
+    'originates-from',
+    'resolves-to',
+  ])
+  if (allow.has(t)) return t
+  return 'related-to'
 }
 
 export function buildStixBundle(
@@ -171,9 +210,10 @@ export function buildStixBundle(
   const objects: unknown[] = []
   const idMap = new Map<number, string>()
 
-  // Investigation as Identity / x-ansein-case
+  // Investigation as Identity
   objects.push({
     type: 'identity',
+    spec_version: '2.1',
     id: stixId('identity', inv.id * 1000000 + 1),
     name: inv.title,
     identity_class: 'organization',
@@ -188,6 +228,7 @@ export function buildStixBundle(
     idMap.set(e.id, id)
     const baseObj: Record<string, unknown> = {
       type: stixType,
+      spec_version: '2.1',
       id,
       created: e.createdAt.toISOString(),
       modified: e.createdAt.toISOString(),
@@ -202,7 +243,6 @@ export function buildStixBundle(
       baseObj.is_family = false
     } else if (stixType === 'threat-actor') {
       baseObj.name = e.value
-      baseObj.roles = ['malicious-actor']
     } else if (stixType === 'tool' || stixType === 'vulnerability') {
       baseObj.name = e.value
     } else if (stixType === 'identity') {
@@ -211,8 +251,10 @@ export function buildStixBundle(
     } else if (stixType === 'location') {
       baseObj.name = e.value
     } else {
-      baseObj.name = e.value
-      baseObj.value = e.value
+      // Fallback vessel for anything unmappable (e.g. wallets): a plain
+      // note always imports cleanly, unlike a made-up x- SDO.
+      baseObj.abstract = `AnseIn entity (${e.entityType})`
+      baseObj.content = e.value
     }
     // Analyst adjudication travels with the object (custom STIX property);
     // machine consumers (rules/TAXII) already exclude FPs upstream.
@@ -227,8 +269,9 @@ export function buildStixBundle(
     if (!srcRef || !tgtRef) continue
     objects.push({
       type: 'relationship',
+      spec_version: '2.1',
       id: stixId('relationship', r.id),
-      relationship_type: r.relationType,
+      relationship_type: stixRelationType(r.relationType),
       source_ref: srcRef,
       target_ref: tgtRef,
       created: r.createdAt.toISOString(),
@@ -239,7 +282,7 @@ export function buildStixBundle(
 
   return {
     type: 'bundle',
-    id: `bundle--ansein-${inv.id}`,
+    id: stixId('bundle', inv.id),
     objects,
   }
 }
