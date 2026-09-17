@@ -23,6 +23,25 @@ async function list(req: NextRequest, ctx: { params: Promise<{ id: string }> }) 
     where: { investigationId: invId },
     orderBy: { confidence: 'desc' },
   })
+  // Cross-case correlation: how many OTHER investigations of this user
+  // contain the same (type, normalized) indicator. One grouped query —
+  // this is the cheap version of OpenCTI's observable correlation.
+  let seenCounts: Record<string, number> = {}
+  try {
+    const rows = (await db.$queryRawUnsafe(
+      `SELECT e."normalized" AS n, e."entity_type" AS t, COUNT(DISTINCT e."investigation_id")::int AS c
+       FROM "entities" e
+       WHERE e."investigation_id" <> $1
+         AND e."investigation_id" IN (SELECT "id" FROM "investigations" WHERE "user_id" = $2 AND "id" <> $1)
+         AND (e."entity_type", e."normalized") IN (SELECT "entity_type", "normalized" FROM "entities" WHERE "investigation_id" = $1)
+       GROUP BY e."normalized", e."entity_type"`,
+      invId,
+      user.id
+    )) as Array<{ n: string; t: string; c: number }>
+    for (const r of rows) seenCounts[`${r.t}|${String(r.n).toLowerCase()}`] = Number(r.c)
+  } catch {
+    seenCounts = {}
+  }
   const now = new Date()
   return ok(
     entities.map((e) => {
@@ -39,6 +58,7 @@ async function list(req: NextRequest, ctx: { params: Promise<{ id: string }> }) 
         decayed_confidence: decay.decayed_confidence,
         age_days: decay.age_days,
         freshness: decay.freshness,
+        seen_in_cases: seenCounts[`${e.entityType}|${e.normalized.toLowerCase()}`] || 0,
       }
     })
   )

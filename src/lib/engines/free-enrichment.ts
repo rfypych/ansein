@@ -10,6 +10,15 @@
  */
 
 export interface FreeEnrichmentResult {
+  nvd?: {
+    found: boolean
+    description?: string
+    cvss_v3?: number
+    cvss_v31?: number
+    severity?: string
+    cwe?: string
+    published?: string
+  }
   threatfox?: {
     found: boolean
     threat_type?: string
@@ -164,6 +173,33 @@ export async function queryCisaKev(cve: string): Promise<FreeEnrichmentResult['c
   return { is_known_exploited: false }
 }
 
+// ---------------------------------------------------- NVD 2.0 (free, no key, 5 req/30s anon)
+export async function queryNVD(cve: string): Promise<FreeEnrichmentResult['nvd']> {
+  const data = await fetchWithTimeout(
+    `https://services.nvd.nist.gov/rest/json/cves/2.0?cveId=${encodeURIComponent(cve.toUpperCase())}`,
+    {},
+    8000
+  )
+  const vuln = data?.vulnerabilities?.[0]?.cve
+  if (!vuln) return { found: false }
+  const m31 = vuln.metrics?.cvssMetricV31?.[0]
+  const m30 = vuln.metrics?.cvssMetricV30?.[0]
+  const best = m31 || m30
+  const descs: Array<{ lang?: string; value?: string }> = vuln.descriptions || []
+  const en = descs.find((d) => d.lang === 'en') || descs[0]
+  const weaknesses: Array<{ description?: Array<{ value?: string }> }> = vuln.weaknesses || []
+  const cwe = weaknesses[0]?.description?.[0]?.value
+  return {
+    found: true,
+    description: en?.value?.slice(0, 500),
+    cvss_v31: typeof m31?.cvssData?.baseScore === 'number' ? m31.cvssData.baseScore : undefined,
+    cvss_v3: typeof m30?.cvssData?.baseScore === 'number' ? m30.cvssData.baseScore : undefined,
+    severity: best?.baseSeverity,
+    cwe,
+    published: vuln.published,
+  }
+}
+
 // ---------------------------------------------------- OSV.dev (Open Source Vulns)
 export async function queryOSV(cve: string): Promise<FreeEnrichmentResult['osv']> {
   const data = await fetchWithTimeout(`https://api.osv.dev/v1/vulns/${encodeURIComponent(cve)}`)
@@ -257,12 +293,14 @@ export async function enrichWithFreeSources(
     const tf = await queryThreatFox(value)
     if (tf?.found) out.threatfox = tf
   } else if (entityType === 'vulnerability') {
-    const [kev, osv] = await Promise.all([
+    const [kev, osv, nvd] = await Promise.all([
       queryCisaKev(value),
       queryOSV(value),
+      queryNVD(value),
     ])
     if (kev?.is_known_exploited) out.cisa_kev = kev
     if (osv?.found) out.osv = osv
+    if (nvd?.found) out.nvd = nvd
   }
 
   return out

@@ -354,7 +354,31 @@ export async function runPipeline(investigationId: number, userId: number): Prom
       }
     }
 
-    const result = await analyze(entitiesForAnalysis, merged, userKeys, text.slice(0, 25000))
+    // Cross-case correlation for the analysis prompt: which of this run's
+    // indicators already appear in the user's other investigations.
+    let correlationNote = ''
+    try {
+      const rows = (await db.$queryRawUnsafe(
+        `SELECT e."normalized" AS n, e."entity_type" AS t, COUNT(DISTINCT e."investigation_id")::int AS c
+         FROM "entities" e
+         WHERE e."investigation_id" <> $1
+           AND e."investigation_id" IN (SELECT "id" FROM "investigations" WHERE "user_id" = $2 AND "id" <> $1)
+           AND (e."entity_type", e."normalized") IN (SELECT "entity_type", "normalized" FROM "entities" WHERE "investigation_id" = $1)
+         GROUP BY e."normalized", e."entity_type"
+         ORDER BY c DESC LIMIT 8`,
+        inv.id,
+        userId
+      )) as Array<{ n: string; t: string; c: number }>
+      if (rows.length > 0) {
+        correlationNote = rows
+          .map((r) => `- [${r.t}] ${r.n} — seen in ${r.c} other case(s)`)
+          .join('\n')
+      }
+    } catch {
+      correlationNote = ''
+    }
+
+    const result = await analyze(entitiesForAnalysis, merged, userKeys, text.slice(0, 25000), correlationNote)
 
     const analysisRun = await db.analysisRun.create({
       data: {

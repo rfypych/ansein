@@ -19,7 +19,7 @@ export interface LLMResponse {
   model: string
   tokensIn: number
   tokensOut: number
-  provider: 'zai' | 'openai' | 'groq' | 'custom'
+  provider: 'zai' | 'openai' | 'groq' | 'custom' | 'pollinations'
 }
 
 export function isLlmAvailable(userKeys: UserKeys = {}): boolean {
@@ -206,12 +206,119 @@ export interface ChatOptions {
 }
 
 /**
+ * Free, keyless, OpenAI-compatible LLM (Pollinations.ai). Anonymous tier is
+ * ~1 req/15s — slow, but it only fires when every keyed provider has failed,
+ * where the alternative is a zero-token heuristic fallback. Strictly better
+ * than silent degradation, and costs the user nothing.
+ */
+const POLLINATIONS_BASE = 'https://text.pollinations.ai/openai'
+const POLLINATIONS_MODEL = 'openai'
+
+async function callPollinations(
+  messages: ChatMessage[],
+  temperature: number,
+  maxTokens: number
+): Promise<LLMResponse> {
+  return callOpenAICompatible('', POLLINATIONS_BASE, POLLINATIONS_MODEL, messages, temperature, maxTokens)
+    .then((r) => ({ ...r, provider: 'pollinations' as const }))
+}
+
+/**
+ * Provider health probe (no token-burning chat calls).
+ * - Groq/OpenAI/custom: key presence + Groq model-list reachability.
+ * - Pollinations: public /models endpoint (free, keyless).
+ * Used by GET /api/v1/health/llm so provider rot is visible BEFORE a
+ * pipeline silently falls back to heuristics.
+ */
+export interface ProviderHealth {
+  provider: string
+  configured: boolean
+  reachable: boolean
+  detail: string
+  models?: string[]
+}
+
+export async function checkLlmProviders(userKeys: UserKeys = {}): Promise<ProviderHealth[]> {
+  const out: ProviderHealth[] = []
+
+  if (userKeys.groq_api_key) {
+    try {
+      const base = process.env.GROQ_API_BASE || 'https://api.groq.com/openai/v1'
+      const resp = await fetch(`${base.replace(/\/$/, '')}/models`, {
+        headers: { Authorization: `Bearer ${userKeys.groq_api_key}` },
+      })
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
+      const data = (await resp.json()) as { data?: Array<{ id?: string }> }
+      const models = Array.isArray(data.data) ? data.data.map((m) => String(m.id || '')).filter(Boolean) : []
+      const alive = GROQ_CANDIDATE_MODELS.filter((c) => models.includes(c))
+      out.push({
+        provider: 'groq',
+        configured: true,
+        reachable: true,
+        detail: alive.length > 0
+          ? `${alive.length}/${GROQ_CANDIDATE_MODELS.length} fallback models live`
+          : 'key valid but NONE of the fallback candidate models exist (rotation risk!)',
+        models: alive,
+      })
+    } catch (e) {
+      out.push({
+        provider: 'groq',
+        configured: true,
+        reachable: false,
+        detail: `key present but API unreachable: ${e instanceof Error ? e.message.slice(0, 120) : String(e).slice(0, 120)}`,
+      })
+    }
+  } else {
+    out.push({ provider: 'groq', configured: false, reachable: false, detail: 'no API key configured' })
+  }
+
+  out.push({
+    provider: 'openai',
+    configured: !!userKeys.openai_api_key,
+    reachable: !!userKeys.openai_api_key,
+    detail: userKeys.openai_api_key ? 'key configured (not probed to avoid spend)' : 'no API key configured',
+  })
+  out.push({
+    provider: 'custom',
+    configured: !!(userKeys.custom_llm_base_url && userKeys.custom_llm_model),
+    reachable: !!(userKeys.custom_llm_base_url && userKeys.custom_llm_model),
+    detail: userKeys.custom_llm_base_url
+      ? `endpoint ${userKeys.custom_llm_base_url} model ${userKeys.custom_llm_model || '?'}`
+      : 'no custom endpoint configured (Gemini/OpenRouter-compatible URL goes here)',
+  })
+
+  try {
+    const resp = await fetch('https://text.pollinations.ai/models')
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
+    const models = (await resp.json()) as unknown
+    const list = Array.isArray(models) ? models.map(String).slice(0, 12) : []
+    out.push({
+      provider: 'pollinations',
+      configured: true,
+      reachable: true,
+      detail: 'free keyless fallback reachable (anonymous ~1 req/15s)',
+      models: list,
+    })
+  } catch (e) {
+    out.push({
+      provider: 'pollinations',
+      configured: true,
+      reachable: false,
+      detail: `free fallback unreachable: ${e instanceof Error ? e.message.slice(0, 120) : String(e).slice(0, 120)}`,
+    })
+  }
+
+  return out
+}
+
+/**
  * Chat with the LLM. Provider priority:
  * 1. preferred = openai/groq/custom + matching key/config
  * 2. user groq key
  * 3. user openai key
  * 4. user custom LLM (if base_url + model set)
- * 5. system z-ai SDK
+ * 5. pollinations (free, keyless — slow last resort before heuristics)
+ * 6. system z-ai SDK
  */
 export async function chatCompletion(opts: ChatOptions): Promise<LLMResponse> {
   const {
@@ -253,7 +360,7 @@ export async function chatCompletion(opts: ChatOptions): Promise<LLMResponse> {
       maxTokensClamped
     ).then((r) => ({ ...r, provider: 'custom' as const }))
   }
-  // Auto preference — try Groq, then OpenAI, then custom, then z-ai
+  // Auto preference — try Groq, then OpenAI, then custom, then pollinations, then z-ai
   if (userKeys.groq_api_key) {
     try {
       return await callGroqWithFallback(
@@ -294,6 +401,12 @@ export async function chatCompletion(opts: ChatOptions): Promise<LLMResponse> {
     } catch (e) {
       console.warn('[llm] Custom LLM failed, falling back to z-ai:', e)
     }
+  }
+  // Free keyless fallback before giving up to heuristics
+  try {
+    return await callPollinations(messages, temperatureClamped, maxTokensClamped)
+  } catch (e) {
+    console.warn('[llm] Pollinations failed, falling back to z-ai:', e)
   }
   // System fallback: z-ai SDK
   return callZai(messages, temperatureClamped, maxTokensClamped)
