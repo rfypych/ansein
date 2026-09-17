@@ -277,16 +277,19 @@ async function callLlmExtractChunk(
   }
 }
 
-/** Score a window for CTI density so the 2-chunk LLM budget is spent where
- *  the threats actually are — not blindly on head+tail. Same call budget,
- *  strictly better coverage on long advisories. */
-function scoreChunk(window: string): number {
+/** Score a window's NARRATIVE density (actors, tools, TTPs in prose). */
+function scoreNarrative(window: string): number {
+  const count = (re: RegExp, cap: number) => Math.min(cap, (window.match(re) || []).length)
+  return count(/\bT\d{4}(?:\.\d{3})?\b|\bapt\b|malware|cobalt|mimikatz|impacket|powershell|\bc2\b|exploit|ransomware|threat.actor|ttps|lateral|exfiltrat|backdoor|webshell|lsass|ntds|credential|persistence/gi, 25)
+}
+
+/** Score a window's IOC density (machine-readable indicators). */
+function scoreIocs(window: string): number {
   const count = (re: RegExp, cap: number) => Math.min(cap, (window.match(re) || []).length)
   return (
     3 * count(/\bCVE-\d{4}-\d{4,7}\b/gi, 10) +
     2 * count(/\b(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)\b/g, 20) +
-    1 * count(/\b(?!\.)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24}\b/gi, 20) +
-    2 * count(/\bT\d{4}(?:\.\d{3})?\b|\bapt\b|malware|cobalt|mimikatz|impacket|powershell|\bc2\b|exploit|ransomware|threat.actor|ttps|lateral|exfiltrat|backdoor|webshell|cobalt|lsass|ntds/gi, 10)
+    1 * count(/\b(?!\.)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24}\b/gi, 20)
   )
 }
 
@@ -315,13 +318,28 @@ async function llmExtract(
       windows.push(text.slice(start, start + CHUNK_SIZE))
       if (start + CHUNK_SIZE >= text.length) break
     }
-    const ranked = windows
-      .map((w, i) => ({ i, s: scoreChunk(w) }))
-      .filter((x) => x.i > 0)
-      .sort((a, b) => b.s - a.s)
-      .slice(0, 2)
+    // Stratified pick: densest NARRATIVE window (actors/tools/TTPs in prose)
+    // plus densest IOC window (tables/dumps). A single score lets IOC dumps
+    // starve prose sections (proven on AA24-038A: Mimikatz lost to a hash table).
+    let bestNarr = 1
+    let bestNarrScore = -1
+    let bestIoc = 1
+    let bestIocScore = -1
+    for (let i = 1; i < windows.length; i++) {
+      const sn = scoreNarrative(windows[i])
+      if (sn > bestNarrScore) {
+        bestNarrScore = sn
+        bestNarr = i
+      }
+      const si = scoreIocs(windows[i])
+      if (si > bestIocScore) {
+        bestIocScore = si
+        bestIoc = i
+      }
+    }
     chunks.push(windows[0])
-    for (const r of ranked) chunks.push(windows[r.i])
+    chunks.push(windows[bestNarr])
+    if (bestIoc !== bestNarr) chunks.push(windows[bestIoc])
   }
 
   const allHits: RegexHit[] = []
