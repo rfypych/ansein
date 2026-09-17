@@ -4,7 +4,7 @@ import { db } from '@/lib/db'
 import { jsonError, withErrorHandler, getClientIp } from '@/lib/api'
 import { verifyPassword, makeTokenPair } from '@/lib/auth'
 import { setAuthCookies } from '@/lib/cookies'
-import { checkRateLimit } from '@/lib/rate-limit'
+import { checkRateLimitAuto } from '@/lib/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,9 +14,9 @@ const LoginSchema = z.object({
 })
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
-  // Per-IP brute-force brake: 10 attempts/minute (per-instance, best-effort
-  // on serverless — see rate-limit.ts for the honest limitation note).
-  const rl = checkRateLimit(`login:${getClientIp(req)}`, 10, 60_000)
+  // Per-IP brute-force brake: 10 attempts/minute. Shared Redis counter when
+  // configured, per-instance memory fallback otherwise (see rate-limit.ts).
+  const rl = await checkRateLimitAuto(`login:${getClientIp(req)}`, 10, 60_000)
   if (!rl.allowed) {
     const res = NextResponse.json(
       { detail: 'Too many login attempts, try again shortly', code: 'rate_limited' },

@@ -51,6 +51,16 @@ function rewriteAliasRequires(dir) {
 async function main() {
   execSync(`npx tsc -p ${path.join(__dirname, 'tsconfig.engines.json')}`, { cwd: ROOT, stdio: 'pipe' })
   rewriteAliasRequires(OUT)
+  const rl = require(path.join(OUT, 'rate-limit.js'))
+  // 0b. rate limiter: memory allows-then-blocks; shared returns null w/o Redis
+  const k = 'test-' + Date.now()
+  let allowed = 0
+  for (let i = 0; i < 12; i++) {
+    if (rl.checkRateLimit(k, 10, 60000).allowed) allowed++
+  }
+  eq('rate limit allows 10 then blocks', allowed, 10)
+  eq('rate limit shared null without env', await rl.checkRateLimitShared(k + 'x', 10, 60000), null)
+
   const ex = require(path.join(OUT, 'engines', 'extraction.js'))
   const an = require(path.join(OUT, 'engines', 'analysis.js'))
   const dc = require(path.join(OUT, 'engines', 'decay.js'))

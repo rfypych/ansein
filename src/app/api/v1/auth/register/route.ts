@@ -4,7 +4,7 @@ import { db } from '@/lib/db'
 import { jsonError, withErrorHandler, handlePrismaError, getClientIp } from '@/lib/api'
 import { hashPassword, makeTokenPair } from '@/lib/auth'
 import { setAuthCookies } from '@/lib/cookies'
-import { checkRateLimit } from '@/lib/rate-limit'
+import { checkRateLimitAuto } from '@/lib/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,7 +15,7 @@ const RegisterSchema = z.object({
 })
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
-  const rl = checkRateLimit(`register:${getClientIp(req)}`, 5, 3_600_000)
+  const rl = await checkRateLimitAuto(`register:${getClientIp(req)}`, 5, 3_600_000)
   if (!rl.allowed) {
     return jsonError(429, 'rate_limited', 'Too many registrations from this address, try again later')
   }

@@ -20,7 +20,7 @@ const UpdateSchema = z.object({
   abuseipdb_api_key: z.string().max(500).optional(),
   shodan_api_key: z.string().max(500).optional(),
   abusech_api_key: z.string().max(500).optional(),
-  preferred_llm: z.enum(['auto', 'openai', 'groq', 'custom']).optional(),
+  preferred_llm: z.enum(['auto', 'openai', 'groq', 'custom', 'pollinations']).optional(),
   // Custom OpenAI-compatible LLM provider
   custom_llm_api_key: z.string().max(500).optional(),
   custom_llm_base_url: z.string().max(500).optional(),

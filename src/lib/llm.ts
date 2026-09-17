@@ -202,7 +202,7 @@ export interface ChatOptions {
   temperature?: number
   maxTokens?: number
   userKeys?: UserKeys
-  preferred?: 'auto' | 'openai' | 'groq' | 'custom'
+  preferred?: 'auto' | 'openai' | 'groq' | 'custom' | 'pollinations'
 }
 
 /**
@@ -359,6 +359,15 @@ export async function chatCompletion(opts: ChatOptions): Promise<LLMResponse> {
       temperatureClamped,
       maxTokensClamped
     ).then((r) => ({ ...r, provider: 'custom' as const }))
+  }
+  if (preferred === 'pollinations') {
+    // Explicit free choice: no key needed, anonymous ~1 req/15s — slow but
+    // free forever. Failures fall through to z-ai / heuristics below.
+    try {
+      return await callPollinations(messages, temperatureClamped, maxTokensClamped)
+    } catch (e) {
+      console.warn('[llm] Explicit pollinations failed, falling back:', e)
+    }
   }
   // Auto preference — try Groq, then OpenAI, then custom, then pollinations, then z-ai
   if (userKeys.groq_api_key) {

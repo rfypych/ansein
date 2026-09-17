@@ -215,6 +215,7 @@ export default function SettingsPage() {
                 { key: 'openai', label: 'OpenAI', desc: 'GPT models' },
                 { key: 'groq', label: 'Groq', desc: 'Llama/Mixtral, fast inference' },
                 { key: 'custom', label: 'Custom', desc: 'Any OpenAI-compatible endpoint' },
+                { key: 'pollinations', label: 'Pollinations', desc: 'Free, no key — slow (~1 req/15s)' },
               ] as const).map((p) => {
                 const active = preferredLlm === p.key
                 const disabled = !canEdit || (p.key === 'custom' && !settingsQuery.data?.has_custom_llm)
