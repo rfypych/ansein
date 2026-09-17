@@ -103,4 +103,3 @@ async function backfill(req: NextRequest) {
 export const GET = withErrorHandler(list)
 export const POST = withErrorHandler(verify)
 export const PUT = withErrorHandler(backfill)
-export const PUT = withErrorHandler(backfill)
